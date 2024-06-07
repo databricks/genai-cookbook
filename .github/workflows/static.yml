@@ -25,6 +25,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} 
 
       # Install dependencies
       - name: Set up Python 3.11
