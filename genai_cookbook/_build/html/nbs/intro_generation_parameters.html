@@ -1,0 +1,820 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Adjusting Foundation Model Behavior with Generation Parameters &#8212; Databricks Generative AI Cookbook</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-6BZ4NTBHVJ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/intro_generation_parameters';</script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Managing Chat Sessions in Python" href="manage_chat_sessions.html" />
+    <link rel="prev" title="Using the Foundation Model API Outside of Databricks" href="fm_api_outside_db.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo2.png" class="logo__image only-light" alt="Databricks Generative AI Cookbook - Home"/>
+    <script>document.write(`<img src="../_static/logo2.png" class="logo__image only-dark" alt="Databricks Generative AI Cookbook - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">All Notebooks</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ai_sql_functions.html">Query Foundation Models with Databricks SQL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fast_classification_provisioned.html">Fast Classification with Provisioned Throughput</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fm_api_mlflow_prompt_eng.html">Using the MLflow Prompt Engineering UI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fm_api_openai_sdk.html">Querying the Foundation Model API with the OpenAI Python SDK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fm_api_outside_db.html">Using the Foundation Model API Outside of Databricks</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Adjusting Foundation Model Behavior with Generation Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manage_chat_sessions.html">Managing Chat Sessions in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="playground.html">Test models with the Databricks AI Playground</a></li>
+<li class="toctree-l1"><a class="reference internal" href="serve_marketplace.html">Serve a Model from Databricks Marketplace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="streaming_outputs.html">Streaming Outputs with the Foundation Model API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector_search_fm_api.html">Foundation Model API Embeddings for Vector Search</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/intro_generation_parameters.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/nbs/intro_generation_parameters.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Adjusting Foundation Model Behavior with Generation Parameters</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#choose-when-to-stop-generating-with-max-tokens-and-stop">Choose when to stop generating with <code class="docutils literal notranslate"><span class="pre">max_tokens</span></code> and <code class="docutils literal notranslate"><span class="pre">stop</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specify-the-variability-of-responses-with-temperature-top-p-and-top-k">Specify the variability of responses with <code class="docutils literal notranslate"><span class="pre">temperature</span></code>, <code class="docutils literal notranslate"><span class="pre">top_p</span></code>, and <code class="docutils literal notranslate"><span class="pre">top_k</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sampling">Sampling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#temperature">Temperature</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#top-p-and-top-k"><code class="docutils literal notranslate"><span class="pre">top_p</span></code> and <code class="docutils literal notranslate"><span class="pre">top_k</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next steps</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusion">Conclusion</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="adjusting-foundation-model-behavior-with-generation-parameters">
+<h1>Adjusting Foundation Model Behavior with Generation Parameters<a class="headerlink" href="#adjusting-foundation-model-behavior-with-generation-parameters" title="Link to this heading">#</a></h1>
+<p>You can set a variety of different parameters to control the behavior of Foundation Model API models. This notebook provides a short summary of these generation parameters and their effects on model outputs.</p>
+<p>The <a class="reference external" href="https://docs.databricks.com/en/machine-learning/foundation-models/api-reference.html">REST API Reference</a> provides a list of the parameters accepted by each type of endpoint. We’ll go through these in turn.</p>
+<section id="choose-when-to-stop-generating-with-max-tokens-and-stop">
+<h2>Choose when to stop generating with <code class="docutils literal notranslate"><span class="pre">max_tokens</span></code> and <code class="docutils literal notranslate"><span class="pre">stop</span></code><a class="headerlink" href="#choose-when-to-stop-generating-with-max-tokens-and-stop" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">max_tokens</span></code> sets the number of <em>new</em> tokens to generate. It does not count input parameters. So specifying <code class="docutils literal notranslate"><span class="pre">max_tokens=10</span></code> will generate up to 10 new tokens, regardless of the length of the input.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">databricks_genai_inference</span> <span class="kn">import</span> <span class="n">ChatCompletion</span>
+
+<span class="n">short_response</span> <span class="o">=</span> <span class="n">ChatCompletion</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;llama-2-70b-chat&quot;</span><span class="p">,</span>
+                                 <span class="n">messages</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;You are a helpful assistant.&quot;</span><span class="p">},</span>
+                                           <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Tell me how MLflow autologging works.&quot;</span><span class="p">}],</span>
+                                 <span class="n">max_tokens</span><span class="o">=</span><span class="mi">10</span><span class="p">,)</span>
+<span class="n">longer_response</span> <span class="o">=</span> <span class="n">ChatCompletion</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;llama-2-70b-chat&quot;</span><span class="p">,</span>
+                                 <span class="n">messages</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;You are a helpful assistant.&quot;</span><span class="p">},</span>
+                                           <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Tell me how MLflow autologging works.&quot;</span><span class="p">}],</span>
+                                 <span class="n">max_tokens</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;max_tokens = 10:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">short_response</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;max_tokens = 128:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">longer_response</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max_tokens = 10:
+   MLflow autologging is a feature that 
+
+
+max_tokens = 128:
+   MLflow autologging is a feature that allows you to automatically log and track experiments, runs, and metrics in your machine learning (ML) projects. Here&#39;s how it works:
+
+1. Install the MLflow library: To use autologging, you first need to install the MLflow library using pip: `pip install mlflow`.
+2. Initialize MLflow: After installing the library, you need to initialize MLflow by running `mlflow init` in your project directory. This command creates a new directory called `.mlflow` in your project directory, which is used to store metadata and logs
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">stop</span></code> parameter, on the other hand, tells the model to stop generating new tokens when it encounters one of the strings in a list. For example, in the following example, we use the <code class="docutils literal notranslate"><span class="pre">stop</span></code> command to make sure the model stops generating after it return the code block we’re interested in, without providing further explanation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stop_response</span> <span class="o">=</span> <span class="n">ChatCompletion</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;llama-2-70b-chat&quot;</span><span class="p">,</span>
+    <span class="n">messages</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;You are a helpful assistant.&quot;</span><span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Show me how to use awk to print the first and third semicolon-separated fields in file.txt&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">],</span>
+    <span class="n">stop</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;file.txt</span><span class="se">\n</span><span class="s2">```&quot;</span><span class="p">],</span>
+    <span class="n">max_tokens</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">stop_response</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sure, I&#39;d be happy to help! Here&#39;s an example of how you can use `awk` to print the first and third semicolon-separated fields in `file.txt`:
+```
+$ awk -F&#39;;&#39; &#39;{print $1, $3}&#39; file.txt
+```
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="specify-the-variability-of-responses-with-temperature-top-p-and-top-k">
+<h2>Specify the variability of responses with <code class="docutils literal notranslate"><span class="pre">temperature</span></code>, <code class="docutils literal notranslate"><span class="pre">top_p</span></code>, and <code class="docutils literal notranslate"><span class="pre">top_k</span></code><a class="headerlink" href="#specify-the-variability-of-responses-with-temperature-top-p-and-top-k" title="Link to this heading">#</a></h2>
+<p>Foundation Model API responses can generate different responses from the same inputs, enabling a degree of randomness or creativity in the outputs. This variability is controlled by the parameters <code class="docutils literal notranslate"><span class="pre">temperature</span></code>, <code class="docutils literal notranslate"><span class="pre">top_p</span></code>, and <code class="docutils literal notranslate"><span class="pre">top_k</span></code>. Through different combinations of these parameters, we can ensure that the model’s responses are entirely deterministic or, on the other hand, are so diverse that they begin to lose coherence.</p>
+<section id="sampling">
+<h3>Sampling<a class="headerlink" href="#sampling" title="Link to this heading">#</a></h3>
+<p>The process of generating responses involves selecting each subsequent token (which may be a word, a character, or a few characters) based on a probability distribution that considers the sequence of tokens generated so far. Unlike deterministic processes, where a given input always produces the same output, this <a class="reference external" href="https://huggingface.co/blog/how-to-generate">sampling</a> process allows for different outputs on the same input, enhancing the model’s flexibility and utility in generating diverse content.</p>
+</section>
+<section id="temperature">
+<h3>Temperature<a class="headerlink" href="#temperature" title="Link to this heading">#</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">temperature</span></code> parameter determines the shape of the probability distribution based on which the tokens are drawn. A low temperature (close to 0) will place much more of the probability on the top candidates, which leads to more predictable responses. A temperature of 0 will result in fully deterministic responses. Higher temperatures (close to 2) will “flatten” the distribution, increasing the likelihood that lower probability tokens will be selected. This increases the diversity and creativity of the responses but it can also result in less coherent responses.</p>
+</section>
+<section id="top-p-and-top-k">
+<h3><code class="docutils literal notranslate"><span class="pre">top_p</span></code> and <code class="docutils literal notranslate"><span class="pre">top_k</span></code><a class="headerlink" href="#top-p-and-top-k" title="Link to this heading">#</a></h3>
+<p>Both <code class="docutils literal notranslate"><span class="pre">top_p</span></code> (nucleus sampling) and <code class="docutils literal notranslate"><span class="pre">top_k</span></code> limit the pool of candidate tokens considered for the next token in the sequence, but they do so differently:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">top_k</span></code> limits the selection to the <code class="docutils literal notranslate"><span class="pre">k</span></code> most likely next tokens.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">top_p</span></code> dynamically selects the smallest set of tokens whose cumulative probability exceeds the threshold <code class="docutils literal notranslate"><span class="pre">p</span></code>, focusing on a “nucleus” of high-probability options. This method adapts to the context’s uncertainty level, potentially considering more or fewer tokens based on their probability distribution.</p></li>
+</ul>
+<p>Let’s consider some scenarios. In each case, we’ll generate three different completions for the prompt <code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">dog</span> <span class="pre">went</span> <span class="pre">to</span> <span class="pre">the</span></code>. We will also examine the distribution of the first token across 100 responses.</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code> = 0
+The model will be deterministic: it will always pick the most likely next token. It doesn’t matter if <code class="docutils literal notranslate"><span class="pre">top_p</span></code> or <code class="docutils literal notranslate"><span class="pre">top_k</span></code> are higher because all of the probability is on the single most likely next token.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">databricks_genai_inference</span> <span class="kn">import</span> <span class="n">Completion</span>
+
+<span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="n">max_tokens</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">Completion</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="s2">&quot;mpt-30b-instruct&quot;</span><span class="p">,</span>
+        <span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;The dog went to the&quot;</span><span class="p">,</span>
+        <span class="n">max_tokens</span><span class="o">=</span><span class="n">max_tokens</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+        <span class="n">top_k</span><span class="o">=</span><span class="n">top_k</span><span class="p">,</span>
+        <span class="n">top_p</span><span class="o">=</span><span class="n">top_p</span><span class="p">,</span>
+        <span class="n">use_raw_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span>
+    <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">generate</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39; door and barked.\n\n&quot;What is it, boy?&quot;\n\nThe dog barked again.\n\n&quot;All right, I\&#39;m coming.&quot;\n\nHe opened the door and the dog dashed out. A moment later there was a loud crash from the direction of the kitchen.\n\n&quot;Oh,&#39;]
+[&#39; door and barked.\n\n&quot;What is it, boy?&quot;\n\nThe dog barked again.\n\n&quot;All right, I\&#39;m coming.&quot;\n\nHe opened the door and the dog dashed out. A moment later there was a loud crash from the direction of the kitchen.\n\n&quot;Oh,&#39;]
+[&#39; door and barked.\n\n&quot;What is it, boy?&quot;\n\nThe dog barked again.\n\n&quot;All right, I\&#39;m coming.&quot;\n\nHe opened the door and the dog dashed out. A moment later there was a loud crash from the direction of the kitchen.\n\n&quot;Oh,&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<span class="k">def</span> <span class="nf">plot_distribution</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top_p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">generate</span><span class="p">(</span><span class="n">max_tokens</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="n">top_k</span><span class="p">,</span> <span class="n">top_p</span><span class="o">=</span><span class="n">top_p</span><span class="p">))</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+
+    <span class="n">word_counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">top_ten</span> <span class="o">=</span> <span class="n">word_counts</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">top_ten</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;generated token&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;relative frequency of top ten generated tokens&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">plot_distribution</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/710aa0c949b0d8e14399bb20ccdbd880d56e22b2e37d38a6ee7601c0deefb8cc.png" src="../_images/710aa0c949b0d8e14399bb20ccdbd880d56e22b2e37d38a6ee7601c0deefb8cc.png" />
+</div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code> = 2 and <code class="docutils literal notranslate"><span class="pre">top_k</span></code> = 1</p></li>
+</ol>
+<p>The model will still be deterministic. Even though the temperature is high, we are still only considering the most probable next token.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">generate</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39; door and barked.\n\n&quot;What is it, boy?&quot;\n\nThe dog barked again.\n\n&quot;All right, I\&#39;m coming.&quot;\n\nHe opened the door and the dog dashed out. A moment later there was a loud crash from the direction of the kitchen.\n\n&quot;Oh,&#39;]
+[&#39; door and barked.\n\n&quot;What is it, boy?&quot;\n\nThe dog barked again.\n\n&quot;All right, I\&#39;m coming.&quot;\n\nHe opened the door and the dog dashed out. A moment later there was a loud crash from the direction of the kitchen.\n\n&quot;Oh,&#39;]
+[&#39; door and barked.\n\n&quot;What is it, boy?&quot;\n\nThe dog barked again.\n\n&quot;All right, I\&#39;m coming.&quot;\n\nHe opened the door and the dog dashed out. A moment later there was a loud crash from the direction of the kitchen.\n\n&quot;Oh,&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_distribution</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/710aa0c949b0d8e14399bb20ccdbd880d56e22b2e37d38a6ee7601c0deefb8cc.png" src="../_images/710aa0c949b0d8e14399bb20ccdbd880d56e22b2e37d38a6ee7601c0deefb8cc.png" />
+</div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code> = 2 and <code class="docutils literal notranslate"><span class="pre">top_k</span></code> = 5</p></li>
+</ol>
+<p>The model will not be deterministic. At each step, the model will consider the <code class="docutils literal notranslate"><span class="pre">5</span></code> most probable next tokens, weighted by their respective probabilities.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">generate</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&quot; front door and waited patiently.\n\nThe dog&#39;s name is Shadow and she has a big heart.\n\nThe dog was panting from the heat.\n\nThe doctor told me that the medicine I need can only be given by injection.\n\nI&#39;m not sure how to give an injection. I&#39;ve&quot;]
+[&#39; door of the cage, and, after a momentary pause, as much\nas to say, &quot;Are you sure you are right? It\&#39;s a pity to disturb anybody\nsleeping,&quot; gave a gentle little tap with his nose.\n\n&quot;Oh, I say!&quot; cried the young officer, starting up,&#39;]
+[&quot; water&#39;s side\nAnd looked at the strange sight;\nHe saw his own tail floating there, --\nHe barked with joyful fright.&quot;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_distribution</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/36e2636e46909a441078dc9ba1d8f0aa505a12d06693f7c733308e7a6d55d51e.png" src="../_images/36e2636e46909a441078dc9ba1d8f0aa505a12d06693f7c733308e7a6d55d51e.png" />
+</div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code> = 1.5 and <code class="docutils literal notranslate"><span class="pre">top_p</span></code> = 0.5</p></li>
+</ol>
+<p>The model will not be deterministic. At each step, the model will consider as many tokens as it takes to account for the top half of candidate tokens by probability.</p>
+<p>Because we specified a relatively high <code class="docutils literal notranslate"><span class="pre">temperature</span></code>, the probability is spread out across many tokens and not concentrated on the top few tokens. Combining a high <code class="docutils literal notranslate"><span class="pre">temperature</span></code> with a high <code class="docutils literal notranslate"><span class="pre">top_p</span></code> may result in responses that start to lose coherence.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">generate</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">top_p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39; hospital where she was x-rayed, and thankfully the x-rays did not show any broken bones.\nThe lump on the side of her head was thought to be caused by a piece of skin from where she had been fighting with another dog.\nThe vets decided to keep her in overnight for observation&#39;]
+[&#39; pigsty and found some water in a\n     pitcher and some turnips in a bag. After this he hunted about the\n     yard, and found a string of onions hanging up to dry. He took\n     them all to Bale Boese, who placed them before his master. When\n     the&#39;]
+[&#39; back door and waited, the chains rattling as he paced back and forth. Something about the noise must have woken Jonathan, because a light came on upstairs and a shadow passed behind the curtained window. Ginny could hear him moving around up there. She imagined him looking out the window, but it was&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_distribution</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">top_p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/7d8b9a83c62b1f98f5454866d912e6a6423137319dd46f156fb6a2eccc5c5c93.png" src="../_images/7d8b9a83c62b1f98f5454866d912e6a6423137319dd46f156fb6a2eccc5c5c93.png" />
+</div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code> = 1 and <code class="docutils literal notranslate"><span class="pre">top_p</span></code> = 0.5</p></li>
+</ol>
+<p>Now we lower the <code class="docutils literal notranslate"><span class="pre">temperature</span></code> while keeping the <code class="docutils literal notranslate"><span class="pre">top_p</span></code> at 0.5. The model will still generate diverse responses, but much more of the probability mass will be concentrated on the top few most likely tokens, so the responses will be more coherent. We see this reflected in the distribution of the first token.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">generate</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39; fridge and started barking at it.\n\n&quot;I don\&#39;t think it\&#39;s going to open,&quot; I said.\n\n&quot;It\&#39;s not,&quot; said Nick. &quot;It\&#39;s a freezer.&quot;\n\n&quot;I know that,&quot; I said. &quot;I was making a joke.&quot;\n\n&quot;I don\&#39;t think&#39;]
+[&#39; bed and lay down.\n\n&quot;You can\&#39;t stay here,&quot; I said. &quot;This isn\&#39;t your home.&quot;\n\nThe dog didn\&#39;t move.\n\n&quot;I\&#39;ll take you out,&quot; I said. &quot;But you have to come with me.&quot;\n\nThe dog didn\&#39;t move.\n\nI&#39;]
+[&#39; door and barked.\n\n&quot;That\&#39;s not a dog,&quot; I said. &quot;That\&#39;s a wolf.&quot;\n\n&quot;Oh,&quot; said Marjorie. &quot;I thought it was a dog.&quot;\n\n&quot;It\&#39;s a wolf,&quot; I said. &quot;It\&#39;s not housebroken.&quot;\n\n&quot;Oh,&quot;&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_distribution</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">top_p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/4e8212587454875b47942e7ba27cfa0d1eb69d04519059fb679c106a0cbc3297.png" src="../_images/4e8212587454875b47942e7ba27cfa0d1eb69d04519059fb679c106a0cbc3297.png" />
+</div>
+</div>
+</section>
+<section id="next-steps">
+<h3>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h3>
+<p>In summary: lower temperatures concentrate more of the probability on the top candidate tokens, while higher temperatures flatten the distribution and result in more diverse responses. Higher values of top_k or top_p consider a wider range of candidate tokens, while lower values restrict the range of candidate tokens.</p>
+<p>We only explored a few combinations of these parameters. Feel free to download this notebook and experiment with different combinations using the <code class="docutils literal notranslate"><span class="pre">generate</span></code> and <code class="docutils literal notranslate"><span class="pre">plot_distribution</span></code> functions from this notebook.</p>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading">#</a></h2>
+<p>You now understand how to use generation parameters to control when the model stops generating and how diverse and creative the responses are. You can use the functions defined in this notebook to experiment with different combinations of temperature, top_p, and top_k to explore the effect of these parameters on the model’s responses.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./nbs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="fm_api_outside_db.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Using the Foundation Model API Outside of Databricks</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="manage_chat_sessions.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Managing Chat Sessions in Python</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#choose-when-to-stop-generating-with-max-tokens-and-stop">Choose when to stop generating with <code class="docutils literal notranslate"><span class="pre">max_tokens</span></code> and <code class="docutils literal notranslate"><span class="pre">stop</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specify-the-variability-of-responses-with-temperature-top-p-and-top-k">Specify the variability of responses with <code class="docutils literal notranslate"><span class="pre">temperature</span></code>, <code class="docutils literal notranslate"><span class="pre">top_p</span></code>, and <code class="docutils literal notranslate"><span class="pre">top_k</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sampling">Sampling</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#temperature">Temperature</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#top-p-and-top-k"><code class="docutils literal notranslate"><span class="pre">top_p</span></code> and <code class="docutils literal notranslate"><span class="pre">top_k</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next steps</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusion">Conclusion</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The Databricks GenAI Community
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

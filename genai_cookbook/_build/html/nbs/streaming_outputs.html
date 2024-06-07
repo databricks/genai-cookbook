@@ -1,0 +1,1281 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Streaming Outputs with the Foundation Model API &#8212; Databricks Generative AI Cookbook</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-6BZ4NTBHVJ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/streaming_outputs';</script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Foundation Model API Embeddings for Vector Search" href="vector_search_fm_api.html" />
+    <link rel="prev" title="Serve a Model from Databricks Marketplace" href="serve_marketplace.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo2.png" class="logo__image only-light" alt="Databricks Generative AI Cookbook - Home"/>
+    <script>document.write(`<img src="../_static/logo2.png" class="logo__image only-dark" alt="Databricks Generative AI Cookbook - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">All Notebooks</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ai_sql_functions.html">Query Foundation Models with Databricks SQL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fast_classification_provisioned.html">Fast Classification with Provisioned Throughput</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fm_api_mlflow_prompt_eng.html">Using the MLflow Prompt Engineering UI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fm_api_openai_sdk.html">Querying the Foundation Model API with the OpenAI Python SDK</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fm_api_outside_db.html">Using the Foundation Model API Outside of Databricks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro_generation_parameters.html">Adjusting Foundation Model Behavior with Generation Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manage_chat_sessions.html">Managing Chat Sessions in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="playground.html">Test models with the Databricks AI Playground</a></li>
+<li class="toctree-l1"><a class="reference internal" href="serve_marketplace.html">Serve a Model from Databricks Marketplace</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Streaming Outputs with the Foundation Model API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector_search_fm_api.html">Foundation Model API Embeddings for Vector Search</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/streaming_outputs.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/nbs/streaming_outputs.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Streaming Outputs with the Foundation Model API</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-with-the-python-sdk">Streaming with the Python SDK</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-responses-with-the-rest-api">Streaming responses with the REST API</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusion">Conclusion</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="streaming-outputs-with-the-foundation-model-api">
+<span id="nbs-streaming-outputs"></span><h1>Streaming Outputs with the Foundation Model API<a class="headerlink" href="#streaming-outputs-with-the-foundation-model-api" title="Link to this heading">#</a></h1>
+<p>This notebook covers how to stream responses from <a class="reference external" href="https://docs.databricks.com/en/machine-learning/foundation-models/query-foundation-model-apis.html#query-a-chat-completion-model">chat completion</a> or <a class="reference external" href="https://docs.databricks.com/en/machine-learning/foundation-models/query-foundation-model-apis.html#query-a-chat-completion-model">text completion</a> models. Streaming enables us to begin returning tokens as they are generated, before the entire response is complete. Streaming can dramatically reduce the time it takes for users to see a response.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">reinstall</span> <span class="n">databricks</span><span class="o">-</span><span class="n">genai</span><span class="o">-</span><span class="n">inference</span>
+<span class="n">dbutils</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">restartPython</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="streaming-with-the-python-sdk">
+<h2>Streaming with the Python SDK<a class="headerlink" href="#streaming-with-the-python-sdk" title="Link to this heading">#</a></h2>
+<p>To enable streaming, include the argument <code class="docutils literal notranslate"><span class="pre">stream=True</span></code> in calls to chat completion or text completion endpoints. Here’s how to do it with the <code class="docutils literal notranslate"><span class="pre">ChatCompletion.create</span></code> method in the Python SDK:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">databricks_genai_inference</span> <span class="kn">import</span> <span class="n">ChatCompletion</span>
+
+<span class="k">def</span> <span class="nf">stream_chat_reply</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">user_message</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">2048</span><span class="p">):</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">user_message</span><span class="p">}]</span>
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">ChatCompletion</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">max_tokens</span><span class="o">=</span><span class="n">max_tokens</span><span class="p">,</span>
+        <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">generator</span><span class="p">:</span>
+        <span class="c1"># Using `end=&#39;&#39;` to avoid adding a new line after each print statement</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>With streaming enabled, the <code class="docutils literal notranslate"><span class="pre">create</span></code> method returns a <a class="reference external" href="https://docs.python.org/3/glossary.html#term-generator">generator</a> that provides a sequence of <code class="docutils literal notranslate"><span class="pre">ChatCompletionChunkObject</span></code>s. The completion itself is included in the <code class="docutils literal notranslate"><span class="pre">ChatCompletionChunkObject.message</span></code> attribute, so we can iterate over generator and print each <code class="docutils literal notranslate"><span class="pre">message</span></code> in order to stream the results to the user.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stream_reply</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;mixtral-8x7b-instruct&quot;</span><span class="p">,</span> <span class="n">user_message</span><span class="o">=</span><span class="s2">&quot;Tell me in detail how to make chocolate chip cookies.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1. Gather ingredients: 
+   - 2 1/4 cups all-purpose flour
+   - 1/2 teaspoon baking soda
+   - 1 cup unsalted butter, room temperature
+   - 1/2 cup granulated sugar
+   - 1 cup packed light-brown sugar
+   - 1 teaspoon salt
+   - 2 teaspoons pure vanilla extract
+   - 2 large eggs
+   - 2 cups semisweet and/or milk chocolate chips
+
+2. Preheat oven to 350°F (180°C). In a small bowl, whisk together flour and baking soda; set aside.
+
+3. In the bowl of an electric mixer fitted with the paddle attachment, combine butter with both sugars; beat on medium speed until light and fluffy.
+
+4. Reduce speed to low; add salt, vanilla, and eggs. Beat until well mixed, about 1 minute.
+
+5. Add flour mixture; mix until just combined. Stir in chocolate chips.
+
+6. Drop heaping tablespoon-size balls of dough about 2 inches apart on baking sheets lined with parchment paper.
+
+7. Bake until cookies are golden around the edges, but still soft in the center, 8 to 10 minutes.
+
+8. Remove from oven, and let cookies cool on baking sheet for 2 minutes. Transfer cookies to a wire rack to cool completely.
+
+Tips:
+- For a chewy cookie, take them out of the oven when they are slightly undercooked and let them finish cooking on the baking sheet.
+- You can add other mix-ins like nuts or dried fruit if desired.
+- Always preheat your oven before baking.
+- Make sure your butter is at room temperature to ensure proper creaming with the sugars.
+- Do not overmix the dough as it can lead to tough cookies.
+- Store cooled cookies in an airtight container at room temperature for up to 1 week.
+</pre></div>
+</div>
+</div>
+</div>
+<p>This works in much the same way for the <a class="reference external" href="https://docs.databricks.com/en/machine-learning/foundation-models/query-foundation-model-apis.html#query-a-text-completion-model">text completion</a> endpoint.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">databricks_genai_inference</span> <span class="kn">import</span> <span class="n">Completion</span>
+
+<span class="k">def</span> <span class="nf">stream_text_reply</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">2048</span><span class="p">):</span>
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">Completion</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">max_tokens</span><span class="o">=</span><span class="n">max_tokens</span><span class="p">,</span>
+        <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">prompt</span><span class="o">=</span><span class="n">user_prompt</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">generator</span><span class="p">:</span>
+        <span class="c1"># Using `end=&#39;&#39;` to avoid adding a new line after each print statement</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+<span class="n">stream_text_reply</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;mpt-30b-instruct&quot;</span><span class="p">,</span>
+                  <span class="n">user_prompt</span><span class="o">=</span><span class="s2">&quot;Tell me in detail how to make chocolate chip cookies.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Ah, this is a very popular recipe.  Here are the basic ingredients, which you can always modify to your own tastes:
+1 cup of butter, softened
+1 cup of brown sugar
+2 eggs
+1 tsp vanilla
+2 1/4 cups of flour
+1 tsp of baking soda
+1/4 tsp of salt
+2 cups of chocolate chips
+
+Some additional tips:  be sure to use softened butter and not melted butter, and also be sure to use a high-quality chocolate chip.  Also, be sure to cream the butter and sugar together well, and also be sure to mix in the eggs and vanilla well.  For the flour, baking soda, and salt, you want to mix them together dry, and then add them to the wet ingredients.  Finally, I recommend using a spoon to mix in the chocolate chips, since that gives a nice, even mixture.
+
+Now, for baking, you want to preheat the oven to 375, and then spoon cookie dough onto a baking sheet, leaving about 2 inches of space between cookies.  You may want to use a cookie scoop for this, or you may want to just eyeball it.  You want to bake these cookies
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="streaming-responses-with-the-rest-api">
+<h2>Streaming responses with the REST API<a class="headerlink" href="#streaming-responses-with-the-rest-api" title="Link to this heading">#</a></h2>
+<p>Including <code class="docutils literal notranslate"><span class="pre">&quot;stream&quot;:</span> <span class="pre">true</span></code> in the REST API request will result in series of <a class="reference external" href="https://docs.databricks.com/en/machine-learning/foundation-models/api-reference.html#chatcompletionchunk"><code class="docutils literal notranslate"><span class="pre">ChatCompletionChunk</span></code></a> objects when calling a Chat model endpoint.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">sh</span>
+<span class="n">curl</span> \
+<span class="o">-</span><span class="n">u</span> <span class="n">token</span><span class="p">:</span><span class="err">$</span><span class="n">DATABRICKS_TOKEN</span> \
+<span class="o">-</span><span class="n">X</span> <span class="n">POST</span> \
+<span class="o">-</span><span class="n">H</span> <span class="s2">&quot;Content-Type: application/json&quot;</span> \
+<span class="o">-</span><span class="n">d</span> <span class="s1">&#39;{</span>
+  <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;system&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;You are a helpful assistant.&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;Tell me in detail how to make chocolate chip cookies.&quot;</span>
+    <span class="p">}</span>
+  <span class="p">],</span>
+  <span class="s2">&quot;max_tokens&quot;</span><span class="p">:</span> <span class="mi">2048</span><span class="p">,</span>
+  <span class="s2">&quot;stream&quot;</span><span class="p">:</span> <span class="n">true</span>
+<span class="p">}</span><span class="s1">&#39; </span><span class="se">\</span>
+<span class="s1">https://e2-dogfood.staging.cloud.databricks.com/serving-endpoints/databricks-mixtral-8x7b-instruct/invocations</span>
+  
+
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;1&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:1,&quot;total_tokens&quot;:29}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;.&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:2,&quot;total_tokens&quot;:30}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; G&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:3,&quot;total_tokens&quot;:31}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;ather&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:4,&quot;total_tokens&quot;:32}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; your&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:5,&quot;total_tokens&quot;:33}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; ingredients&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:6,&quot;total_tokens&quot;:34}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;:&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:7,&quot;total_tokens&quot;:35}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; To&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:8,&quot;total_tokens&quot;:36}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; make&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:9,&quot;total_tokens&quot;:37}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; chocolate&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:10,&quot;total_tokens&quot;:38}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; chip&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:11,&quot;total_tokens&quot;:39}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; cookies&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:12,&quot;total_tokens&quot;:40}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;,&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:13,&quot;total_tokens&quot;:41}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; you&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:14,&quot;total_tokens&quot;:42}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; will&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:15,&quot;total_tokens&quot;:43}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; need&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:16,&quot;total_tokens&quot;:44}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; the&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:17,&quot;total_tokens&quot;:45}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; following&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:18,&quot;total_tokens&quot;:46}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; ingredients&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:19,&quot;total_tokens&quot;:47}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;:&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:20,&quot;total_tokens&quot;:48}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;\n&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:21,&quot;total_tokens&quot;:49}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;\n&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:22,&quot;total_tokens&quot;:50}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;*&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:23,&quot;total_tokens&quot;:51}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; &quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:24,&quot;total_tokens&quot;:52}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;1&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:25,&quot;total_tokens&quot;:53}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; cup&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:26,&quot;total_tokens&quot;:54}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; (&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:27,&quot;total_tokens&quot;:55}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;2&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:28,&quot;total_tokens&quot;:56}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; sticks&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:29,&quot;total_tokens&quot;:57}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;)&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:30,&quot;total_tokens&quot;:58}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; uns&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:31,&quot;total_tokens&quot;:59}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;alt&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:32,&quot;total_tokens&quot;:60}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;ed&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:33,&quot;total_tokens&quot;:61}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; butter&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:34,&quot;total_tokens&quot;:62}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;,&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:35,&quot;total_tokens&quot;:63}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; soft&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:36,&quot;total_tokens&quot;:64}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;ened&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:37,&quot;total_tokens&quot;:65}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;\n&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:38,&quot;total_tokens&quot;:66}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;*&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:39,&quot;total_tokens&quot;:67}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; &quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:40,&quot;total_tokens&quot;:68}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;1&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:41,&quot;total_tokens&quot;:69}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; cup&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:42,&quot;total_tokens&quot;:70}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; white&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:43,&quot;total_tokens&quot;:71}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; sugar&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:44,&quot;total_tokens&quot;:72}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;\n&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:45,&quot;total_tokens&quot;:73}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;*&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:46,&quot;total_tokens&quot;:74}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; &quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:47,&quot;total_tokens&quot;:75}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;1&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:48,&quot;total_tokens&quot;:76}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; cup&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:49,&quot;total_tokens&quot;:77}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; packed&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:50,&quot;total_tokens&quot;:78}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; brown&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:51,&quot;total_tokens&quot;:79}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; sugar&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:52,&quot;total_tokens&quot;:80}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;\n&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:53,&quot;total_tokens&quot;:81}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;*&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:54,&quot;total_tokens&quot;:82}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; &quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:55,&quot;total_tokens&quot;:83}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;2&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:56,&quot;total_tokens&quot;:84}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; eggs&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:57,&quot;total_tokens&quot;:85}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;\n&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:58,&quot;total_tokens&quot;:86}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;*&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:59,&quot;total_tokens&quot;:87}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; &quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:60,&quot;total_tokens&quot;:88}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;2&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:61,&quot;total_tokens&quot;:89}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; teas&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:62,&quot;total_tokens&quot;:90}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;po&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:63,&quot;total_tokens&quot;:91}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;ons&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:64,&quot;total_tokens&quot;:92}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; van&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:65,&quot;total_tokens&quot;:93}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;illa&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:66,&quot;total_tokens&quot;:94}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; extract&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:67,&quot;total_tokens&quot;:95}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;\n&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:68,&quot;total_tokens&quot;:96}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;*&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:69,&quot;total_tokens&quot;:97}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; &quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:70,&quot;total_tokens&quot;:98}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;3&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:71,&quot;total_tokens&quot;:99}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; cups&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:72,&quot;total_tokens&quot;:100}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; all&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:73,&quot;total_tokens&quot;:101}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;-&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:74,&quot;total_tokens&quot;:102}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;pur&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:75,&quot;total_tokens&quot;:103}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;pose&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:76,&quot;total_tokens&quot;:104}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; flour&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:77,&quot;total_tokens&quot;:105}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;\n&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:78,&quot;total_tokens&quot;:106}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;*&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:79,&quot;total_tokens&quot;:107}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; &quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:80,&quot;total_tokens&quot;:108}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;1&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:81,&quot;total_tokens&quot;:109}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; teas&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:82,&quot;total_tokens&quot;:110}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a
+
+*** WARNING: max output size exceeded, skipping output. ***
+
+tant&quot;,&quot;content&quot;:&quot; Use&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:640,&quot;total_tokens&quot;:668}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; a&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:641,&quot;total_tokens&quot;:669}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; cookie&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:642,&quot;total_tokens&quot;:670}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; sc&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:643,&quot;total_tokens&quot;:671}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;oop&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:644,&quot;total_tokens&quot;:672}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;:&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:645,&quot;total_tokens&quot;:673}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; Using&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:646,&quot;total_tokens&quot;:674}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; a&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:647,&quot;total_tokens&quot;:675}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; cookie&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:648,&quot;total_tokens&quot;:676}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; sc&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:649,&quot;total_tokens&quot;:677}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;oop&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:650,&quot;total_tokens&quot;:678}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; will&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:651,&quot;total_tokens&quot;:679}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; help&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:652,&quot;total_tokens&quot;:680}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; you&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:653,&quot;total_tokens&quot;:681}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; portion&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:654,&quot;total_tokens&quot;:682}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; out&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:655,&quot;total_tokens&quot;:683}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; the&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:656,&quot;total_tokens&quot;:684}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; dough&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:657,&quot;total_tokens&quot;:685}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; even&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:658,&quot;total_tokens&quot;:686}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;ly&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:659,&quot;total_tokens&quot;:687}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;,&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:660,&quot;total_tokens&quot;:688}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; ensuring&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:661,&quot;total_tokens&quot;:689}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; that&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:662,&quot;total_tokens&quot;:690}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; all&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:663,&quot;total_tokens&quot;:691}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; of&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:664,&quot;total_tokens&quot;:692}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; your&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:665,&quot;total_tokens&quot;:693}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; cookies&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:666,&quot;total_tokens&quot;:694}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; are&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:667,&quot;total_tokens&quot;:695}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; the&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:668,&quot;total_tokens&quot;:696}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; same&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:669,&quot;total_tokens&quot;:697}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; size&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:670,&quot;total_tokens&quot;:698}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; and&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:671,&quot;total_tokens&quot;:699}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; b&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:672,&quot;total_tokens&quot;:700}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;ake&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:673,&quot;total_tokens&quot;:701}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; at&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:674,&quot;total_tokens&quot;:702}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; the&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:675,&quot;total_tokens&quot;:703}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; same&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:676,&quot;total_tokens&quot;:704}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; rate&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:677,&quot;total_tokens&quot;:705}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;.&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:678,&quot;total_tokens&quot;:706}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;\n&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:679,&quot;total_tokens&quot;:707}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;*&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:680,&quot;total_tokens&quot;:708}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; Don&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:681,&quot;total_tokens&quot;:709}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;&#39;&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:682,&quot;total_tokens&quot;:710}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;t&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:683,&quot;total_tokens&quot;:711}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; over&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:684,&quot;total_tokens&quot;:712}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;b&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:685,&quot;total_tokens&quot;:713}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;ake&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:686,&quot;total_tokens&quot;:714}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; the&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:687,&quot;total_tokens&quot;:715}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; cookies&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:688,&quot;total_tokens&quot;:716}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;:&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:689,&quot;total_tokens&quot;:717}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; Keep&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:690,&quot;total_tokens&quot;:718}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; an&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:691,&quot;total_tokens&quot;:719}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; eye&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:692,&quot;total_tokens&quot;:720}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; on&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:693,&quot;total_tokens&quot;:721}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; the&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:694,&quot;total_tokens&quot;:722}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; cookies&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:695,&quot;total_tokens&quot;:723}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; while&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:696,&quot;total_tokens&quot;:724}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; they&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:697,&quot;total_tokens&quot;:725}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; are&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:698,&quot;total_tokens&quot;:726}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; baking&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:699,&quot;total_tokens&quot;:727}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;,&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:700,&quot;total_tokens&quot;:728}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; and&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:701,&quot;total_tokens&quot;:729}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; remove&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:702,&quot;total_tokens&quot;:730}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; them&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:703,&quot;total_tokens&quot;:731}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; from&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:704,&quot;total_tokens&quot;:732}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; the&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:705,&quot;total_tokens&quot;:733}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; oven&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:706,&quot;total_tokens&quot;:734}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; as&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:707,&quot;total_tokens&quot;:735}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; soon&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:708,&quot;total_tokens&quot;:736}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; as&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:709,&quot;total_tokens&quot;:737}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; they&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:710,&quot;total_tokens&quot;:738}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; are&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:711,&quot;total_tokens&quot;:739}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; set&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:712,&quot;total_tokens&quot;:740}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; at&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:713,&quot;total_tokens&quot;:741}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; the&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:714,&quot;total_tokens&quot;:742}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; edges&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:715,&quot;total_tokens&quot;:743}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;.&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:716,&quot;total_tokens&quot;:744}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; This&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:717,&quot;total_tokens&quot;:745}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; will&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:718,&quot;total_tokens&quot;:746}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; help&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:719,&quot;total_tokens&quot;:747}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; ensure&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:720,&quot;total_tokens&quot;:748}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; that&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:721,&quot;total_tokens&quot;:749}}
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   254    0     0  100   254      0   1242 --:--:-- --:--:-- --:--:--  1239
+100 29181    0 28927  100   254  25051    219  0:00:01  0:00:01 --:--:-- 25264
+100 60401    0 60147  100   254  27892    117  0:00:02  0:00:02 --:--:-- 28002
+100 91692    0 91438  100   254  28936     80  0:00:03  0:00:03 --:--:-- 29016
+100  119k    0  119k  100   254  29412     61  0:00:04  0:00:04 --:--:-- 29472
+100  149k    0  149k  100   254  29699     49  0:00:05  0:00:05 --:--:-- 30924
+100  179k    0  179k  100   254  29863     41  0:00:06  0:00:06 --:--:-- 30975
+100  209k    0  209k  100   254  29952     35  0:00:07  0:00:07 --:--:-- 30838
+100  219k    0  219k  100   254  29995     33  0:00:07  0:00:07 --:--:-- 30770
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; they&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:722,&quot;total_tokens&quot;:750}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; are&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:723,&quot;total_tokens&quot;:751}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; soft&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:724,&quot;total_tokens&quot;:752}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; and&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:725,&quot;total_tokens&quot;:753}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; che&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:726,&quot;total_tokens&quot;:754}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;wy&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:727,&quot;total_tokens&quot;:755}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; in&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:728,&quot;total_tokens&quot;:756}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; the&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:729,&quot;total_tokens&quot;:757}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot; middle&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:730,&quot;total_tokens&quot;:758}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;.&quot;},&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:731,&quot;total_tokens&quot;:759}}
+
+data: {&quot;id&quot;:&quot;604bbef0-44ac-4835-be63-70a4c0870278&quot;,&quot;object&quot;:&quot;chat.completion.chunk&quot;,&quot;created&quot;:1707146947,&quot;model&quot;:&quot;mixtral-8x7b-instruct-v0.1&quot;,&quot;choices&quot;:[{&quot;index&quot;:0,&quot;delta&quot;:{&quot;role&quot;:&quot;assistant&quot;,&quot;content&quot;:&quot;&quot;},&quot;finish_reason&quot;:&quot;stop&quot;}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:28,&quot;completion_tokens&quot;:732,&quot;total_tokens&quot;:760}}
+
+data: [DONE]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Calling on a completion model will return a series of <a class="reference external" href="https://docs.databricks.com/en/machine-learning/foundation-models/api-reference.html#completion-response"><code class="docutils literal notranslate"><span class="pre">text_completion</span></code></a>s.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">sh</span>
+<span class="n">curl</span> \
+ <span class="o">-</span><span class="n">u</span> <span class="n">token</span><span class="p">:</span><span class="err">$</span><span class="n">DATABRICKS_TOKEN</span> \
+ <span class="o">-</span><span class="n">X</span> <span class="n">POST</span> \
+ <span class="o">-</span><span class="n">H</span> <span class="s2">&quot;Content-Type: application/json&quot;</span> \
+ <span class="o">-</span><span class="n">d</span> <span class="s1">&#39;{&quot;prompt&quot;: &quot;Tell me in detail how to make chocolate chip cookies.&quot;,</span>
+      <span class="s2">&quot;stream&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">}</span><span class="s1">&#39; </span><span class="se">\</span>
+<span class="s1">https://e2-dogfood.staging.cloud.databricks.com/serving-endpoints/databricks-mpt-30b-instruct/invocations</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;Sure&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:1,&quot;total_tokens&quot;:40}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;,&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:2,&quot;total_tokens&quot;:41}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; you&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:3,&quot;total_tokens&quot;:42}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;’&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:4,&quot;total_tokens&quot;:43}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;ll&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:5,&quot;total_tokens&quot;:44}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; want&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:6,&quot;total_tokens&quot;:45}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; to&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:7,&quot;total_tokens&quot;:46}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; start&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:8,&quot;total_tokens&quot;:47}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; by&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:9,&quot;total_tokens&quot;:48}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; mixing&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:10,&quot;total_tokens&quot;:49}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; together&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:11,&quot;total_tokens&quot;:50}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; 2&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:12,&quot;total_tokens&quot;:51}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; cups&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:13,&quot;total_tokens&quot;:52}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; of&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:14,&quot;total_tokens&quot;:53}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; flour&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:15,&quot;total_tokens&quot;:54}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;,&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:16,&quot;total_tokens&quot;:55}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; 1&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:17,&quot;total_tokens&quot;:56}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; cup&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:18,&quot;total_tokens&quot;:57}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; of&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:19,&quot;total_tokens&quot;:58}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; brown&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:20,&quot;total_tokens&quot;:59}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; sugar&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:21,&quot;total_tokens&quot;:60}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;,&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:22,&quot;total_tokens&quot;:61}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; and&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:23,&quot;total_tokens&quot;:62}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; 1&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:24,&quot;total_tokens&quot;:63}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;/&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:25,&quot;total_tokens&quot;:64}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;2&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:26,&quot;total_tokens&quot;:65}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; teaspoon&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:27,&quot;total_tokens&quot;:66}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; of&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:28,&quot;total_tokens&quot;:67}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; baking&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:29,&quot;total_tokens&quot;:68}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; soda&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:30,&quot;total_tokens&quot;:69}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;.&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:31,&quot;total_tokens&quot;:70}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; Next&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:32,&quot;total_tokens&quot;:71}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;,&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:33,&quot;total_tokens&quot;:72}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; blend&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:34,&quot;total_tokens&quot;:73}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; in&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:35,&quot;total_tokens&quot;:74}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; 1&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:36,&quot;total_tokens&quot;:75}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;/&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:37,&quot;total_tokens&quot;:76}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;4&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:38,&quot;total_tokens&quot;:77}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; cup&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:39,&quot;total_tokens&quot;:78}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; of&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:40,&quot;total_tokens&quot;:79}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; melted&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:41,&quot;total_tokens&quot;:80}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; butter&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:42,&quot;total_tokens&quot;:81}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; and&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:43,&quot;total_tokens&quot;:82}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; 1&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:44,&quot;total_tokens&quot;:83}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;/&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:45,&quot;total_tokens&quot;:84}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;4&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:46,&quot;total_tokens&quot;:85}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; cup&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:47,&quot;total_tokens&quot;:86}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; of&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:48,&quot;total_tokens&quot;:87}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; milk&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:49,&quot;total_tokens&quot;:88}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;,&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:50,&quot;total_tokens&quot;:89}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; and&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:51,&quot;total_tokens&quot;:90}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; then&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:52,&quot;total_tokens&quot;:91}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; stir&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:53,&quot;total_tokens&quot;:92}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; in&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:54,&quot;total_tokens&quot;:93}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; 1&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:55,&quot;total_tokens&quot;:94}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;/&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:56,&quot;total_tokens&quot;:95}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;2&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:57,&quot;total_tokens&quot;:96}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; cup&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:58,&quot;total_tokens&quot;:97}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; of&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:59,&quot;total_tokens&quot;:98}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; chocolate&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:60,&quot;total_tokens&quot;:99}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; chips&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:61,&quot;total_tokens&quot;:100}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; and&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:62,&quot;total_tokens&quot;:101}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; 1&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:63,&quot;total_tokens&quot;:102}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;/&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:64,&quot;total_tokens&quot;:103}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;2&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:65,&quot;total_tokens&quot;:104}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; cup&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:66,&quot;total_tokens&quot;:105}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; of&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:67,&quot;total_tokens&quot;:106}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; nuts&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:68,&quot;total_tokens&quot;:107}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;.&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:69,&quot;total_tokens&quot;:108}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; Drop&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:70,&quot;total_tokens&quot;:109}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; the&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:71,&quot;total_tokens&quot;:110}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; batter&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:72,&quot;total_tokens&quot;:111}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; by&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:73,&quot;total_tokens&quot;:112}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; tablespoon&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:74,&quot;total_tokens&quot;:113}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; onto&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:75,&quot;total_tokens&quot;:114}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; a&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:76,&quot;total_tokens&quot;:115}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; gre&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:77,&quot;total_tokens&quot;:116}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;ased&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:78,&quot;total_tokens&quot;:117}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; baking&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:79,&quot;total_tokens&quot;:118}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; sheet&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:80,&quot;total_tokens&quot;:119}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;,&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:81,&quot;total_tokens&quot;:120}}
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  5622    0  5533  100    89   5194     83  0:00:01  0:00:01 --:--:--  5273
+100 11907    0 11818  100    89   5726     43  0:00:02  0:00:02 --:--:--  5768
+100 18209    0 18120  100    89   5918     29  0:00:03  0:00:03 --:--:--  5946
+100 24300    0 24211  100    89   6026     22  0:00:04  0:00:04 --:--:--  6049
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; and&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:82,&quot;total_tokens&quot;:121}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; bake&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:83,&quot;total_tokens&quot;:122}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; for&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:84,&quot;total_tokens&quot;:123}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; 8&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:85,&quot;total_tokens&quot;:124}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; to&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:86,&quot;total_tokens&quot;:125}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; 10&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:87,&quot;total_tokens&quot;:126}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; minutes&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:88,&quot;total_tokens&quot;:127}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; at&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:89,&quot;total_tokens&quot;:128}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; 350&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:90,&quot;total_tokens&quot;:129}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; degrees&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:91,&quot;total_tokens&quot;:130}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot; F&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:92,&quot;total_tokens&quot;:131}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;ahren&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:93,&quot;total_tokens&quot;:132}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;heit&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:94,&quot;total_tokens&quot;:133}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;.&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:null}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:95,&quot;total_tokens&quot;:134}}
+
+data: {&quot;id&quot;:&quot;74b9c840-934a-490f-a542-4191bff313da&quot;,&quot;object&quot;:&quot;text_completion&quot;,&quot;model&quot;:&quot;mpt-30b-instruct&quot;,&quot;choices&quot;:[{&quot;text&quot;:&quot;&quot;,&quot;index&quot;:0,&quot;logprobs&quot;:null,&quot;finish_reason&quot;:&quot;stop&quot;}],&quot;usage&quot;:{&quot;prompt_tokens&quot;:39,&quot;completion_tokens&quot;:96,&quot;total_tokens&quot;:135}}
+
+data: [DONE]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading">#</a></h2>
+<p>You are now ready to integrate streaming outputs into your next project with the Databricks Foundation Model API!</p>
+<p>See the <a class="reference external" href="https://docs.databricks.com/en/machine-learning/foundation-models/index.html">Databricks Foundation Model APIs Documentation</a> for more detail.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./nbs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="serve_marketplace.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Serve a Model from Databricks Marketplace</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="vector_search_fm_api.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Foundation Model API Embeddings for Vector Search</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-with-the-python-sdk">Streaming with the Python SDK</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#streaming-responses-with-the-rest-api">Streaming responses with the REST API</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusion">Conclusion</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The Databricks GenAI Community
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

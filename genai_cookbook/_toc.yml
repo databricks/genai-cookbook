@@ -1,0 +1,18 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: index
+parts:
+- caption: All Notebooks
+  chapters:
+  - file: nbs/1-introduction-to-rag
+  - file: nbs/2-fundamentals-unstructured
+    sections:
+    - file: nbs/2-fundamentals-unstructured-data-pipeline
+    - file: nbs/2-fundamentals-unstructured-rag
+    - file: nbs/2-fundamentals-unstructured-eval
+    - file: nbs/2-fundamentals-unstructured-llmops
+  - file: nbs/3-deep-dive
+  - file: nbs/4-evaluation
+  - file: nbs/5-hands-on

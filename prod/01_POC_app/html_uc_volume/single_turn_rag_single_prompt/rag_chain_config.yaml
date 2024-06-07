@@ -1,0 +1,36 @@
+databricks_resources:
+  llm_endpoint_name: databricks-dbrx-instruct
+  vector_search_endpoint_name: rag_studio_demo
+input_example:
+  messages:
+  - content: Sample user question
+    role: user
+llm_config:
+  llm_parameters:
+    max_tokens: 1500
+    temperature: 0.01
+  llm_prompt_template: 'You are an assistant that answers questions. Use the following
+    pieces of retrieved context to answer the question. Some pieces of context may
+    be irrelevant, in which case you should not use them to form the answer.
+
+    Question: {question}
+
+    Context: {context}
+
+    Answer:'
+  llm_prompt_template_variables:
+  - context
+  - question
+retriever_config:
+  chunk_template: 'Passage: {chunk_text}
+
+    '
+  data_pipeline_tag: poc
+  parameters:
+    k: 5
+    query_type: ann
+  schema:
+    chunk_text: chunked_text
+    document_uri: path
+    primary_key: chunk_id
+  vector_search_index: rag.rag_e.my_single_turn_html_rag_app_poc_chunked_docs_gold_index

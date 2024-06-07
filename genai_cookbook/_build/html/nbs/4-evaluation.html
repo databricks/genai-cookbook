@@ -1,0 +1,693 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Section 4: Evaluation &#8212; Databricks Generative AI Cookbook</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-6BZ4NTBHVJ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/4-evaluation';</script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Section 5: Hands-on guide to implementing high-quality RAG" href="5-hands-on.html" />
+    <link rel="prev" title="Section 3: Deep dive into RAG over unstructured documents" href="3-deep-dive.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo2.png" class="logo__image only-light" alt="Databricks Generative AI Cookbook - Home"/>
+    <script>document.write(`<img src="../_static/logo2.png" class="logo__image only-dark" alt="Databricks Generative AI Cookbook - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">All Notebooks</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html"><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html"><strong>Section 2:</strong> Fundamentals of RAG over unstructured documents</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-rag.html">Retrieval, augmentation, and generation (RAG Chain)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">Evaluation &amp; monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">Governance and LLMops</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="3-deep-dive.html"><strong>Section 3:</strong> Deep dive into RAG over unstructured documents</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><strong>Section 4:</strong> Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on.html"><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/4-evaluation.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/nbs/4-evaluation.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Section 4: Evaluation</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#establishing-ground-truth-creating-evaluation-sets">Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#assessing-performance-defining-metrics-that-matter">Assessing Performance: Defining Metrics that Matter</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-metrics">Retrieval metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#response-metrics">Response metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chain-metrics">Chain metrics</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enabling-measurement-building-supporting-infrastructure">Enabling Measurement: Building Supporting Infrastructure</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appendix">Appendix</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#precision-and-recall">Precision and Recall</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="section-4-evaluation">
+<h1><strong>Section 4:</strong> Evaluation<a class="headerlink" href="#section-4-evaluation" title="Link to this heading">#</a></h1>
+<p>The old saying “you can’t manage what you can’t measure” is incredibly relevant (no pun intended) in the context of any generative AI application, RAG included. In order for your generative AI application to deliver high quality, accurate responses, you <strong>must</strong> be able to define and measure what “quality” means for your use case.</p>
+<p>This section deep dives into 3 critical components of evaluation:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#establishing-ground-truth-creating-evaluation-sets"><span class="xref myst">Establishing Ground Truth: Creating Evaluation Sets</span></a></p></li>
+<li><p><a class="reference internal" href="#assessing-performance-defining-metrics-that-matter"><span class="xref myst">Assessing Performance: Defining Metrics that Matter</span></a></p></li>
+<li><p><a class="reference internal" href="#enabling-measurement-building-supporting-infrastructure"><span class="xref myst">Enabling Measurement: Building Supporting Infrastructure</span></a></p></li>
+</ol>
+<section id="establishing-ground-truth-creating-evaluation-sets">
+<h2>Establishing Ground Truth: Creating Evaluation Sets<a class="headerlink" href="#establishing-ground-truth-creating-evaluation-sets" title="Link to this heading">#</a></h2>
+<p>To measure quality, Databricks recommends creating a human-labeled Evaluation Set, which is a curated, representative set of queries, along with ground-truth answers and (optionally) the correct supporting documents that should be retrieved. Human input is crucial in this process, as it ensures that the Evaluation Set accurately reflects the expectations and requirements of the end-users.</p>
+<p>A good Evaluation Set has the following characteristics:</p>
+<ul class="simple">
+<li><p><strong>Representative:</strong> Accurately reflects the variety of requests the application will encounter in production.</p></li>
+<li><p><strong>Challenging:</strong> The set should include difficult and diverse cases to effectively test the model’s capabilities.  Ideally, it will include adversarial examples such as questions attempting prompt injection or questions attempting to generate inappropriate responses from LLM.</p></li>
+<li><p><strong>Continually updated:</strong> The set must be periodically updated to reflect how the application is used in production and the changing nature of the indexed data.</p></li>
+</ul>
+<p>Databricks recommends at least 30 questions in your evaluation set, and ideally 100 - 200. The best evaluation sets will grow over time to contain 1,000s of questions.</p>
+<p>To avoid overfitting, Databricks recommends splitting your evaluation set into training, test, and validation sets:</p>
+<ul class="simple">
+<li><p>Training set: ~70% of the questions. Used for an initial pass to evaluate every experiment to identify the highest potential ones.</p></li>
+<li><p>Test set: ~20% of the questions. Used for evaluating the highest performing experiments from the training set.</p></li>
+<li><p>Validation set: ~10% of the questions. Used for a final validation check before deploying an experiment to production.</p></li>
+</ul>
+</section>
+<section id="assessing-performance-defining-metrics-that-matter">
+<h2>Assessing Performance: Defining Metrics that Matter<a class="headerlink" href="#assessing-performance-defining-metrics-that-matter" title="Link to this heading">#</a></h2>
+<p>With an evaluation set, you are able to measure the performance of your RAG application across a number of different dimensions, including:</p>
+<ul class="simple">
+<li><p><strong>Retrieval quality</strong>: Retrieval metrics assess how successfully your RAG application retrieves relevant supporting data. Precision and recall are two key retrieval metrics.</p></li>
+<li><p><strong>Response quality</strong>: Response quality metrics assess how well the RAG application responds to a user’s request. Response metrics can measure, for instance, how well-grounded the response was given the retrieved context, or how harmful/harmless the response was.</p></li>
+<li><p><strong>Chain performance:</strong> Chain metrics capture the overall cost and performance of RAG applications. Overall latency and token consumption are examples of chain performance metrics.</p></li>
+</ul>
+<p>There are two key approaches to measuring performance across these metrics:</p>
+<ul class="simple">
+<li><p><strong>Ground truth based:</strong> This approach involves comparing the RAG application’s retrieved supporting data or final output to the ground-truth answers and supporting documents recorded in the evaluation set. It allows for assessing the performance based on known correct answers.</p></li>
+<li><p><strong>LLM judge based:</strong> In this approach, a separate <a class="reference external" href="https://arxiv.org/abs/2306.05685">LLM acts as a judge</a> to evaluate the quality of the RAG application’s retrieval and responses. LLM judges can be configured to compare the final response to the user query and rate its relevance. This approach automates evaluation across numerous dimensions. LLM judges can also be configured to return rationales for their ratings.</p></li>
+</ul>
+<p>Take time to ensure that the LLM judge’s evaluations align with the RAG application’s success criteria. Some LLM-as-judge metrics still rely on the ground truth from the evaluation set, which the judge LLM uses to assess the application’s output.</p>
+<section id="retrieval-metrics">
+<h3>Retrieval metrics<a class="headerlink" href="#retrieval-metrics" title="Link to this heading">#</a></h3>
+<p>Retrieval metrics help you understand if your retriever is delivering relevant results. Retrieval metrics are largely based on precision and recall.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Metric Name</p></th>
+<th class="head"><p>Question Answered</p></th>
+<th class="head"><p>Details</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Precision</p></td>
+<td><p>Is the retrieved supporting data relevant?</p></td>
+<td><p>Precision is the proportion of retrieved documents that are actually relevant to the user’s request. An LLM judge can be used to assess the relevance of each retrieved chunk to the user’s request.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Recall</p></td>
+<td><p>Did I retrieve most/all of the relevant chunks?</p></td>
+<td><p>Recall is the proportion of all of the relevant documents that were retrieved. This is a measure of the completeness of the results.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>In the example below, two out of the three retrieved results were relevant to the user’s query, so the precision was 0.66 (2/3). The retrieved docs included two out of a total of four relevant docs, so the recall was 0.5 (2/4).</p>
+<img alt="../_images/1_img3.png" class="align-center" src="../_images/1_img3.png" />
+<p>See the <a class="reference internal" href="#appendix"><span class="xref myst">appendix</span></a> on precision and recall for more details.</p>
+</section>
+<section id="response-metrics">
+<h3>Response metrics<a class="headerlink" href="#response-metrics" title="Link to this heading">#</a></h3>
+<p>Response metrics assess the quality of the final output. “Quality” has many different dimensions when it comes to assessing LLM outputs, and the range of metrics reflects this.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Metric Name</p></th>
+<th class="head"><p>Question Answered</p></th>
+<th class="head"><p>Details</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Correctness</p></td>
+<td><p>All things considered, did the LLM give an accurate answer?</p></td>
+<td><p>Correctness is an LLM-generated metric that assesses whether the LLM’s output is correct by comparing it to the ground truth in the evaluation dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Groundedness</p></td>
+<td><p>Is the LLM’s response a hallucination or is it grounded to the context?</p></td>
+<td><p>To measure groundedness, an LLM judge compares the LLM’s output to the retrieved supporting data and assesses whether the output reflects the contents of the supporting data or whether it constitutes a hallucination.</p></td>
+</tr>
+<tr class="row-even"><td><p>Harmfulness</p></td>
+<td><p>Is the LLM responding safely without any harmful or toxic content?</p></td>
+<td><p>The Harmfulness measure considers only the RAG application’s final response. An LLM judge determines whether the response should be considered harmful or toxic.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Relevance</p></td>
+<td><p>Is the LLM responding to the question asked?</p></td>
+<td><p>Relevance is based on the user’s request and the RAG application’s output. An LLM judge provides a rating of how relevant the output is to the response.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>It is very important to collect both response and retrieval metrics. A RAG application can respond poorly in spite of retrieving the correct context; it can also provide good responses on the basis of faulty retrievals. Only by measuring both components can we accurately diagnose and address issues in the application.</p>
+</section>
+<section id="chain-metrics">
+<h3>Chain metrics<a class="headerlink" href="#chain-metrics" title="Link to this heading">#</a></h3>
+<p>Chain metrics access the overall performance of the whole RAG chain. Cost and latency can be just as important as quality when it comes to evaluating RAG applications. It is important to consider cost and latency requirements early in the process of developing a RAG application as these considerations can affect every part of the application, including both the retrieval method and the LLM used for generation.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Metric Name</p></th>
+<th class="head"><p>Question Answered</p></th>
+<th class="head"><p>Details</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Total tokens</p></td>
+<td><p>What is the cost of executing the RAG chain?</p></td>
+<td><p>Token consumption can be used to approximate cost. This metric counts the tokens used across all LLM generation calls in the RAG pipeline. Generally speaking, more tokens lead to higher costs, and finding ways to reduce tokens can reduce costs.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Latency</p></td>
+<td><p>What is the latency of executing the RAG chain?</p></td>
+<td><p>Latency measures the time it takes for the application to return a response after the user sends a request. This includes the time it takes the retriever to retrieve relevant supporting data and for the LLM to generate output.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="enabling-measurement-building-supporting-infrastructure">
+<h2>Enabling Measurement: Building Supporting Infrastructure<a class="headerlink" href="#enabling-measurement-building-supporting-infrastructure" title="Link to this heading">#</a></h2>
+<p>Measuring quality is not easy and requires a significant infrastructure investment. This section details what you need to succeed and how Databricks provides these components.</p>
+<p><strong>Detailed trace logging.</strong> The core of your RAG application’s logic is a series of steps in the chain. In order to evaluate and debug quality, you need to implement instrumentation that tracks the chain’s inputs and outputs, along with each step of the chain and its associated inputs and outputs. The instrumentation you put in place should work the same way in development and production.</p>
+<p>In Databricks, MLflow Trace Logging provides this capability. With MLflow Trace Logging, you instrument your code in production, and get the same traces during development and in production. For more details, [link the docs].</p>
+<p><strong>Stakeholder review UI.</strong> Most often, as a developer, you are not a domain expert in the content of the application you are developing. In order to collect feedback from human experts who can assess your application’s output quality, you need an interface that allows them to interact with early versions of the application and provide detailed feedback. Further, you need a way to load specific application outputs for the stakeholders to assess their quality.</p>
+<p>This interface must track the application’s outputs and associated feedback in a structured manner, storing the full application trace and detailed feedback in a data table.</p>
+<p>In Databricks, the Quality Lab Review App provides this capability. For more details, [link the docs].</p>
+<p><strong>Quality / cost / latency metric framework.</strong> You need a way to define the metrics that comprehensively measure the quality of each component of your chain and the end-to-end application. Ideally, the framework would provide a suite of standard metrics out of the box, in addition to supporting customization, so you can add metrics that test specific aspects of quality that are unique to your business.</p>
+<p><strong>Evaluation harness.</strong> You need a way to quickly and efficiently get outputs from your chain for every question in your evaluation set, and then evaluate each output on the relevant metrics. This harness must be as efficient as possible, since you will run evaluation after every experiment that you try to improve quality.</p>
+<p>In Databricks, Quality Lab provides these capabilities. [link more details]</p>
+<p><strong>Evaluation set management.</strong> Your evaluation set is a living, breathing set of questions that you will update iteratively over the course of your application’s development and production lifecycle.</p>
+<p><strong>Experiment tracking framework.</strong> During the course of your application development, you will try many different experiments. An experiment tracking framework enables you to log each experiment and track its metrics vs. other experiments.</p>
+<p><strong>Chain parameterization framework.</strong> Many experiments you try will require you to hold the chain’s code constant while iterating on various parameters used by the code. You need a framework that enables you to do this.</p>
+<p>In Databricks, MLflow provides these capabilities. [link]</p>
+<p>Online monitoring. [talk about LHM]</p>
+</section>
+<section id="appendix">
+<h2>Appendix<a class="headerlink" href="#appendix" title="Link to this heading">#</a></h2>
+<section id="precision-and-recall">
+<h3>Precision and Recall<a class="headerlink" href="#precision-and-recall" title="Link to this heading">#</a></h3>
+<p>Retrieval metrics are based on the concept of Precision &amp; Recall.  Below is a quick primer on Precision &amp; Recall adapted from the excellent <a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall">Wikipedia article</a>.</p>
+<p>Precision measures “Of the items* I retrieved, what % of these items are actually relevant to my user’s query? Computing precision does NOT require your ground truth to contain ALL relevant items.</p>
+<a class="reference internal image-reference" href="../_images/2_img2.png"><img alt="../_images/2_img2.png" class="align-center" src="../_images/2_img2.png" style="width: 400px;" /></a>
+<p>Recall measures “Of ALL the items* that I know are relevant to my user’s query, what % did I retrieve?”  Computing recall requires your ground-truth to contain ALL relevant items.</p>
+<a class="reference internal image-reference" href="../_images/3_img2.png"><img alt="../_images/3_img2.png" class="align-center" src="../_images/3_img2.png" style="width: 400px;" /></a>
+<p>* Items can either be a document or a chunk of a document.</p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./nbs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="3-deep-dive.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><strong>Section 3:</strong> Deep dive into RAG over unstructured documents</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="5-hands-on.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#establishing-ground-truth-creating-evaluation-sets">Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#assessing-performance-defining-metrics-that-matter">Assessing Performance: Defining Metrics that Matter</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-metrics">Retrieval metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#response-metrics">Response metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chain-metrics">Chain metrics</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enabling-measurement-building-supporting-infrastructure">Enabling Measurement: Building Supporting Infrastructure</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appendix">Appendix</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#precision-and-recall">Precision and Recall</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The Databricks GenAI Community
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
