@@ -50,7 +50,7 @@ Using the user query directly as a retrieval query can work for some queries. Ho
 ```{eval-rst}
 .. note::
 
-   Filter extraction must be done in conjunction with changes to both metadata extraction [data pipeline] and retrieval [RAG chain] components. The metadata extraction step should ensure that the relevant metadata fields are available for each document/chunk, and the retrieval step should be implemented to accept and apply extracted filters.
+   Filter extraction must be done in conjunction with changes to both metadata extraction [data pipeline](./3-deep-dive-data-pipeline.md) and [retriever chain](#retrieval) components. The metadata extraction step should ensure that the relevant metadata fields are available for each document/chunk, and the retrieval step should be implemented to accept and apply extracted filters.
 
 .. include:: ./include-rst.rst
 ```

@@ -13,7 +13,7 @@ During data preparation, the RAG application's data pipeline takes raw unstructu
 
 In the remainder of this section, we describe the process of preparing unstructured data for retrieval using *semantic search*. Semantic search understands the contextual meaning and intent of a user query to provide more relevant search results.
 
-Semantic search is one of several approaches that can be taken when implementing the retrieval component of a RAG application over unstructured data. We cover alternate retrieval strategies in the [retrieval deep dive section](/nbs/3-deep-dive).
+Semantic search is one of several approaches that can be taken when implementing the retrieval component of a RAG application over unstructured data. We cover alternate retrieval strategies in the [retrieval knobs section](/nbs/3-deep-dive).
 
 
 

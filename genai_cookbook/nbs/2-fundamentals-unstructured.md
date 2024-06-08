@@ -16,5 +16,4 @@ This section will introduce the key components and principles behind developing 
 :alt: Major components of RAG over unstructured data
 :align: center
 ```
-
-The [next section](/nbs/3-deep-dive) of this guide will unpack the finer details of the typical components that make up the data pipeline and RAG chain of a RAG application using unstructured data.
+<br/>

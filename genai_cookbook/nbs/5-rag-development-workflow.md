@@ -14,18 +14,16 @@ This section walks you through Databricks recommended development workflow for b
 ```{image} ../images/5-hands-on/1_img.png
 :align: center
 ```
-
-Mapping to this workflow, this section provides ready-to-run sample code for every step and every suggestion to improve quality.
-
-Throughout, we will demonstrate evaluation-driven development using one of Databricks' internal use generative AI cases: using a RAG bot to help answer customer support questions in order to [1] reduce support costs [2] improve the customer experience.
+<br/>
+The [implement](./5-hands-on-requirements.md) section of this cookbook provides a guided implementation of this workflow with sample code.
 
 There are two core concepts in **evaluation-driven development:**
 
-1. **Metrics:** Defining high-quality
+1. [**Metrics:**](./4-evaluation-metrics.md) Defining what high-quality means
 
    *Similar to how you set business goals each year, you need to define what high-quality means for your use case.* *Databricks' Quality Lab provides a suggested set of* *N metrics to use, the most important of which is answer accuracy or correctness - is the RAG application providing the right answer?*
 
-2. **Evaluation:** Objectively measuring the metrics
+2. [**Evaluation set:**](./4-evaluation-eval-sets.md) Objectively measuring the metrics
 
    *To objectively measure quality, you need an evaluation set, which contains questions with known-good answers validated by humans. While this may seem scary at first - you probably don't have an evaluation set sitting ready to go - this guide walks you through the process of developing and iteratively refining this evaluation set.*
 
@@ -35,4 +33,4 @@ Anchoring against metrics and an evaluation set provides the following benefits:
 
 2. Getting alignment with business stakeholders on the readiness of the application for production becomes more straightforward when you can confidently state, *"we know our application answers the most critical questions to our business correctly and doesn't hallucinate."*
 
-*>> Evaluation-driven development is known in the academic research community as "hill climbing" akin to climbing a hill to reach the peak - where the hill is your metric and the peak is 100% accuracy on your evaluation set.*
+> Evaluation-driven development is known in the academic research community as ["hill climbing"](https://en.wikipedia.org/wiki/Hill_climbing) akin to climbing a hill to reach the peak - where the hill is your metric and the peak is 100% accuracy on your evaluation set.

@@ -11,12 +11,13 @@ Evaluation and monitoring of Generative AI applications, including RAG, differs 
 | **Metrics** | Metrics evaluate the __inputs & outputs__ of the component e.g., feature drift, precision/recall, latency, etc <br/><br/> Since there is only one component, overall metrics == component metrics. | __Component metrics__ evaluate the __inputs & outputs__ of each component e.g., precision @ K, nDCG, latency, toxicity, etc <br/><br/>__Compound metrics__ evaluate how multiple components interact e.g., faithfulness measures the generator’s adherence to the knowledge from a retriever which requires the chain input, chain output, and output of the internal retriever<br/><br/>__Overall metrics__ evaluate the overall input & output of the system e.g., answer correctness, latency |
 | **Evaluation** | Answer is __deterministically__ “right” or “wrong” <br/><br/> → __Deterministic metrics__ work | Answer is “right” or “wrong” but: <br/><ul><li>Many right answers (non deterministic)</li><li>Some right answers are more right</li></ul><br/>→ Need __human feedback__ to be confident<br/>→ Need __LLM-judged metrics__ to scale evaluation<br/> |
 
+Effectively evaluating and monitoring application quality, cost and latency requires several components:
+
+
 ```{image} ../images/2-fundamentals-unstructured/4_img.png
 :align: center
 ```
 <br/>
-
-Effectively evaluating and monitoring application quality, cost and latency requires several components:
 
 - **Evaluation set:** To rigorously evaluate your RAG application, you need a curated set of evaluation queries (and ideally outputs) that are representative of the application's intended use. These evaluation examples should be challenging, diverse, and updated to reflect changing usage and requirements.
 
