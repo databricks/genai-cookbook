@@ -1,4 +1,4 @@
-## Deploy POC *to* collect stakeholder feedback
+## Deploy POC to collect stakeholder feedback
 
 ```{image} ../images/5-hands-on/3_img.png
 :align: center
@@ -14,11 +14,11 @@ Databricks recommends building your POC using the simplest RAG chain architectur
 
 > *!! Important: our recommended default parameters are by no means perfect, nor are they intended to be. Rather, they are a place to start from - the next steps of our workflow guide you through iterating on these parameters.*
 >
-> *Why start from a simple POC? There are hundreds of possible combinations of knobs you can tune within your RAG application. You can easily spend weeks tuning these knobs, but if you do so before you can systematically evaluate your RAG, you'll end up in what we call the POC doom loop - iterating on settings, but with no way to objectively know if you made an improvement -- all while your stakeholders sit around impatiently waiting.*
+> *Why start from a simple POC? There are hundreds of possible combinations of knobs you can tune within your RAG application. You can easily spend weeks tuning these knobs, but if you do so before you can systematically evaluate your RAG, you'll end up in what we call the POC doom loop—iterating on settings, but with no way to objectively know if you made an improvement—all while your stakeholders sit around impatiently waiting.*
 
-The POC templates in this guide are designed with quality iteration in mind - that is, they are parameterized with the knobs that our research has shown are most important to tune in order to improve RAG quality. Each knob has a smart default.
+The POC templates in this guide are designed with quality iteration in mind—that is, they are parameterized with the knobs that our research has shown are most important to tune in order to improve RAG quality. Each knob has a smart default.
 
-Said differently, these templates are not "3 lines of code that magically make a RAG" - rather, they are a well-structured RAG application that can be tuned for quality in the following steps of an evaluation-driven development workflow.  
+Said differently, these templates are not "3 lines of code that magically make a RAG"—rather, they are a well-structured RAG application that can be tuned for quality in the following steps of an evaluation-driven development workflow.  
 
 This enables you to quickly deploy a POC, but transition quickly to quality iteration without needing to rewrite your code.
 
@@ -28,7 +28,7 @@ This enables you to quickly deploy a POC, but transition quickly to quality iter
 
 **Requirements:**
 
-- Data from your [requirements](#requirements-questions) is available in your [Lakehouse](https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html) inside a [Unity Catalog](https://www.databricks.com/product/unity-catalog) [volume](https://docs.databricks.com/en/connect/unity-catalog/volumes.html) or [Delta Table](https://docs.databricks.com/en/delta/index.html)
+- Data from your [requirements](/nbs/5-hands-on-requirements.md#requirements-questions) is available in your [Lakehouse](https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html) inside a [Unity Catalog](https://www.databricks.com/product/unity-catalog) [volume](https://docs.databricks.com/en/connect/unity-catalog/volumes.html) or [Delta Table](https://docs.databricks.com/en/delta/index.html)
 - Access to a [Mosaic AI Vector Search](https://docs.databricks.com/en/generative-ai/vector-search.html) endpoint [[instructions](https://docs.databricks.com/en/generative-ai/create-query-vector-search.html)]
 - Write access to Unity Catalog schema
 - A single-user cluster with DBR 14.3+
@@ -111,9 +111,9 @@ Parameters and their default values that are configured in `00_config`.
 
 | Knob                                     | Description                                                                                                                               | Default value                                                                                                                                |
 |------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| [Parsing strategy](/nbs/3-deep-dive.md#parsing)             | Extracting relevant information from the raw data using appropriate parsing techniques                                                     | Varies based on document type, but generally an open source parsing library                                                                  |
-| [Chunking strategy](/nbs/3-deep-dive.md#chunking)           | Breaking down the parsed data into smaller, manageable chunks for efficient retrieval                                                     | Token Text Splitter, which splits text along using a chunk size of 4000 tokens and a stride of 500 tokens.                                    |
-| [Embedding model](/nbs/3-deep-dive.md#embedding-model)      | Converting the chunked text data into a numerical vector representation that captures its semantic meaning                                 | GTE-Large-v1.5 on the Databricks FMAPI pay-per-token                                                                                         |
+| [Parsing strategy](/nbs/3-deep-dive-data-pipeline.md#parsing)             | Extracting relevant information from the raw data using appropriate parsing techniques                                                     | Varies based on document type, but generally an open source parsing library                                                                  |
+| [Chunking strategy](/nbs/3-deep-dive-data-pipeline.md#chunking)           | Breaking down the parsed data into smaller, manageable chunks for efficient retrieval                                                     | Token Text Splitter, which splits text along using a chunk size of 4000 tokens and a stride of 500 tokens.                                    |
+| [Embedding model](/nbs/3-deep-dive-data-pipeline.md#embedding-model)      | Converting the chunked text data into a numerical vector representation that captures its semantic meaning                                 | GTE-Large-v1.5 on the Databricks FMAPI pay-per-token                                                                                         |
 
 #### 4. Deploy the POC chain to the Quality Lab Review App
 
@@ -174,11 +174,11 @@ Parameters and their default values configured in 00_config:
 
 | Knob | Description | Default value |
 |------|-------------|---------------|
-| [Query understanding](/nbs/3-deep-dive.md#query-understanding) | Analyzing and transforming user queries to better represent intent and extract relevant information, such as filters or keywords, to improve the retrieval process. | None, the provided query is directly embedded. |
-| [Retrieval](/nbs/3-deep-dive.md#retrieval) | Finding the most relevant chunks of information given a retrieval query. In the unstructured data case, this typically involves one or a combination of semantic or keyword-based search. | Semantic search with K = 5 chunks retrieved |
-| [Prompt augmentation](/nbs/3-deep-dive.md#prompt-augmentation) | Combining a user query with retrieved information and instructions to guide the LLM towards generating high-quality responses. | A simple RAG prompt template |
-| [LLM](/nbs/3-deep-dive.md#llm) | Selecting the most appropriate model (and model parameters) for your application to optimize/balance performance, latency, and cost. | Databricks-dbrx-instruct hosted using Databricks FMAPI pay-per-token |
-| [Post processing & guardrails](/nbs/3-deep-dive.md#post-processing-guardrails) | Applying additional processing steps and safety measures to ensure the LLM-generated responses are on-topic, factually consistent, and adhere to specific guidelines or constraints. | None |
+| [Query understanding](/nbs/3-deep-dive-chain.md#query-understanding) | Analyzing and transforming user queries to better represent intent and extract relevant information, such as filters or keywords, to improve the retrieval process. | None, the provided query is directly embedded. |
+| [Retrieval](/nbs/3-deep-dive-chain.md#retrieval) | Finding the most relevant chunks of information given a retrieval query. In the unstructured data case, this typically involves one or a combination of semantic or keyword-based search. | Semantic search with K = 5 chunks retrieved |
+| [Prompt augmentation](/nbs/3-deep-dive-chain.md#prompt-augmentation) | Combining a user query with retrieved information and instructions to guide the LLM towards generating high-quality responses. | A simple RAG prompt template |
+| [LLM](/nbs/3-deep-dive-chain.md#llm) | Selecting the most appropriate model (and model parameters) for your application to optimize/balance performance, latency, and cost. | Databricks-dbrx-instruct hosted using Databricks FMAPI pay-per-token |
+| [Post processing & guardrails](/nbs/3-deep-dive-chain.md#post-processing-guardrails) | Applying additional processing steps and safety measures to ensure the LLM-generated responses are on-topic, factually consistent, and adhere to specific guidelines or constraints. | None |
 
 #### 5. Share the Review App with stakeholders
 

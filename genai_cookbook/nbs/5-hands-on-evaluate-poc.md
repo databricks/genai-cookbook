@@ -9,8 +9,8 @@
 **Requirements:**
 
 - Stakeholders have used your POC and provided feedback
-- All requirements from [POC step](#how-to-build-a-poc)
-  - Data from your [requirements](#requirements-questions) is available in your [Lakehouse](https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html) inside a [Unity Catalog](https://www.databricks.com/product/unity-catalog) [volume](https://docs.databricks.com/en/connect/unity-catalog/volumes.html) or [Delta Table](https://docs.databricks.com/en/delta/index.html)
+- All requirements from [POC step](/nbs/5-hands-on-build-poc.md#how-to-build-a-poc)
+  - Data from your [requirements](/nbs/5-hands-on-requirements.md#data) is available in your [Lakehouse](https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html) inside a [Unity Catalog](https://www.databricks.com/product/unity-catalog) [volume](https://docs.databricks.com/en/connect/unity-catalog/volumes.html) or [Delta Table](https://docs.databricks.com/en/delta/index.html)
   - Access to a [Mosaic AI Vector Search](https://docs.databricks.com/en/generative-ai/vector-search.html) endpoint [[instructions](https://docs.databricks.com/en/generative-ai/create-query-vector-search.html)]
   - Write access to Unity Catalog schema
   - A single-user cluster with DBR 14.3+
