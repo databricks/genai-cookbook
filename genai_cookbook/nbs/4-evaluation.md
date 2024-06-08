@@ -4,6 +4,5 @@ The old saying "you can't manage what you can't measure" is incredibly relevant 
 
 This section deep dives into 3 critical components of evaluation:
 
-1. [Establishing Ground Truth: Creating Evaluation Sets](#establishing-ground-truth-creating-evaluation-sets)
-2. [Assessing Performance: Defining Metrics that Matter](#assessing-performance-defining-metrics-that-matter)  
-3. [Enabling Measurement: Building Supporting Infrastructure](#enabling-measurement-building-supporting-infrastructure)
+```{tableofcontents}
+```

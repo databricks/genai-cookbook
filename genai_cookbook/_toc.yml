@@ -35,6 +35,7 @@ parts:
 # - caption: "Build: Evaluate RAG POC's quality"
 #   numbered: true
 #   chapters:
+  - file: nbs/5-hands-on-curate-eval-set
   - file: nbs/5-hands-on-evaluate-poc
 # - caption: "Build: Debug & iterate on RAG quality"  
 #   numbered: true
