@@ -3,7 +3,7 @@
 ```{image} ../images/5-hands-on/2_img.png
 :align: center
 ```
-
+<br/>
 Defining clear and comprehensive use case requirements is a critical first step in developing a successful RAG application. These requirements serve two primary purposes. Firstly, they help determine whether RAG is the most suitable approach for the given use case. If RAG is indeed a good fit, these requirements guide solution design, implementation, and evaluation decisions. Investing time at the outset of a project to gather detailed requirements can prevent significant challenges and setbacks later in the development process, and ensures that the resulting solution meets the needs of end-users and stakeholders. Well-defined requirements provide the foundation for the subsequent stages of the development lifecycle we'll walk through.
 
 ### Is the use case a good fit for RAG?
@@ -25,37 +25,37 @@ Conversely, RAG may not be the best fit when:
 - Simple rule-based or templated responses are sufficient (e.g., a customer support chatbot that provides predefined answers based on keywords)
 - Input data needs to be reformatted (e.g., a user provides some input text and expects it to be transformed to a table)
 
-### Requirements questions  
+### Requirements to discover  
 
 Having established that RAG is indeed a good fit for your use case, consider the following questions to capture concrete requirements. For each requirement, we have prioritized them:
 
-- 🟢 P0 : Must define this requirement before starting your POC
-- 🟡 P1: Must define before going to production, but can iteratively refine during the POC
-- ⚪ P2: Nice to have requirement
+- 🟢 **P0**: Must define this requirement before starting your POC
+- 🟡 **P1**: Must define before going to production, but can iteratively refine during the POC
+- ⚪ **P2**: Nice to have requirement
 
 #### User Experience
 
 *Define how users will interact with the RAG system and what kind of responses are expected*
 
-- 🟢 P0 What will a typical request to the RAG chain look like? Ask stakeholders for examples of potential user queries.
-- 🟢 P0 What kind of responses will users expect (e.g., short answers, long-form explanations, a combination, or something else)?
-- 🟡 P1 How will users interact with the system? Through a chat interface, search bar, or some other modality?  
-- 🟡 P1 What tone or style should generated responses take? (e.g., formal, conversational, technical)
-- 🟡 P1 How should the application handle ambiguous, incomplete, or irrelevant queries? Should any form of feedback or guidance be provided in such cases?
-- ⚪ P2 Are there specific formatting or presentation requirements for the generated output? Should the output include any metadata in addition to the chain's response?
+- 🟢 What will a typical request to the RAG chain look like? Ask stakeholders for examples of potential user queries.
+- 🟢 What kind of responses will users expect (e.g., short answers, long-form explanations, a combination, or something else)?
+- 🟡 How will users interact with the system? Through a chat interface, search bar, or some other modality?  
+- 🟡 What tone or style should generated responses take? (e.g., formal, conversational, technical)
+- 🟡 How should the application handle ambiguous, incomplete, or irrelevant queries? Should any form of feedback or guidance be provided in such cases?
+- ⚪  Are there specific formatting or presentation requirements for the generated output? Should the output include any metadata in addition to the chain's response?
 
 #### Data
 
 *Determine the nature, source(s), and quality of the data that will be used in the RAG solution*
 
-- 🟢 P0 What are the available sources to use?
+- 🟢 What are the available sources to use?
 - For each data source:
-  - 🟢 P0 Is data structured or unstructured?  
-  - 🟢 P0 What is the source format of the retrieval data (e.g., PDFs, documentation with images/tables, structured API responses)?
-  - 🟢 P0 Where does that data reside?
-  - 🟢 P0 How much data is available?
-  - 🟡 P1 How frequently is the data updated? How should those updates be handled?
-  - 🟡 P1 Are there any known data quality issues or inconsistencies for each data source?
+  - 🟢 Is data structured or unstructured?  
+  - 🟢 What is the source format of the retrieval data (e.g., PDFs, documentation with images/tables, structured API responses)?
+  - 🟢 Where does that data reside?
+  - 🟢 How much data is available?
+  - 🟡 How frequently is the data updated? How should those updates be handled?
+  - 🟡 Are there any known data quality issues or inconsistencies for each data source?
 
 Consider creating an inventory table to consolidate this information, for example:
 
@@ -69,39 +69,39 @@ Consider creating an inventory table to consolidate this information, for exampl
 
 *Capture performance and resource requirements for the RAG application*
 
-- 🟡 P1 What is the maximum acceptable latency for generating the responses?
-  - 🟡 P1 What is the maximum acceptable time to first token?
-  - 🟡 P1 If the output is being streamed, is higher total latency acceptable?
-- 🟡 P1 Are there any cost limitations on compute resources available for inference?
-- 🟡 P1 What are the expected usage patterns and peak loads? 
-- 🟡 P1 How many concurrent users or requests should the system be able to handle?
+- 🟡 What is the maximum acceptable latency for generating the responses?
+  - 🟡 What is the maximum acceptable time to first token?
+  - 🟡 If the output is being streamed, is higher total latency acceptable?
+- 🟡 Are there any cost limitations on compute resources available for inference?
+- 🟡 What are the expected usage patterns and peak loads? 
+- 🟡 How many concurrent users or requests should the system be able to handle?
   - **NOTE:** Databricks natively handles such scalability requirements, through the ability to scale automatically with [Model Serving](https://docs.databricks.com/en/machine-learning/model-serving/index.html).
 
 #### Evaluation
 
 *Establish how the RAG solution will be evaluated and improved over time*
 
-- 🟢 P0 What is the business goal / KPI you want to impact? What is the baseline value and what is the target?
-- 🟢 P0 Which users or stakeholders will provide initial and ongoing feedback?
-- 🟢 P0 What metrics should be used to assess the quality of generated responses? 
+- 🟢 What is the business goal / KPI you want to impact? What is the baseline value and what is the target?
+- 🟢 Which users or stakeholders will provide initial and ongoing feedback?
+- 🟢 What metrics should be used to assess the quality of generated responses? 
   - Note: Databricks Quality Lab provides a recommended set of metrics to yo use
-- 🟡 P1 What is the set of questions the RAG app must be good at to go to production?
-- 🟡 P1 Does an [evaluation set](/nbs/4-evaluation.md#establishing-ground-truth-creating-evaluation-sets) exist? Is it possible to get an evaluation set of user queries, along with ground-truth answers and (optionally) the correct supporting documents that should be retrieved?
-- 🟡 P1 How will user feedback be collected and incorporated into the system?
+- 🟡 What is the set of questions the RAG app must be good at to go to production?
+- 🟡 Does an [evaluation set](/nbs/4-evaluation.md#establishing-ground-truth-creating-evaluation-sets) exist? Is it possible to get an evaluation set of user queries, along with ground-truth answers and (optionally) the correct supporting documents that should be retrieved?
+- 🟡 How will user feedback be collected and incorporated into the system?
 
 #### Security
 
 *Identify any security and privacy considerations*
 
-- 🟢 P0 Are there sensitive/confidential data that needs to be handled with care? 
-- 🟡 P1 Do access controls need to be implemented in the solution (e.g., a given user can only retrieve from a restricted set of documents)?
+- 🟢 Are there sensitive/confidential data that needs to be handled with care? 
+- 🟡 Do access controls need to be implemented in the solution (e.g., a given user can only retrieve from a restricted set of documents)?
 
 #### Deployment
 
 *Understanding how the RAG solution will be integrated, deployed, and maintained*
 
-- 🟡 P1 How should the RAG solution integrate with existing systems and workflows?
-- 🟡 P1 How should the model be deployed, scaled, and versioned?
+- 🟡 How should the RAG solution integrate with existing systems and workflows?
+- 🟡 How should the model be deployed, scaled, and versioned?
   - **NOTE:** we will cover how this end-to-end lifecycle can be handled on Databricks with MLflow, Unity Catalog, Agent SDK, and Model Serving**.**
 
 Note that this is by no means an exhaustive list of questions. However, it should provide a solid foundation for capturing the key requirements for your RAG solution. 
