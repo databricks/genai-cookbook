@@ -2,7 +2,7 @@
 
 In the previous section, we introduced the key components of a RAG application and discussed the fundamental principles behind developing RAG applications over unstructured data. This section discusses how you can think about refining each component in order to increase the quality of your application.
 
-There are a myriad of "knobs" to tune at every point in both the offline data pipeline, and online RAG chain. While there are countless other knobs, we focus on the most important knobs that have the greatest impact on the the quality of your RAG application.  Databricks recommends starting with these knobs.
+There are myriad "knobs" to tune at every point in both the offline data pipeline, and online RAG chain. While there are countless others, we focus on the most important knobs that have the greatest impact on the the quality of your RAG application. Databricks recommends starting with these knobs.
 
 From a conceptual point of view, it's helpful to view RAG quality knobs through the lens of the 2 key types of quality issues:
 
@@ -17,7 +17,7 @@ RAG apps have two components that can be iterated on to address quality challeng
 
 This overlap underscores the need for a holistic approach to RAG quality improvement. By understanding which components to change across both the data pipeline and RAG chain, and how these changes affect the overall solution, you can make targeted updates to improve RAG output quality.
 
-[**Data pipeline**](/nbs/3-deep-dive.md#data-pipeline-1)
+[**Data pipeline**](/nbs/3-deep-dive-data-pipeline)
 
 ```{image} ../images/5-hands-on/15_img.png
 :align: center
@@ -30,7 +30,7 @@ This overlap underscores the need for a holistic approach to RAG quality improve
 - What metadata (e.g., section title, document title) is extracted about each document/chunk? How is this metadata included (or not included) in each chunk?
 - Which embedding model is used to convert text into vector representations for similarity search
 
-[**RAG chain**](/nbs/3-deep-dive.md#rag-chain)
+[**RAG chain**](/nbs/3-deep-dive-chain)
 
 ```{image} ../images/5-hands-on/16_img.png
 :align: center

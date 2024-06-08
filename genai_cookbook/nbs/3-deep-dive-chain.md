@@ -16,7 +16,7 @@ The RAG chain takes a user query as input, retrieves relevant information given 
 
 5. **Post-processing and guardrails:** Applying additional processing steps and safety measures to ensure the LLM-generated responses are on-topic, factually consistent, and adhere to specific guidelines or constraints.
 
-In the [implementing RAG chain changes](nbs/5-hands-on.md#rag-chain-changes) section we will demonstrate how to iterate over these various components of a chain.
+In the [implementing RAG chain changes](/nbs/5-hands-on-improve-quality-step-2.md#rag-chain-changes) section we will demonstrate how to iterate over these various components of a chain.
 
 ### Query understanding
 

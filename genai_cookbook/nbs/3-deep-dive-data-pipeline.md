@@ -14,11 +14,11 @@ The foundation of any RAG application with unstructured data is the data pipelin
 
 4. **Embedding:** Converting the chunked text data into a numerical vector representation that captures its semantic meaning
 
-We discuss how to experiment with all of these data pipeline choices from a practical standpoint in [implementing data pipeline changes](/nbs/5-hands-on.md#data-pipeline-changes).
+We discuss how to experiment with all of these data pipeline choices from a practical standpoint in [implementing data pipeline changes](/nbs/5-hands-on-improve-quality-step-2.md#data-pipeline-changes).
 
 ### Corpus composition
 
-To state the obvious, without the right data corpus, your RAG application won't be able to retrieve the information required to answer a user query. The right data will be entirely dependent on the specific requirements and goals of your application, making it crucial to dedicate time to understand the nuances of data available (see the [requirements gathering section](/nbs/5-hands-on.md#requirements-questions) for guidance on this).
+To state the obvious, without the right data corpus, your RAG application won't be able to retrieve the information required to answer a user query. The right data will be entirely dependent on the specific requirements and goals of your application, making it crucial to dedicate time to understand the nuances of data available (see the [requirements gathering section](/nbs/5-hands-on-requirements) for guidance on this).
 
 For example, when building a customer support bot, you might consider including:
 
@@ -47,7 +47,7 @@ When parsing your data, consider the following best practices:
 
 2. **Handling errors and exceptions:** Implement error handling and logging mechanisms to identify and resolve any issues encountered during the parsing process. This will help you quickly identify and fix problems. Doing so often points to upstream issues with the quality of the source data.
 
-3. **Customizing parsing logic:** Depending on the structure and format of your data, you may need to customize the parsing logic to extract the most relevant information. While it may require additional effort upfront, invest the time to do this if required - it often prevents a lot of downstream quality issues.
+3. **Customizing parsing logic:** Depending on the structure and format of your data, you may need to customize the parsing logic to extract the most relevant information. While it may require additional effort upfront, invest the time to do this if required—it often prevents a lot of downstream quality issues.
 
 4. **Evaluating parsing quality**: Regularly assess the quality of the parsed data by manually reviewing a sample of the output. This can help you identify any issues or areas for improvement in the parsing process.
 
