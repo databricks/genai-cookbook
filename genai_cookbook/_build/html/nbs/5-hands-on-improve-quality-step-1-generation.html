@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>1. Gather requirements &#8212; Databricks Generative AI Cookbook</title>
+    <title>4.1.4. Generation quality &#8212; Databricks Generative AI Cookbook</title>
   
   
   
@@ -70,12 +70,12 @@
                 gtag('config', 'G-6BZ4NTBHVJ');
             </script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/5-hands-on-requirements';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/5-hands-on-improve-quality-step-1-generation';</script>
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="2. Deploy POC to collect stakeholder feedback" href="5-hands-on-build-poc.html" />
-    <link rel="prev" title="5. RAG development workflow" href="5-rag-development-workflow.html" />
+    <link rel="next" title="4.2. Implement and evaluate changes" href="5-hands-on-improve-quality-step-2.html" />
+    <link rel="prev" title="4.1.3. Retrieval quality" href="5-hands-on-improve-quality-step-1-retrieval.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -209,13 +209,13 @@
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Implement</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">1. Gather requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-requirements.html">1. Gather requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="5-hands-on-build-poc.html">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
 <li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="5-hands-on-improve-quality-step-1-retrieval.html">4.1.3. Retrieval quality</a></li>
-<li class="toctree-l3"><a class="reference internal" href="5-hands-on-improve-quality-step-1-generation.html">4.1.4. Generation quality</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">4.1.4. Generation quality</a></li>
 </ul>
 </details></li>
 <li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.2. Implement and evaluate changes</a></li>
@@ -293,7 +293,7 @@
       
       
       
-      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/5-hands-on-requirements.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/5-hands-on-improve-quality-step-1-generation.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -323,7 +323,7 @@
       
       
       
-      <li><a href="../_sources/nbs/5-hands-on-requirements.md" target="_blank"
+      <li><a href="../_sources/nbs/5-hands-on-improve-quality-step-1-generation.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -407,7 +407,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Gather requirements</h1>
+    <h1>Generation quality</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -417,17 +417,8 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#is-the-use-case-a-good-fit-for-rag">1.1. Is the use case a good fit for RAG?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#requirements-questions">1.2. Requirements questions</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#user-experience">1.2.1. User Experience</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data">1.2.2. Data</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-constraints">1.2.3. Performance constraints</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation">1.2.4. Evaluation</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#security">1.2.5. Security</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment">1.2.6. Deployment</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example">1.3. Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-generation-quality">4.1.4.1. Debugging generation quality</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-generation-quality">4.1.4.2. Common reasons for poor generation quality</a></li>
 </ul>
             </nav>
         </div>
@@ -439,193 +430,65 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="gather-requirements">
-<h1><span class="section-number">1. </span>Gather requirements<a class="headerlink" href="#gather-requirements" title="Link to this heading">#</a></h1>
-<img alt="../_images/2_img3.png" class="align-center" src="../_images/2_img3.png" />
-<p>Defining clear and comprehensive use case requirements is a critical first step in developing a successful RAG application. These requirements serve two primary purposes. Firstly, they help determine whether RAG is the most suitable approach for the given use case. If RAG is indeed a good fit, these requirements guide solution design, implementation, and evaluation decisions. Investing time at the outset of a project to gather detailed requirements can prevent significant challenges and setbacks later in the development process, and ensures that the resulting solution meets the needs of end-users and stakeholders. Well-defined requirements provide the foundation for the subsequent stages of the development lifecycle we’ll walk through.</p>
-<section id="is-the-use-case-a-good-fit-for-rag">
-<h2><span class="section-number">1.1. </span>Is the use case a good fit for RAG?<a class="headerlink" href="#is-the-use-case-a-good-fit-for-rag" title="Link to this heading">#</a></h2>
-<p>The first thing you’ll need to establish is whether RAG is even the right approach for your use case. Given the hype around RAG, it’s tempting to view it as a possible solution for any problem. However, there are nuances as to when RAG is suitable versus not.</p>
-<p>RAG is a good fit when:</p>
+  <section id="generation-quality">
+<h1><span class="section-number">4.1.4. </span>Generation quality<a class="headerlink" href="#generation-quality" title="Link to this heading">#</a></h1>
+<section id="debugging-generation-quality">
+<h2><span class="section-number">4.1.4.1. </span>Debugging generation quality<a class="headerlink" href="#debugging-generation-quality" title="Link to this heading">#</a></h2>
+<p><strong>You are on this page because your <a class="reference internal" href="5-hands-on-improve-quality-step-1.html"><span class="std std-doc">root cause analysis</span></a> said that LLM generation quality was the issue to focus.</strong></p>
+<p>Even with optimal retrieval, if the LLM component of a RAG chain cannot effectively utilize the retrieved context to generate accurate, coherent, and relevant responses, the final output quality will suffer. Issues with generation quality can arise as hallucinations, inconsistencies, or failure to concisely address the user’s query, to name a few.</p>
+<p>The following is a step-by-step process to address <strong>generation quality</strong> issues:</p>
+<ol class="arabic simple">
+<li><p>Identify a set of test queries with low generation quality metrics.</p></li>
+<li><p>For each query, manually examine the generated response and compare it to the retrieved context and the ground-truth response.</p></li>
+<li><p>Look for patterns or common issues among the queries with low generation quality. Some examples:</p>
 <ul class="simple">
-<li><p>Reasoning over retrieved information (both unstructured and structured)</p></li>
-<li><p>Synthesizing information from multiple sources (e.g., generating a summary of key points from different articles on a topic)</p></li>
-<li><p>Dynamic retrieval based on a user query is necessary (e.g., given a user query, determine what data source to retrieve from)</p></li>
-<li><p>The use case requires generating novel content based on retrieved information (e.g., answering questions, providing explanations, offering recommendations)</p></li>
-</ul>
-<p>Conversely, RAG may not be the best fit when:</p>
-<ul class="simple">
-<li><p>The task does not require query-specific retrieval. For example, generating call transcript summaries; even if individual transcripts are provided as context in the LLM prompt, the retrieved information remains the same for each summary.</p></li>
-<li><p>Extremely low-latency responses are required (i.e., when responses are required in milliseconds)</p></li>
-<li><p>The output is expected to be an exact copy of the retrieved information without modification (e.g., a search engine that returns verbatim snippets from documents)</p></li>
-<li><p>Simple rule-based or templated responses are sufficient (e.g., a customer support chatbot that provides predefined answers based on keywords)</p></li>
-<li><p>Input data needs to be reformatted (e.g., a user provides some input text and expects it to be transformed to a table)</p></li>
-</ul>
-</section>
-<section id="requirements-questions">
-<h2><span class="section-number">1.2. </span>Requirements questions<a class="headerlink" href="#requirements-questions" title="Link to this heading">#</a></h2>
-<p>Having established that RAG is indeed a good fit for your use case, consider the following questions to capture concrete requirements. For each requirement, we have prioritized them:</p>
-<ul class="simple">
-<li><p>🟢 P0 : Must define this requirement before starting your POC</p></li>
-<li><p>🟡 P1: Must define before going to production, but can iteratively refine during the POC</p></li>
-<li><p>⚪ P2: Nice to have requirement</p></li>
-</ul>
-<section id="user-experience">
-<h3><span class="section-number">1.2.1. </span>User Experience<a class="headerlink" href="#user-experience" title="Link to this heading">#</a></h3>
-<p><em>Define how users will interact with the RAG system and what kind of responses are expected</em></p>
-<ul class="simple">
-<li><p>🟢 P0 What will a typical request to the RAG chain look like? Ask stakeholders for examples of potential user queries.</p></li>
-<li><p>🟢 P0 What kind of responses will users expect (e.g., short answers, long-form explanations, a combination, or something else)?</p></li>
-<li><p>🟡 P1 How will users interact with the system? Through a chat interface, search bar, or some other modality?</p></li>
-<li><p>🟡 P1 What tone or style should generated responses take? (e.g., formal, conversational, technical)</p></li>
-<li><p>🟡 P1 How should the application handle ambiguous, incomplete, or irrelevant queries? Should any form of feedback or guidance be provided in such cases?</p></li>
-<li><p>⚪ P2 Are there specific formatting or presentation requirements for the generated output? Should the output include any metadata in addition to the chain’s response?</p></li>
-</ul>
-</section>
-<section id="data">
-<h3><span class="section-number">1.2.2. </span>Data<a class="headerlink" href="#data" title="Link to this heading">#</a></h3>
-<p><em>Determine the nature, source(s), and quality of the data that will be used in the RAG solution</em></p>
-<ul class="simple">
-<li><p>🟢 P0 What are the available sources to use?</p></li>
-<li><p>For each data source:</p>
-<ul>
-<li><p>🟢 P0 Is data structured or unstructured?</p></li>
-<li><p>🟢 P0 What is the source format of the retrieval data (e.g., PDFs, documentation with images/tables, structured API responses)?</p></li>
-<li><p>🟢 P0 Where does that data reside?</p></li>
-<li><p>🟢 P0 How much data is available?</p></li>
-<li><p>🟡 P1 How frequently is the data updated? How should those updates be handled?</p></li>
-<li><p>🟡 P1 Are there any known data quality issues or inconsistencies for each data source?</p></li>
+<li><p>Generating information not present in the retrieved context or outputting contradicting information with respect to the retrieved context (i.e., hallucination)</p></li>
+<li><p>Failure to directly address the user’s query given the provided retrieved context</p></li>
+<li><p>Generating responses that are overly verbose, difficult to understand or lack logical coherence</p></li>
 </ul>
 </li>
-</ul>
-<p>Consider creating an inventory table to consolidate this information, for example:</p>
-<div class="pst-scrollable-table-container"><table class="table">
+<li><p>Based on the identified issues, hypothesize potential root causes and corresponding fixes. See the “<a class="reference internal" href="#common-reasons-for-poor-generation-quality"><span class="xref myst">Common reasons for poor generation quality</span></a>” table below for guidance.</p></li>
+<li><p>Implement the proposed fix for the most promising or impactful root cause by following <a class="reference internal" href="5-hands-on-improve-quality-step-2.html"><span class="std std-doc">step 4.2</span></a>. This may involve modifying the RAG chain (e.g., adjusting the prompt template, trying a different LLM) or the data pipeline (e.g., adjusting the chunking strategy to provide more context).</p></li>
+<li><p>Re-run evaluation on the updated system and compare generation quality metrics to the previous version.  Once generation quality is at a desired level, re-run the <a class="reference internal" href="5-hands-on-improve-quality-step-1.html"><span class="std std-doc">root cause analysis</span></a> to determine if the overall chain has any additional issues that should be addressed.</p></li>
+<li><p>If the generation quality is still not satisfactory, repeat steps 4-6 for the next most promising fix until the desired performance is achieved.</p></li>
+</ol>
+</section>
+<section id="common-reasons-for-poor-generation-quality">
+<h2><span class="section-number">4.1.4.2. </span>Common reasons for poor generation quality<a class="headerlink" href="#common-reasons-for-poor-generation-quality" title="Link to this heading">#</a></h2>
+<p>Each of these potential fixes are tagged as one of three types. Based on the type of change, you will follow different steps in <a class="reference internal" href="5-hands-on-improve-quality-step-2.html"><span class="std std-doc">step 4.2</span></a>.</p>
+<table>
 <thead>
-<tr class="row-odd"><th class="head"><p>Data Source</p></th>
-<th class="head"><p>Source</p></th>
-<th class="head"><p>File type(s)</p></th>
-<th class="head"><p>Size</p></th>
-<th class="head"><p>Update frequency</p></th>
+<tr>
+<th>Generation Issue</th>
+<th>Debugging Steps</th>
+<th>Potential Fix</th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Data source 1</p></td>
-<td><p>Unity Catalog Volume</p></td>
-<td><p>JSON</p></td>
-<td><p>10GB</p></td>
-<td><p>Daily</p></td>
+<tr>
+<td>Generating information not present in the retrieved context (e.g., hallucinations)</td>
+<td><ul><li>Compare generated responses to retrieved context to identify hallucinated information</li><li>Assess if certain types of queries or retrieved context are more prone to hallucinations</td>
+<td><ul><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Update prompt template to emphasize reliance on retrieved context</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Use a more capable LLM</li><li><img src="../_images/chain_code.png" alt="chain-code" height="20"/> Implement a fact-checking or verification step post-generation</td>
 </tr>
-<tr class="row-odd"><td><p>Data source 2</p></td>
-<td><p>Public API</p></td>
-<td><p>XML</p></td>
-<td><p>n/a (API)</p></td>
-<td><p>Real-time</p></td>
+<tr>
+<td>Failure to directly address the user&#39;s query or providing overly generic responses</td>
+<td><ul><li>Compare generated responses to user queries to assess relevance and specificity</li><li>Check if certain types of queries result in the correct context being retrieved, but the LLM producing low quality output</td>
+<td><ul><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Improve prompt template to encourage direct, specific responses</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Retrieve more targeted context by improving the retrieval process</li><li><img src="../_images/chain_code.png" alt="chain-code" height="20"/> Re-rank retrieval results to put most relevant chunks first, only provide these to the LLM</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Use a more capable LLM</td>
 </tr>
-<tr class="row-even"><td><p>Data source 3</p></td>
-<td><p>SharePoint</p></td>
-<td><p>PDF, DOCX</p></td>
-<td><p>500MB</p></td>
-<td><p>Monthly</p></td>
+<tr>
+<td>Generating responses that are difficult to understand or lack logical flow</td>
+<td><ul><li>Assess output for logical flow, grammatical correctness, and understandability</li><li>Analyze if incoherence occurs more often with certain types of queries or when certain types of context are retrieved</td>
+<td><ul><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Change prompt template to encourage coherent, well-structured response</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Provide more context to the LLM by retrieving additional relevant chunks</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Use a more capable LLM</td>
 </tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="performance-constraints">
-<h3><span class="section-number">1.2.3. </span>Performance constraints<a class="headerlink" href="#performance-constraints" title="Link to this heading">#</a></h3>
-<p><em>Capture performance and resource requirements for the RAG application</em></p>
-<ul class="simple">
-<li><p>🟡 P1 What is the maximum acceptable latency for generating the responses?</p>
-<ul>
-<li><p>🟡 P1 What is the maximum acceptable time to first token?</p></li>
-<li><p>🟡 P1 If the output is being streamed, is higher total latency acceptable?</p></li>
-</ul>
-</li>
-<li><p>🟡 P1 Are there any cost limitations on compute resources available for inference?</p></li>
-<li><p>🟡 P1 What are the expected usage patterns and peak loads?</p></li>
-<li><p>🟡 P1 How many concurrent users or requests should the system be able to handle?</p>
-<ul>
-<li><p><strong>NOTE:</strong> Databricks natively handles such scalability requirements, through the ability to scale automatically with <a class="reference external" href="https://docs.databricks.com/en/machine-learning/model-serving/index.html">Model Serving</a>.</p></li>
-</ul>
-</li>
-</ul>
-</section>
-<section id="evaluation">
-<h3><span class="section-number">1.2.4. </span>Evaluation<a class="headerlink" href="#evaluation" title="Link to this heading">#</a></h3>
-<p><em>Establish how the RAG solution will be evaluated and improved over time</em></p>
-<ul class="simple">
-<li><p>🟢 P0 What is the business goal / KPI you want to impact? What is the baseline value and what is the target?</p></li>
-<li><p>🟢 P0 Which users or stakeholders will provide initial and ongoing feedback?</p></li>
-<li><p>🟢 P0 What metrics should be used to assess the quality of generated responses?</p>
-<ul>
-<li><p>Note: Databricks Quality Lab provides a recommended set of metrics to yo use</p></li>
-</ul>
-</li>
-<li><p>🟡 P1 What is the set of questions the RAG app must be good at to go to production?</p></li>
-<li><p>🟡 P1 Does an <a class="reference internal" href="4-evaluation.html#establishing-ground-truth-creating-evaluation-sets"><span class="std std-ref">evaluation set</span></a> exist? Is it possible to get an evaluation set of user queries, along with ground-truth answers and (optionally) the correct supporting documents that should be retrieved?</p></li>
-<li><p>🟡 P1 How will user feedback be collected and incorporated into the system?</p></li>
-</ul>
-</section>
-<section id="security">
-<h3><span class="section-number">1.2.5. </span>Security<a class="headerlink" href="#security" title="Link to this heading">#</a></h3>
-<p><em>Identify any security and privacy considerations</em></p>
-<ul class="simple">
-<li><p>🟢 P0 Are there sensitive/confidential data that needs to be handled with care?</p></li>
-<li><p>🟡 P1 Do access controls need to be implemented in the solution (e.g., a given user can only retrieve from a restricted set of documents)?</p></li>
-</ul>
-</section>
-<section id="deployment">
-<h3><span class="section-number">1.2.6. </span>Deployment<a class="headerlink" href="#deployment" title="Link to this heading">#</a></h3>
-<p><em>Understanding how the RAG solution will be integrated, deployed, and maintained</em></p>
-<ul class="simple">
-<li><p>🟡 P1 How should the RAG solution integrate with existing systems and workflows?</p></li>
-<li><p>🟡 P1 How should the model be deployed, scaled, and versioned?</p>
-<ul>
-<li><p><strong>NOTE:</strong> we will cover how this end-to-end lifecycle can be handled on Databricks with MLflow, Unity Catalog, Agent SDK, and Model Serving**.**</p></li>
-</ul>
-</li>
-</ul>
-<p>Note that this is by no means an exhaustive list of questions. However, it should provide a solid foundation for capturing the key requirements for your RAG solution.</p>
-</section>
-</section>
-<section id="example">
-<h2><span class="section-number">1.3. </span>Example<a class="headerlink" href="#example" title="Link to this heading">#</a></h2>
-<p>As an example, let’s review how these questions apply to the internal Databricks RAG application used by our customer support team:</p>
-<div class="pst-scrollable-table-container"><table class="table">
-<thead>
-<tr class="row-odd"><th class="head"><p></p></th>
-<th class="head"><p>Considerations</p></th>
-<th class="head"><p>Requirements</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>User experience</p></td>
-<td><p>- Interaction modality<br>- Typical user query examples<br>- Expected response format/style<br>- Handling ambiguous/irrelevant queries</p></td>
-<td><p>- Chat interface integrated with Slack<br>- Example queries:<br>  - “How do I reduce cluster startup time?”<br>  - “What kind of support plan do I have?”<br>- Clear, technical responses with code snippets and links to relevant documentation where appropriate<br>- Provide contextual suggestions and escalate to Databricks support engineers when needed</p></td>
-</tr>
-<tr class="row-odd"><td><p>Data</p></td>
-<td><p>- Number and type of data sources<br>- Data format and location<br>- Data size and update frequency<br>- Data quality and consistency</p></td>
-<td><p>- 3 data sources<br>  - Databricks documentation (HTML, PDF)<br>  - Resolved support tickets (JSON)<br>  - Community forum posts (Delta table)<br>- Data stored in Unity Catalog and updated weekly<br>- Total data size: 5 GB<br>- Consistent data structure and quality maintained by dedicated docs and support teams</p></td>
-</tr>
-<tr class="row-even"><td><p>Performance</p></td>
-<td><p>- Maximum acceptable latency<br>- Cost constraints<br>- Expected usage and concurrency</p></td>
-<td><p>- Maximum latency:<br>  - &lt;5 seconds<br>- Cost constraints:<br>  - [confidential]<br>- Expected peak load:<br>  - 200 concurrent users</p></td>
-</tr>
-<tr class="row-odd"><td><p>Evaluation</p></td>
-<td><p>- Evaluation dataset availability<br>- Quality metrics<br>- User feedback collection</p></td>
-<td><p>- SMEs from each product area will help review outputs and adjust incorrect answers to create the evaluation dataset<br>- Business KPIs<br>  - Increase in support ticket resolution rate<br>  - Decrease in user time spent per support ticket<br>- Quality metrics<br>  - LLM judged answer correctness &amp; relevance<br>  - LLM judges retrieval precision<br>  - User upvote/downvote<br>- Feedback collection<br>  - Slack will be instrumented to provide a thumbs up / down</p></td>
-</tr>
-<tr class="row-even"><td><p>Security</p></td>
-<td><p>- Sensitive data handling<br>- Access control requirements</p></td>
-<td><p>- No sensitive customer data should be in the retrieval source<br>- User authentication through Databricks Community SSO</p></td>
-</tr>
-<tr class="row-odd"><td><p>Deployment</p></td>
-<td><p>- Integration with existing systems<br>- Deployment and versioning</p></td>
-<td><p>- Integration with Databricks support ticket system<br>- Chain deployed as a Databricks Model Serving endpoint</p></td>
+<tr>
+<td>Generated responses are not in the desired format or style</td>
+<td><ul><li>Compare output to expected format and style guidelines</li><li>Assess if certain types of queries or retrieved context are more likely to result in format/style deviations</td>
+<td><ul><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Update prompt template to specify the desired output format and style</li><li><img src="../_images/chain_code.png" alt="chain-code" height="20"/> Implement a post-processing step to convert the generated response into the desired format</li><li><img src="../_images/chain_code.png" alt="chain-code" height="20"/> Add a step to validate output structure/style, and output a fallback answer if needed.</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Use an LLM fine-tuned to provide outputs in a specific format or style</td>
 </tr>
 </tbody>
 </table>
-</div>
+<br/>
+<br/>
 </section>
 </section>
 
@@ -660,20 +523,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="5-rag-development-workflow.html"
+       href="5-hands-on-improve-quality-step-1-retrieval.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">5. </span>RAG development workflow</p>
+        <p class="prev-next-title"><span class="section-number">4.1.3. </span>Retrieval quality</p>
       </div>
     </a>
     <a class="right-next"
-       href="5-hands-on-build-poc.html"
+       href="5-hands-on-improve-quality-step-2.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">2. </span>Deploy POC <em>to</em> collect stakeholder feedback</p>
+        <p class="prev-next-title"><span class="section-number">4.2. </span>Implement and evaluate changes</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -693,17 +556,8 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#is-the-use-case-a-good-fit-for-rag">1.1. Is the use case a good fit for RAG?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#requirements-questions">1.2. Requirements questions</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#user-experience">1.2.1. User Experience</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data">1.2.2. Data</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-constraints">1.2.3. Performance constraints</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation">1.2.4. Evaluation</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#security">1.2.5. Security</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment">1.2.6. Deployment</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example">1.3. Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-generation-quality">4.1.4.1. Debugging generation quality</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-generation-quality">4.1.4.2. Common reasons for poor generation quality</a></li>
 </ul>
   </nav></div>
 

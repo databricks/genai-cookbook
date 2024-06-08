@@ -42,6 +42,9 @@ parts:
   - file: nbs/5-hands-on-improve-quality
     sections:
     - file: nbs/5-hands-on-improve-quality-step-1
+      sections:
+      - file: nbs/5-hands-on-improve-quality-step-1-retrieval
+      - file: nbs/5-hands-on-improve-quality-step-1-generation
     - file: nbs/5-hands-on-improve-quality-step-2
   - file: nbs/5-hands-on-deploy-and-monitor
 # - caption: "Deploy & monitor a RAG app"

@@ -6,22 +6,24 @@ Unstructured data lacks a predefined data model or schema, making it impossible 
 
 During data preparation, the RAG application's data pipeline takes raw unstructured data and transforms it into discrete chunks that can be queried based on their relevance to a user's query. The key steps in data preprocessing are outlined below. Each step has a variety of knobs that can be tuned - for a deeper dive discussion on these knobs, please refer to the [deep dive into RAG section.](/nbs/3-deep-dive)
 
+```{image} ../images/2-fundamentals-unstructured/2_img.png
+:align: center
+```
+<br/>
+
 In the remainder of this section, we describe the process of preparing unstructured data for retrieval using *semantic search*. Semantic search understands the contextual meaning and intent of a user query to provide more relevant search results.
 
 Semantic search is one of several approaches that can be taken when implementing the retrieval component of a RAG application over unstructured data. We cover alternate retrieval strategies in the [retrieval deep dive section](/nbs/3-deep-dive).
 
-```{image} ../images/2-fundamentals-unstructured/2_img.png
-:align: center
-```
 
-<br/>
+
 The following are the typical steps of a data pipeline in a RAG application using unstructured data:
 
 1. **Parse the raw documents:** The initial step involves transforming raw data into a usable format. This can include extracting text, tables, and images from a collection of PDFs or employing optical character recognition (OCR) techniques to extract text from images.
 
 2. **Extract document metadata (optional):** In some cases, extracting and using document metadata, such as document titles, page numbers, URLs, or other information can help the retrieval step more precisely query the correct data.
 
-3. **Chunk documents:** To ensure the parsed documents can fit into the embedding model and the LLM's context window, we break the parsed documents into smaller, discrete chunks. Retrieving these focused chunks, rather than entire documents, gives the LLM more targeted content from which to generate its responses.
+3. **Chunk documents:** To ensure the parsed documents can fit into the embedding model and the LLM's context window, we break the parsed documents into smaller, discrete chunks. Retrieving these focused chunks, rather than entire documents, gives the LLM more targeted context from which to generate its responses.
 
 4. **Embedding chunks:** In a RAG application that uses semantic search, a special type of language model called an *embedding model* transforms each of the chunks from the previous step into numeric vectors, or lists of numbers, that encapsulate the meaning of each piece of content. Crucially, these vectors represent the semantic meaning of the text, not just surface-level keywords. This will later enable searching based on meaning rather than literal text matches.
 

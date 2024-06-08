@@ -106,7 +106,9 @@ Consider creating an inventory table to consolidate this information, for exampl
 
 Note that this is by no means an exhaustive list of questions. However, it should provide a solid foundation for capturing the key requirements for your RAG solution. 
 
-Let's look at how some of these questions apply to the Databricks customer support RAG application:
+### Example 
+
+As an example, let's review how these questions apply to the internal Databricks RAG application used by our customer support team:
 
 | | Considerations | Requirements |
 |---|---|---|

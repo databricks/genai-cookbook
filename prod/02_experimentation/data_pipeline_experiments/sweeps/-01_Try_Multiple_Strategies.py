@@ -227,7 +227,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import yaml
 import json
 
-NUMBER_THREADS = 20
+NUMBER_THREADS = 5
+
+# If True, the tables & streaming checkpoints will be deleted before starting.
+# Use True if you are actively changing your parsing/chunking code and need to re-run for already processed files.
+# If you re-ruse a `strategy_short_name`, you will need to set to True in order to reset, otherwise you will experience an error with Spark streaming
+RESET_TABLES_BEFORE_RUNNING = False
 
 def write_to_yaml(json_data, file_name):
     yaml_str = yaml.dump(json_data)
@@ -241,26 +246,53 @@ def run_notebook(notebook_path, timeout_seconds=0, args={}):
     result = dbutils.notebook.run(notebook_path, timeout_seconds, args)
     return result
 
+def run_main_notebooks(packed_strategy_as_json):
+    validate = run_notebook(notebook_path="00_validate_config", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+    if validate:
+        load = run_notebook(notebook_path="01_load_files", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+        if load:
+            parse = run_notebook(notebook_path="02_parse_docs", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+            if parse:
+                chunk = run_notebook(notebook_path="03_chunk_docs", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+                if chunk:
+                    index = run_notebook(notebook_path="04_vector_index", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+                    if index:
+                        return True
+    else:
+        return False
+
 def run_single_strategy(strategy):
     # print(strategy)
     packed_strategy_as_json = strategy['packed_json']
     print("----Start Run----")
     print("Strategy: " + strategy['config']['strategy_short_name'])
 
-    reset = run_notebook(notebook_path="reset_tables_and_checkpoints", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
-    if reset:
-        validate = run_notebook(notebook_path="00_validate_config", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
-        if validate:
-            load = run_notebook(notebook_path="01_load_files", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
-            if load:
-                parse = run_notebook(notebook_path="02_parse_docs", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
-                if parse:
-                    chunk = run_notebook(notebook_path="03_chunk_docs", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
-                    if chunk:
-                        index = run_notebook(notebook_path="04_vector_index", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
-                        if index:
-                            strategy['status'] = "success"
-                            loaded_strategy = json.loads(packed_strategy_as_json)
+    if RESET_TABLES_BEFORE_RUNNING:
+        reset = run_notebook(notebook_path="reset_tables_and_checkpoints", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+        if reset:
+            outcome = run_main_notebooks(packed_strategy_as_json)
+        else:
+            outcome = False
+    else:
+        outcome = run_main_notebooks(packed_strategy_as_json)
+
+    if outcome is True:
+        strategy['status'] = "success"
+        # loaded_strategy = json.loads(packed_strategy_as_json)
+    else: 
+        strategy['status'] = "failure"
+        # validate = run_notebook(notebook_path="00_validate_config", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+        # if validate:
+        #     load = run_notebook(notebook_path="01_load_files", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+        #     if load:
+        #         parse = run_notebook(notebook_path="02_parse_docs", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+        #         if parse:
+        #             chunk = run_notebook(notebook_path="03_chunk_docs", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+        #             if chunk:
+        #                 index = run_notebook(notebook_path="04_vector_index", timeout_seconds=0, args={"strategy_to_run": packed_strategy_as_json})
+        #                 if index:
+                            # strategy['status'] = "success"
+                            # loaded_strategy = json.loads(packed_strategy_as_json)
                             # strategy['chain_config'] = {
                             #     "retriever_config": {
                             #         "vector_search_index": loaded_strategy['destination_tables_config']['vectorsearch_index_name'],
@@ -269,8 +301,8 @@ def run_single_strategy(strategy):
                             #     }
                             # }
                     
-    else:
-        strategy['status'] = "failure"
+    # else:
+    #     strategy['status'] = "failure"
     
     return strategy
 
@@ -296,6 +328,10 @@ with ThreadPoolExecutor(max_workers=NUMBER_THREADS) as executor:
 
 # Contains information about all runs
 # print(results)
+
+# Print out the strategies for ease of copy / paste to the evaluation notebook
+for item in strategies_to_try:
+    print('"data_pipeline_'+item['strategy_short_name']+'",')
 
 # COMMAND ----------
 

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>4.1. Identify the root cause of quality issues &#8212; Databricks Generative AI Cookbook</title>
+    <title>Generation quality &#8212; Databricks Generative AI Cookbook</title>
   
   
   
@@ -70,12 +70,10 @@
                 gtag('config', 'G-6BZ4NTBHVJ');
             </script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/5-hands-on-improve-quality-step-1';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/5-hands-on-improve-quality-step-1-chain';</script>
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="4.1.3. Retrieval quality" href="5-hands-on-improve-quality-step-1-retrieval.html" />
-    <link rel="prev" title="4. Root cause &amp; iteratively fix quality issues" href="5-hands-on-improve-quality.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -137,6 +135,8 @@
     <div class="bd-container__inner bd-page-width">
       
       
+      
+        
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -208,17 +208,15 @@
 <li class="toctree-l1"><a class="reference internal" href="5-rag-development-workflow.html">5. RAG development workflow</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Implement</span></p>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="5-hands-on-requirements.html">1. Gather requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="5-hands-on-build-poc.html">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
 <li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">4.1. Identify the root cause of quality issues</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l3"><a class="reference internal" href="5-hands-on-improve-quality-step-1-retrieval.html">4.1.3. Retrieval quality</a></li>
-<li class="toctree-l3"><a class="reference internal" href="5-hands-on-improve-quality-step-1-generation.html">4.1.4. Generation quality</a></li>
-</ul>
-</details></li>
-<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.2. Implement and evaluate changes</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.4. Implement and evaluate changes</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="5-hands-on-deploy-and-monitor.html">5. Deploy &amp; monitor</a></li>
@@ -293,7 +291,7 @@
       
       
       
-      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/5-hands-on-improve-quality-step-1.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/5-hands-on-improve-quality-step-1-chain.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -323,7 +321,7 @@
       
       
       
-      <li><a href="../_sources/nbs/5-hands-on-improve-quality-step-1.md" target="_blank"
+      <li><a href="../_sources/nbs/5-hands-on-improve-quality-step-1-chain.md" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -407,7 +405,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Identify the root cause of quality issues</h1>
+    <h1>Generation quality</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -417,8 +415,8 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-ground-truth-responses-are-available">4.1.1. If ground-truth responses are available</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#no-ground-truth-responses-available">4.1.2. No ground-truth responses available</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-generation-quality">Debugging generation quality</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-generation-quality">Common reasons for poor generation quality</a></li>
 </ul>
             </nav>
         </div>
@@ -430,378 +428,64 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="identify-the-root-cause-of-quality-issues">
-<h1><span class="section-number">4.1. </span>Identify the root cause of quality issues<a class="headerlink" href="#identify-the-root-cause-of-quality-issues" title="Link to this heading">#</a></h1>
-<p>Retrieval and generation are the 2 primary buckets of root causes.  To identify the root cause to focus on first, use the output of the Mosaic AI Quality Lab’s LLM judges that you ran in the previous steps.  You should start with the Root Cause that appears most frequently in your dataset.</p>
-<p>To determine the root cause, use the output of the following metrics:</p>
-<div class="pst-scrollable-table-container"><table class="table">
+  <section id="generation-quality">
+<h1>Generation quality<a class="headerlink" href="#generation-quality" title="Link to this heading">#</a></h1>
+<section id="debugging-generation-quality">
+<h2>Debugging generation quality<a class="headerlink" href="#debugging-generation-quality" title="Link to this heading">#</a></h2>
+<p>Even with optimal retrieval, if the LLM component of a RAG chain cannot effectively utilize the retrieved context to generate accurate, coherent, and relevant responses, the final output quality will suffer. Issues with generation quality can arise as hallucinations, inconsistencies, or failure to concisely address the user’s query, to name a few.</p>
+<p>To identify generation quality issues, you can use the approach outlined in the <a class="reference internal" href="#section-4-evaluation"><span class="xref myst">Evaluation section</span></a>. If evaluation results indicate poor generation quality (e.g., low accuracy, coherence, or relevance scores), you’ll need to investigate further to identify the root cause.</p>
+<p>The following is a step-by-step process to address <strong>generation quality</strong> issues:</p>
+<ol class="arabic simple">
+<li><p>Identify a set of test queries with low generation quality metrics.</p></li>
+<li><p>For each query, manually examine the generated response and compare it to the retrieved context and the ground-truth response.</p></li>
+<li><p>Look for patterns or common issues among the queries with low generation quality. Some examples:</p>
+<ul class="simple">
+<li><p>Generating information not present in the retrieved context or outputting contradicting information with respect to the retrieved context (i.e., hallucination)</p></li>
+<li><p>Failure to directly address the user’s query given the provided retrieved context</p></li>
+<li><p>Generating responses that are overly verbose, difficult to understand or lack logical coherence</p></li>
+</ul>
+</li>
+<li><p>Based on the identified issues, hypothesize potential root causes and corresponding fixes. See the “<a class="reference internal" href="#common-reasons-for-poor-generation-quality"><span class="xref myst">Common reasons for poor generation quality</span></a>” table below for guidance.</p></li>
+<li><p>Implement the proposed fix for the most promising or impactful root cause. This may involve modifying the RAG chain (e.g., adjusting the prompt template, trying a different LLM) or the data pipeline (e.g., adjusting the chunking strategy to provide more context).</p></li>
+<li><p>Re-run evals on the updated system and compare generation quality metrics to the previous version. If there is significant improvement, consider deploying the updated RAG application for further testing with end-users (see the <a class="reference internal" href="#deployment"><span class="xref myst">Deployment</span></a> section).</p></li>
+<li><p>If the generation quality is still not satisfactory, repeat steps 4-6 for the next most promising fix until the desired performance is achieved.</p></li>
+</ol>
+</section>
+<section id="common-reasons-for-poor-generation-quality">
+<h2>Common reasons for poor generation quality<a class="headerlink" href="#common-reasons-for-poor-generation-quality" title="Link to this heading">#</a></h2>
+<p>Each of these potential fixes are tagged as one of three types. Based on the type of change, you will follow different steps in section 3.</p>
+<table>
 <thead>
-<tr class="row-odd"><th class="head"><p>Metric name</p></th>
-<th class="head"><p>Quality Lab metric ID</p></th>
-<th class="head"><p>Description</p></th>
-<th class="head"><p>More details</p></th>
+<tr>
+<th>Generation Issue</th>
+<th>Debugging Steps</th>
+<th>Potential Fix</th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>LLM-judged retrieval precision</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">retrieval/llm_judged/</span> <span class="pre">chunk_relevance/precision/average</span></code></p></td>
-<td><p>Is each retrieved chunk relevant to the input request?</p></td>
-<td><p><a class="reference internal" href="#"><span class="xref myst">docs link</span></a></p></td>
+<tr>
+<td>Generating information not present in the retrieved context (e.g., hallucinations)</td>
+<td><ul><li>Compare generated responses to retrieved context to identify hallucinated information</li><li>Assess if certain types of queries or retrieved context are more prone to hallucinations</td>
+<td><ul><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Update prompt template to emphasize reliance on retrieved context</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Use a more capable LLM</li><li><img src="../_images/chain_code.png" alt="chain-code" height="20"/> Implement a fact-checking or verification step post-generation</td>
 </tr>
-<tr class="row-odd"><td><p>LLM-judged groundedness</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">response/llm_judged/</span> <span class="pre">groundedness/rating/percentage</span></code></p></td>
-<td><p>Is the generated response is factually consistent with the retrieved context e.g., “grounded”?</p></td>
-<td><p><a class="reference internal" href="#"><span class="xref myst">docs link</span></a></p></td>
+<tr>
+<td>Failure to directly address the user&#39;s query or providing overly generic responses</td>
+<td><ul><li>Compare generated responses to user queries to assess relevance and specificity</li><li>Check if certain types of queries result in the correct context being retrieved, but the LLM producing low quality output</td>
+<td><ul><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Improve prompt template to encourage direct, specific responses</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Retrieve more targeted context by improving the retrieval process</li><li><img src="../_images/chain_code.png" alt="chain-code" height="20"/> Re-rank retrieval results to put most relevant chunks first, only provide these to the LLM</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Use a more capable LLM</td>
 </tr>
-<tr class="row-even"><td><p>LLM-judged correctness vs. the ground-truth answer</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">response/llm_judged/</span> <span class="pre">correctness/rating/percentage</span></code></p></td>
-<td><p>Is the agent’s generated response is factually accurate and semantically similar to the provided ground-truth response?</p></td>
-<td><p><a class="reference internal" href="#"><span class="xref myst">docs link</span></a></p></td>
+<tr>
+<td>Generating responses that are difficult to understand or lack logical flow</td>
+<td><ul><li>Assess output for logical flow, grammatical correctness, and understandability</li><li>Analyze if incoherence occurs more often with certain types of queries or when certain types of context are retrieved</td>
+<td><ul><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Change prompt template to encourage coherent, well-structured response</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Provide more context to the LLM by retrieving additional relevant chunks</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Use a more capable LLM</td>
 </tr>
-<tr class="row-odd"><td><p>LLM-judged relevance to query</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">response/llm_judged/</span> <span class="pre">relevance_to_query/rating/percentage</span></code></p></td>
-<td><p>Is the response relevant to the input request?</p></td>
-<td><p><a class="reference internal" href="#"><span class="xref myst">docs link</span></a></p></td>
+<tr>
+<td>Generated responses are not in the desired format or style</td>
+<td><ul><li>Compare output to expected format and style guidelines</li><li>Assess if certain types of queries or retrieved context are more likely to result in format/style deviations</td>
+<td><ul><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Update prompt template to specify the desired output format and style</li><li><img src="../_images/chain_code.png" alt="chain-code" height="20"/> Implement a post-processing step to convert the generated response into the desired format</li><li><img src="../_images/chain_code.png" alt="chain-code" height="20"/> Add a step to validate output structure/style, and output a fallback answer if needed.</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Use an LLM fine-tuned to provide outputs in a specific format or style</td>
 </tr>
 </tbody>
 </table>
-</div>
-<p>Note: If you have human labeled ground-truth for which document should be retrieved for each question, you can optionally replace <code class="docutils literal notranslate"><span class="pre">retrieval/llm_judged/chunk_relevance/precision/average</span></code> with the score for <code class="docutils literal notranslate"><span class="pre">retrieval/ground_truth/document_recall/average</span></code>.</p>
-<section id="if-ground-truth-responses-are-available">
-<h2><span class="section-number">4.1.1. </span>If ground-truth responses are available<a class="headerlink" href="#if-ground-truth-responses-are-available" title="Link to this heading">#</a></h2>
-<table>
-  <tr>
-   <td>Retrieval precision >50% 
-   </td>
-   <td>Groundedness
-   </td>
-   <td>Correctness
-   </td>
-   <td>Relevance to query
-   </td>
-   <td>Issue summary
-   </td>
-   <td>Root cause
-   </td>
-   <td>Overall Rating
-   </td>
-  </tr>
-  <tr>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td><strong>Retrieval is poor.</strong>
-   </td>
-   <td>Improve Retriever
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>LLM generates relevant response, but <strong>retrieval is poor</strong> e.g., the LLM ignores retrieval and uses its training knowledge to answer.
-   </td>
-   <td>Improve Retriever
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>Either
-   </td>
-   <td><strong>Retrieval quality is poor</strong>, but LLM gets the answer correct regardless.
-   </td>
-   <td>Improve Retriever
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>Response is grounded in retrieval, but <strong>retrieval is poor</strong>.
-   </td>
-   <td>Improve Retriever
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>Relevant response grounded in the retrieved context, but <strong>retrieval may not be related to the expected answer.</strong>
-   </td>
-   <td>Improve Retriever
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>✅
-   </td>
-   <td>Either
-   </td>
-   <td>Retrieval is poor, but good enough for this question
-   </td>
-   <td>N/A
-   </td>
-   <td>✅
-   </td>
-  </tr>
-  <tr>
-   <td>✅
-   </td>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>Either
-   </td>
-   <td>Hallucination
-   </td>
-   <td>Improve LLM
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>✅
-   </td>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>Either
-   </td>
-   <td>Hallucination, correct but generates details not in context
-   </td>
-   <td>Improve LLM
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>✅
-   </td>
-   <td>✅
-   </td>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>Good retrieval, but the LLM does not provide a relevant response.
-   </td>
-   <td>Improve LLM
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>✅
-   </td>
-   <td>✅
-   </td>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>Good retrieval and relevant response, but not correct.
-   </td>
-   <td>Improve LLM
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>✅
-   </td>
-   <td>✅
-   </td>
-   <td>✅
-   </td>
-   <td>✅
-   </td>
-   <td>No issue!! 🎉
-   </td>
-   <td>N/A
-   </td>
-   <td>✅
-   </td>
-  </tr>
-</table>
-<br/>
-<br/>
 </section>
-<section id="no-ground-truth-responses-available">
-<h2><span class="section-number">4.1.2. </span>No ground-truth responses available<a class="headerlink" href="#no-ground-truth-responses-available" title="Link to this heading">#</a></h2>
-<p>If you do not have ground-truth responses available, <code class="docutils literal notranslate"><span class="pre">response/llm_judged/correctness/</span></code> can’t be computed.  Use this table instead.</p>
-<table>
-  <tr>
-   <td>Retrieval precision >50% 
-   </td>
-   <td>Groundedness
-   </td>
-   <td>Relevance to Query
-   </td>
-   <td>Issue summary
-   </td>
-   <td>Root cause
-   </td>
-   <td>Overall rating
-   </td>
-  </tr>
-  <tr>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>Retrieval quality is poor
-   </td>
-   <td>Improve Retriever
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>Retrieval quality is poor
-   </td>
-   <td>Improve Retriever
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>❌
-   </td>
-   <td>Response is grounded in retrieval, but <strong>retrieval is poor</strong>.
-   </td>
-   <td>Improve Retriever
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>✅
-   </td>
-   <td>Relevant response grounded in the retrieved context and relevant, but <strong>retrieval is poor</strong>.
-   </td>
-   <td>Improve Retriever
-   </td>
-   <td>✅
-   </td>
-  </tr>
-  <tr>
-   <td>✅
-   </td>
-   <td>❌
-   </td>
-   <td>❌
-   </td>
-   <td>Hallucination
-   </td>
-   <td>Improve LLM
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>✅
-   </td>
-   <td>❌
-   </td>
-   <td>✅
-   </td>
-   <td>Hallucination
-   </td>
-   <td>Improve LLM
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>✅
-   </td>
-   <td>✅
-   </td>
-   <td>❌
-   </td>
-   <td>Good retrieval & grounded, but LLM does not provide a relevant response.
-   </td>
-   <td>Improve LLM
-   </td>
-   <td>❌
-   </td>
-  </tr>
-  <tr>
-   <td>✅
-   </td>
-   <td>✅
-   </td>
-   <td>✅
-   </td>
-   <td>Good retrieval and relevant response.  Collect ground-truth to know if the answer is correct.
-   </td>
-   <td>None
-   </td>
-   <td>✅
-   </td>
-  </tr>
-</table>
-<br/>
-<br/>
-</section>
-<div class="toctree-wrapper compound">
-</div>
 </section>
 
     <script type="text/x-thebe-config">
@@ -834,24 +518,6 @@ document.write(`
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
-    <a class="left-prev"
-       href="5-hands-on-improve-quality.html"
-       title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">4. </span>Root cause &amp; iteratively fix quality issues</p>
-      </div>
-    </a>
-    <a class="right-next"
-       href="5-hands-on-improve-quality-step-1-retrieval.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">4.1.3. </span>Retrieval quality</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
-    </a>
 </div>
                 </footer>
               
@@ -868,8 +534,8 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#if-ground-truth-responses-are-available">4.1.1. If ground-truth responses are available</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#no-ground-truth-responses-available">4.1.2. No ground-truth responses available</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-generation-quality">Debugging generation quality</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-generation-quality">Common reasons for poor generation quality</a></li>
 </ul>
   </nav></div>
 

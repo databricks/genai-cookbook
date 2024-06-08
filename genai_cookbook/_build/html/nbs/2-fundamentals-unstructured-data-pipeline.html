@@ -213,10 +213,12 @@
 <li class="toctree-l1"><a class="reference internal" href="5-hands-on-build-poc.html">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
 <li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a></li>
-
-
-<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.4. Implement and evaluate changes</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="5-hands-on-improve-quality-step-1-retrieval.html">4.1.3. Retrieval quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="5-hands-on-improve-quality-step-1-generation.html">4.1.4. Generation quality</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.2. Implement and evaluate changes</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="5-hands-on-deploy-and-monitor.html">5. Deploy &amp; monitor</a></li>
@@ -422,15 +424,15 @@ document.write(`
 <p>Throughout this guide we will focus on preparing unstructured data for use in RAG applications. <em>Unstructured</em> data refers to data without a specific structure or organization, such as PDF documents that might include text and images, or multimedia content such as audio or videos.</p>
 <p>Unstructured data lacks a predefined data model or schema, making it impossible to query on the basis of structure and metadata alone. As a result, unstructured data requires techniques that can understand and extract semantic meaning from raw text, images, audio, or other content.</p>
 <p>During data preparation, the RAG application’s data pipeline takes raw unstructured data and transforms it into discrete chunks that can be queried based on their relevance to a user’s query. The key steps in data preprocessing are outlined below. Each step has a variety of knobs that can be tuned - for a deeper dive discussion on these knobs, please refer to the <a class="reference internal" href="3-deep-dive.html"><span class="doc std std-doc">deep dive into RAG section.</span></a></p>
-<p>In the remainder of this section, we describe the process of preparing unstructured data for retrieval using <em>semantic search</em>. Semantic search understands the contextual meaning and intent of a user query to provide more relevant search results.</p>
-<p>Semantic search is one of several approaches that can be taken when implementing the retrieval component of a RAG application over unstructured data. We cover alternate retrieval strategies in the <a class="reference internal" href="3-deep-dive.html"><span class="doc std std-doc">retrieval deep dive section</span></a>.</p>
 <img alt="../_images/2_img.png" class="align-center" src="../_images/2_img.png" />
 <br/>
-The following are the typical steps of a data pipeline in a RAG application using unstructured data:
+<p>In the remainder of this section, we describe the process of preparing unstructured data for retrieval using <em>semantic search</em>. Semantic search understands the contextual meaning and intent of a user query to provide more relevant search results.</p>
+<p>Semantic search is one of several approaches that can be taken when implementing the retrieval component of a RAG application over unstructured data. We cover alternate retrieval strategies in the <a class="reference internal" href="3-deep-dive.html"><span class="doc std std-doc">retrieval deep dive section</span></a>.</p>
+<p>The following are the typical steps of a data pipeline in a RAG application using unstructured data:</p>
 <ol class="arabic simple">
 <li><p><strong>Parse the raw documents:</strong> The initial step involves transforming raw data into a usable format. This can include extracting text, tables, and images from a collection of PDFs or employing optical character recognition (OCR) techniques to extract text from images.</p></li>
 <li><p><strong>Extract document metadata (optional):</strong> In some cases, extracting and using document metadata, such as document titles, page numbers, URLs, or other information can help the retrieval step more precisely query the correct data.</p></li>
-<li><p><strong>Chunk documents:</strong> To ensure the parsed documents can fit into the embedding model and the LLM’s context window, we break the parsed documents into smaller, discrete chunks. Retrieving these focused chunks, rather than entire documents, gives the LLM more targeted content from which to generate its responses.</p></li>
+<li><p><strong>Chunk documents:</strong> To ensure the parsed documents can fit into the embedding model and the LLM’s context window, we break the parsed documents into smaller, discrete chunks. Retrieving these focused chunks, rather than entire documents, gives the LLM more targeted context from which to generate its responses.</p></li>
 <li><p><strong>Embedding chunks:</strong> In a RAG application that uses semantic search, a special type of language model called an <em>embedding model</em> transforms each of the chunks from the previous step into numeric vectors, or lists of numbers, that encapsulate the meaning of each piece of content. Crucially, these vectors represent the semantic meaning of the text, not just surface-level keywords. This will later enable searching based on meaning rather than literal text matches.</p></li>
 <li><p><strong>Index chunks in a vector database:</strong> The final step is to load the vector representations of the chunks, along with the chunk’s text, into a <em>vector database</em>. A vector database is a specialized type of database designed to efficiently store and search for vector data like embeddings. To maintain performance with a large number of chunks, vector databases commonly include a vector index that uses various algorithms to organize and map the vector embeddings in a way that optimizes search efficiency. At query time, a user’s request is embedded into a vector, and the database leverages the vector index to find the most similar chunk vectors, returning the corresponding original text chunks.</p></li>
 </ol>
