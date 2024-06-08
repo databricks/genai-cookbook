@@ -4,7 +4,7 @@ This section provides an overview of Retrieval-augmented generation (RAG): what 
 
 ## What is retrieval-augmented generation?
 
-Retrieval-augmented generation (RAG) is a technique that enables a large language model (LLM) to generate enriched responses by augmenting a user’s prompt with supporting data retrieved from an outside information source. By incorporating this retrieved information, RAG enables the LLM to generate more accurate, higher quality responses compared not augmenting the prompt with additional context.
+Retrieval-augmented generation (RAG) is a technique that enables a large language model (LLM) to generate enriched responses by augmenting a user’s prompt with supporting data retrieved from an outside information source. By incorporating this retrieved information, RAG enables the LLM to generate more accurate, higher quality responses compared to not augmenting the prompt with additional context.
 
 For example, suppose you are building a question-and-answer chatbot to help employees answer questions about your company’s proprietary documents. A standalone LLM won’t be able to accurately answer questions about the content of these documents if it was not specifically trained on them. The LLM might refuse to answer due to a lack of information or, even worse, it might generate an incorrect response. 
 
@@ -14,11 +14,11 @@ RAG addresses this issue by first retrieving relevant information from the compa
 
 A RAG application is an example of a [compound AI system](https://bair.berkeley.edu/blog/2024/02/18/compound-ai-systems/): it expands on the language capabilities of the model alone by combining it with other tools and procedures.
 
-When using a stand-alone LLM, a user submits a request, such as a question, to the LLM, and the LLM responds with an answer based solely on its training data.  
+When using a standalone LLM, a user submits a request, such as a question, to the LLM, and the LLM responds with an answer based solely on its training data.  
 
 In its most basic form, the following steps happen in a RAG application:
 
-1. **Retrieval:** The **user's request** is used to query some outside source of information. This might mean querying a database or vector store, a keyword search over some text, or querying a SQL database. The goal of the retrieval step is to obtain **supporting data** that will help the LLM provide a useful response.
+1. **Retrieval:** The **user's request** is used to query some outside source of information. This might mean querying a vector store, conducting a keyword search over some text, or querying a SQL database. The goal of the retrieval step is to obtain **supporting data** that will help the LLM provide a useful response.
 
 2. **Augmentation:** The **supporting data** from the retrieval step is combined with the **user's request**, often using a template with additional formatting and instructions to the LLM, to create a **prompt**.
 
