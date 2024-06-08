@@ -53,9 +53,9 @@ Chain metrics access the overall performance of the whole RAG chain. Cost and la
 | Latency     | What is the latency of executing the RAG chain? | Latency measures the time it takes for the application to return a response after the user sends a request. This includes the time it takes the retriever to retrieve relevant supporting data and for the LLM to generate output.               |
 
 
-## Appendix
+### Appendix
 
-### Precision and Recall
+#### Precision and Recall
 
 Retrieval metrics are based on the concept of Precision & Recall.  Below is a quick primer on Precision & Recall adapted from the excellent [Wikipedia article](https://en.wikipedia.org/wiki/Precision_and_recall).
 
