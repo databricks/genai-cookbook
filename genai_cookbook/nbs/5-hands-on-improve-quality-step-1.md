@@ -1,22 +1,39 @@
 ### Identify the root cause of quality issues
 
-Retrieval and generation are the 2 primary buckets of root causes.  To identify the root cause to focus on first, use the output of the Mosaic AI Quality Lab's LLM judges that you ran in the previous steps.  You should start with the Root Cause that appears most frequently in your dataset.  
+**Expected time:** 60 minutes
+
+**Overview**
+
+Retrieval and generation are the 2 primary buckets of root causes.  To identify the root cause to focus on first, we will use the output of the Mosaic AI Quality Lab's LLM judges that you ran in the previous [step](./5-hands-on-evaluate-poc.md) to identify the root cause that most impacts your app's quality.
 
 To determine the root cause, use the output of the following metrics:
+- `retrieval/llm_judged/chunk_relevance/precision/average`
+- `response/llm_judged/groundedness/rating/percentage`
+- `response/llm_judged/correctness/rating/percentage`
+- `response/llm_judged/relevance_to_query/rating/percentage`
 
-| Metric name | Quality Lab metric ID | Description | More details |
-|-----|-----|-----|-----|
-| LLM-judged retrieval precision | `retrieval/llm_judged/ chunk_relevance/precision/average` | Is each retrieved chunk relevant to the input request? | [docs link]() | [cookbook link]() |
-| LLM-judged groundedness | `response/llm_judged/ groundedness/rating/percentage` | Is the generated response is factually consistent with the retrieved context e.g., "grounded"? | [docs link]() | [cookbook link]() |
-| LLM-judged correctness vs. the ground-truth answer | `response/llm_judged/ correctness/rating/percentage` | Is the agent’s generated response is factually accurate and semantically similar to the provided ground-truth response? | [docs link]() | [cookbook link]() |
-| LLM-judged relevance to query | `response/llm_judged/ relevance_to_query/rating/percentage` | Is the response relevant to the input request? |[docs link]() | [cookbook link]() |
+If you have human labeled ground-truth for which document should be retrieved for each question, you can optionally replace `retrieval/llm_judged/chunk_relevance/precision/average` with the score for `retrieval/ground_truth/document_recall/average`.
 
-Note: If you have human labeled ground-truth for which document should be retrieved for each question, you can optionally replace `retrieval/llm_judged/chunk_relevance/precision/average` with the score for `retrieval/ground_truth/document_recall/average`.
+**Requirements**
 
-#### If ground-truth responses are available
+- Your Evaluation results for the POC are available in MLflow 
+  - If you followed the previous step, this will be the case!
+- All requirements from previous steps
 
 
-<table>
+**Instructions**
+
+How you root cause your app depends on if your evaluation set contains the ground-truth responses to your questions - stored in `expected_response`.  If you have these available, use the first table below.  Otherwise, use the second table.
+
+1. Open the `06_root_cause_poc_quality_issues` Notebook
+2. Press Run All
+3. Review the output tables to determine the most frequent root cause in your application and follow the steps linked below:
+  - [Improve retriever](./5-hands-on-improve-quality-step-1-retrieval.md)
+  - [Improve LLM](./5-hands-on-improve-quality-step-1-generation.md)
+
+**_Root cause analysis with available ground truth_**
+
+<table class="table">
   
   <tr>
    <td>Retrieval precision >50% 
@@ -216,12 +233,9 @@ Note: If you have human labeled ground-truth for which document should be retrie
 <br/>
 
 
-#### No ground-truth responses available
+**_Root cause analysis WITHOUT available ground truth_**
 
-If you do not have ground-truth responses available, `response/llm_judged/correctness/` can't be computed.  Use this table instead.
-
-
-<table>
+<table class="table">
   <tr>
    <td>Retrieval precision >50% 
    </td>

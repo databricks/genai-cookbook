@@ -1,6 +1,6 @@
 #### Retrieval quality
 
-##### Debugging retrieval quality
+##### How to debug retrieval quality
 
 **You are on this page because your [root cause analysis](./5-hands-on-improve-quality-step-1.md) said that retrieval quality was the issue to focus.**
 

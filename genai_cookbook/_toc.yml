@@ -28,6 +28,7 @@ parts:
   numbered: true
   chapters:
   - file: nbs/5-hands-on-requirements
+  - file: nbs/6-implement-overview
 # - caption: "Build: POC"
 #   numbered: true
 #   chapters:

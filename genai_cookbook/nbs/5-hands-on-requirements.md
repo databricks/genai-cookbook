@@ -1,4 +1,4 @@
-## Gather requirements
+## **Prerequisite:** Gather requirements
 
 ```{image} ../images/5-hands-on/2_img.png
 :align: center
