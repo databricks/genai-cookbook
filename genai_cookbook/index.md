@@ -4,12 +4,12 @@ title: Databricks Generative AI Cookbook
 
 # Databricks Mosaic Generative AI Cookbook
 
-Databricks' Generative AI Cookbook is a definitive how-to guide for building *high-quality* generative AI applications. *High-quality* applications are:
+The Databricks Generative AI Cookbook is a definitive how-to guide for building *high-quality* generative AI applications. *High-quality* applications are:
 1. **Accurate:** provides correct responses
 2. **Safe:** does not deliver harmful or insecure responses
 3. **Governed:** respects permissions & access controls
 
-Developed in partnership with Mosaic AI's research team, this cookbook lays Databricks best-practice development workflow for building high-quality RAG apps: *evaluation driven development.*  It outlines the most relevant knobs & approaches that can increase quality and provides a comprehensive repository of sample code implementing those techniques.  This code & cookbook will take you from initial POC to high-quality production-ready application.
+Developed in partnership with Mosaic AI's research team, this cookbook lays out Databricks best-practice development workflow for building high-quality RAG apps: *evaluation driven development.* It outlines the most relevant knobs & approaches that can increase quality and provides a comprehensive repository of sample code implementing those techniques. This code & cookbook will take you from initial POC to high-quality production-ready application.
 
 > This first release focuses on retrieval-augmented generation (RAG).  Future releases will include the other popular generative AI techniques: agents & function calling, prompt engineering, fine tuning, and pre-training.
 
@@ -17,14 +17,14 @@ Developed in partnership with Mosaic AI's research team, this cookbook lays Data
 
 The RAG cookbook is divided into 2 sections:
 1. [**Learn:**](#learn) Understand the required components of a production-ready, high-quality RAG application
-2. [**Implement:**](#implement) Use our sample code to follow Databricks’ recommended developer workflow for delivering a high-quality RAG application
+2. [**Implement:**](#implement) Use our sample code to follow the Databricks-recommended developer workflow for delivering a high-quality RAG application
 
 
 #### Learn
 
 **Table of contents**
-1. [RAG overview](./nbs/1-introduction-to-rag): High level overview of the basic concepts within RAG
-2. [RAG fundamentals](./nbs/2-fundamentals-unstructured): Introduction to the key components within a RAG application
+1. [RAG overview](./nbs/1-introduction-to-rag): High level overview of the basic concepts of RAG
+2. [RAG fundamentals](./nbs/2-fundamentals-unstructured): Introduction to the key components of a RAG application
 3. [RAG quality knobs](./nbs/3-deep-dive): Explains the knobs that Databricks recommends tuning in order to improve RAG application quality
 4. [RAG quality evaluation deep dive](./nbs/4-evaluation): Understand how RAG evaluation works, including creating evaluation sets, the quality metrics that matter, and required developer tooling
 5. [RAG development workflow](nbs/5-rag-development-workflow.md): Understand Databricks recommended development workflow for building, testing, and deploying a high-quality RAG application: evaluation-driven development
