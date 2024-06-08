@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Section 1: Introduction to retrieval-augmented generation (RAG) &#8212; Databricks Generative AI Cookbook</title>
+    <title>1. RAG overview &#8212; Databricks Generative AI Cookbook</title>
   
   
   
@@ -74,7 +74,7 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Section 2: Fundamentals of RAG over unstructured documents" href="2-fundamentals-unstructured.html" />
+    <link rel="next" title="2. RAG fundamentals" href="2-fundamentals-unstructured.html" />
     <link rel="prev" title="Databricks Mosaic Generative AI Cookbook" href="../index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -183,19 +183,43 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">All Notebooks</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#"><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html"><strong>Section 2:</strong> Fundamentals of RAG over unstructured documents</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">Data pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-rag.html">Retrieval, augmentation, and generation (RAG Chain)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">Evaluation &amp; monitoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">Governance and LLMops</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">1. RAG overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html">2. RAG fundamentals</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">2.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-chain.html">2.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">2.3. Evaluation &amp; monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">2.4. Governance and LLMops</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="3-deep-dive.html"><strong>Section 3:</strong> Deep dive into RAG over unstructured documents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="4-evaluation.html"><strong>Section 4:</strong> Evaluation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="5-hands-on.html"><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="3-deep-dive.html">3. RAG quality knobs</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-data-pipeline.html">3.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-chain.html">3.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="4-evaluation.html">4. Evaluating RAG quality</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-eval-sets.html">4.5. Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-metrics.html">4.6. Assessing Performance: Metrics that Matter</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-infra.html">4.8. Enabling Measurement: Supporting Infrastructure</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-rag-development-workflow.html">5. RAG development workflow</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Implement</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-requirements.html">1. Gather requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-build-poc.html">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.4. Implement and evaluate changes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-deploy-and-monitor.html">5. Deploy &amp; monitor</a></li>
 </ul>
 
     </div>
@@ -381,7 +405,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Section 1: Introduction to retrieval-augmented generation (RAG)</h1>
+    <h1>RAG overview</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -391,10 +415,10 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-retrieval-augmented-generation">What is retrieval-augmented generation?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#core-components-of-a-rag-application">Core components of a RAG application</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-use-rag">Why use RAG?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#types-of-rag">Types of RAG</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-retrieval-augmented-generation">1.1. What is retrieval-augmented generation?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#core-components-of-a-rag-application">1.2. Core components of a RAG application</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-use-rag">1.3. Why use RAG?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#types-of-rag">1.4. Types of RAG</a></li>
 </ul>
             </nav>
         </div>
@@ -406,17 +430,17 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="section-1-introduction-to-retrieval-augmented-generation-rag">
-<h1><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)<a class="headerlink" href="#section-1-introduction-to-retrieval-augmented-generation-rag" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="rag-overview">
+<h1><span class="section-number">1. </span>RAG overview<a class="headerlink" href="#rag-overview" title="Link to this heading">#</a></h1>
 <p>This section provides an overview of Retrieval-augmented generation (RAG): what it is, how it works, and key concepts.</p>
 <section id="what-is-retrieval-augmented-generation">
-<h2>What is retrieval-augmented generation?<a class="headerlink" href="#what-is-retrieval-augmented-generation" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">1.1. </span>What is retrieval-augmented generation?<a class="headerlink" href="#what-is-retrieval-augmented-generation" title="Link to this heading">#</a></h2>
 <p>Retrieval-augmented generation (RAG) is a technique that enables a large language model (LLM) to generate enriched responses by augmenting a user’s prompt with supporting data retrieved from an outside information source. By incorporating this retrieved information, RAG enables the LLM to generate more accurate, higher quality responses compared to using the prompt alone.</p>
 <p>For example, suppose you are building a question-and-answer chatbot to help employees answer questions about your company’s proprietary documents. A standalone LLM won’t be able to accurately answer questions about the content of these documents if it was not specifically trained on them. The LLM might refuse to answer due to a lack of information or, even worse, it might generate an incorrect response.</p>
 <p>RAG addresses this issue by first retrieving relevant information from the company documents based on a user’s query, and then providing the retrieved information to the LLM as additional context. This allows the LLM to generate a more accurate response by drawing from the specific details found in the relevant documents. In essence, RAG enables the LLM to “consult” the retrieved information to formulate its answer.</p>
 </section>
 <section id="core-components-of-a-rag-application">
-<h2>Core components of a RAG application<a class="headerlink" href="#core-components-of-a-rag-application" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">1.2. </span>Core components of a RAG application<a class="headerlink" href="#core-components-of-a-rag-application" title="Link to this heading">#</a></h2>
 <p>A RAG application is an example of a <a class="reference external" href="https://bair.berkeley.edu/blog/2024/02/18/compound-ai-systems/">compound AI system</a>: it expands on the language capabilities of the model alone by combining it with other tools and procedures.</p>
 <p>When using a stand-alone LLM, a user submits a request, such as a question, to the LLM, and the LLM responds with an answer based solely on its training data.</p>
 <p>In its most basic form, the following steps happen in a RAG application:</p>
@@ -430,7 +454,7 @@ document.write(`
 <p>This is a simplified overview of the RAG process, but it’s important to note that implementing a RAG application involves a number of complex tasks. Preprocessing source data to make it suitable for use in RAG, effectively retrieving data, formatting the augmented prompt, and evaluating the generated responses all require careful consideration and effort. These topics will be covered in greater detail in later sections of this guide.</p>
 </section>
 <section id="why-use-rag">
-<h2>Why use RAG?<a class="headerlink" href="#why-use-rag" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">1.3. </span>Why use RAG?<a class="headerlink" href="#why-use-rag" title="Link to this heading">#</a></h2>
 <p>The following table outlines the benefits of using RAG versus a stand-alone LLM:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -456,7 +480,7 @@ document.write(`
 </div>
 </section>
 <section id="types-of-rag">
-<h2>Types of RAG<a class="headerlink" href="#types-of-rag" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">1.4. </span>Types of RAG<a class="headerlink" href="#types-of-rag" title="Link to this heading">#</a></h2>
 <p>The RAG architecture can work with 2 types of <strong>supporting data</strong>:</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -525,7 +549,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><strong>Section 2:</strong> Fundamentals of RAG over unstructured documents</p>
+        <p class="prev-next-title"><span class="section-number">2. </span>RAG fundamentals</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -545,10 +569,10 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-retrieval-augmented-generation">What is retrieval-augmented generation?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#core-components-of-a-rag-application">Core components of a RAG application</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-use-rag">Why use RAG?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#types-of-rag">Types of RAG</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-retrieval-augmented-generation">1.1. What is retrieval-augmented generation?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#core-components-of-a-rag-application">1.2. Core components of a RAG application</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-use-rag">1.3. Why use RAG?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#types-of-rag">1.4. Types of RAG</a></li>
 </ul>
   </nav></div>
 

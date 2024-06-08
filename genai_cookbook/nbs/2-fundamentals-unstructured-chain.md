@@ -1,4 +1,4 @@
-## Retrieval, augmentation, and generation (RAG Chain)
+## Retrieval, augmentation, and generation (aka RAG Chain)
 
 Once the data has been processed by the data pipeline, it is suitable for use in the RAG application. This section describes the process that occurs once the user submits a request to the RAG application in an online setting. The series, or *chain* of steps that are invoked at inference time is commonly referred to as the RAG chain.
 

@@ -1,0 +1,640 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Step 3: Implement and evaluate changes &#8212; Databricks Generative AI Cookbook</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-6BZ4NTBHVJ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/5-hands-on-improve-quality copy 3';</script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo2.png" class="logo__image only-light" alt="Databricks Generative AI Cookbook - Home"/>
+    <script>document.write(`<img src="../_static/logo2.png" class="logo__image only-dark" alt="Databricks Generative AI Cookbook - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Learning how RAG works</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html">Introduction to retrieval-augmented generation (RAG)</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html">Fundamentals of RAG over unstructured documents</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-chain.html">Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">Evaluation &amp; monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">Governance and LLMops</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="3-deep-dive.html">Deep dive into RAG over unstructured documents</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-data-pipeline.html">Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-chain.html">Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Evaluating RAG apps</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="4-evaluation.html">Evaluation overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="4-evaluation-eval-sets.html">Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="4-evaluation-metrics.html">Assessing Performance: Metrics that Matter</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="4-evaluation-infra.html">Enabling Measurement: Supporting Infrastructure</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">How to implement RAG</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on.html">1. <strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/5-hands-on-improve-quality copy 3.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/nbs/5-hands-on-improve-quality copy 3.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Step 3: Implement and evaluate changes</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#"><strong>Step 3:</strong> Implement and evaluate changes</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-pipeline-changes">Data pipeline changes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rag-chain-changes">RAG chain changes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-a-potential-fix-that-could-improve-quality">Testing a potential fix that could improve quality</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment">Deployment</a></li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="step-3-implement-and-evaluate-changes">
+<h1><strong>Step 3:</strong> Implement and evaluate changes<a class="headerlink" href="#step-3-implement-and-evaluate-changes" title="Link to this heading">#</a></h1>
+<p>As discussed above, when working to improve the quality of the RAG system, changes can be broadly categorized into three buckets:</p>
+<ol class="arabic simple">
+<li><p><strong><img alt="Data pipeline" src="../_images/data_pipeline.png" /></strong> Data pipeline changes</p></li>
+<li><p><strong><img alt="Chain config" src="../_images/chain_config.png" /></strong> RAG chain configuration changes</p></li>
+<li><p><strong><img alt="Chain code" src="../_images/chain_code.png" /></strong> RAG chain code changes</p></li>
+</ol>
+<p>Depending on the specific issue you are trying to address, you may need to apply changes to one or both of these components. In some cases, simultaneous changes to both the data pipeline and RAG chain may be necessary to achieve the desired quality improvements.</p>
+<section id="data-pipeline-changes">
+<h2>Data pipeline changes<a class="headerlink" href="#data-pipeline-changes" title="Link to this heading">#</a></h2>
+<p><strong>Data pipeline changes</strong> involve modifying how input data is processed, transformed, or stored before being used by the RAG chain. Examples of data pipeline changes include (and are not limited to):</p>
+<ul class="simple">
+<li><p>Trying a different chunking strategy</p></li>
+<li><p>Iterating on the document parsing process</p></li>
+<li><p>Changing the embedding model</p></li>
+</ul>
+<p>Implementing a data pipeline change will generally require re-running the entire pipeline to create a new vector index. This process involves reprocessing the input documents, regenerating the vector embeddings, and updating the vector index with new embeddings and metadata.</p>
+</section>
+<section id="rag-chain-changes">
+<h2>RAG chain changes<a class="headerlink" href="#rag-chain-changes" title="Link to this heading">#</a></h2>
+<p><strong>RAG chain changes</strong> involve modifying steps or parameters of the RAG chain itself, without necessarily changing the underlying vector database. Examples of RAG chain changes include (and are not limited to):</p>
+<ul class="simple">
+<li><p>Changing the LLM</p></li>
+<li><p>Modifying the prompt template</p></li>
+<li><p>Adjusting the retrieval component (e.g., number of retrieval chunks, reranking, query expansion)</p></li>
+<li><p>Introducing additional processing steps such as a query understanding step</p></li>
+</ul>
+<p>RAG chain updates may involve editing the <strong>RAG chain configuration file</strong> (e.g., changing the LLM parameters or prompt template), <em>or</em> modifying the actual <strong>RAG chain code</strong> (e.g., adding new processing steps or retrieval logic).</p>
+</section>
+<section id="testing-a-potential-fix-that-could-improve-quality">
+<h2>Testing a potential fix that could improve quality<a class="headerlink" href="#testing-a-potential-fix-that-could-improve-quality" title="Link to this heading">#</a></h2>
+<p>Once you have identified a potential fix based on the debugging process outlined above, follow these steps to test your changes:</p>
+<ol class="arabic">
+<li><p>Make the necessary changes to the data pipeline or RAG chain code</p>
+<ul class="simple">
+<li><p>See the <a class="reference internal" href="#code-examples"><span class="xref myst">code examples</span></a> below for how and where to make these changes</p></li>
+<li><p>If required, re-run the data pipeline to update the vector index with the new embeddings and metadata</p></li>
+</ul>
+</li>
+<li><p>Log a new version of your chain to MLflow</p>
+<ul>
+<li><p>Ensure that any config files (i.e., for both your data pipeline and RAG chain) are logged to the MLflow run</p>
+<ul>
+<li><SCREENSHOT OF LOGGED CHAIN>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Run evaluation on this new chain</p></li>
+<li><p>Review evaluation results</p>
+<ul>
+<li><p>Analyze the evaluation metrics to determine if there has been an improvement the RAG chain’s performance</p>
+<ul>
+<li><SCREENSHOT OF EVALS>
+</li>
+</ul>
+</li>
+<li><p>Compare the traces and LLM judge results for individual queries before and after the changes to gain insights into the impact of your changes</p></li>
+</ul>
+</li>
+<li><p>Iterate on the fixes</p>
+<ul class="simple">
+<li><p>If the evaluation results do not show the desired improvement, iterate on your changes based on the insights gained from analysis.</p></li>
+<li><p>Repeat steps 1-4 until you are satisfied with the improvement in the RAG chain’s output quality</p></li>
+</ul>
+</li>
+<li><p>Deploy the updated RAG chain for user feedback</p>
+<ul>
+<li><p>Once evaluation results indicate improvement, register the chain to Unity Catalog and deploy the updated RAG chain via the Review App.</p></li>
+<li><p>Gather feedback from stakeholders and end-users through one or both of the following:</p>
+<ul>
+<li><p>Have stakeholders interact with the app directly in the RAG Studio UI and provide feedback on response quality</p>
+<ul>
+<li><SCREENSHOT OF REVIEW APP>
+</li>
+</ul>
+</li>
+<li><p>Generate responses using the updated chain for the set of evaluation queries and seek feedback on those specific responses</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Monitor and analyze user feedback</p>
+<ul class="simple">
+<li><p>Review these results using a <a class="reference external" href="https://docs.databricks.com/en/dashboards/index.html#dashboards">dashboard</a>.</p></li>
+<li><p>Monitor metrics such as the percentage of positive and negative feedback, as well as any specific comments or issues raised by users.</p></li>
+</ul>
+</li>
+</ol>
+<!--
+### Code Examples
+| | Component | Change(s) |
+|---|---|---|
+| **Data pipeline changes**<br><br>1. Re-run data pipeline to create new vector index<br>2. Log new version of RAG chain using the updated index<br>3. Run evals on new chain | [Parser](https://github.com/databricks-field-eng/field-ai-examples/blob/main/dev/data_processing/notebook_version/data_prep/02_parse_docs.py) | - Change parsing strategy<br>  - [Add new parsing strategy to notebook](https://github.com/databricks-field-eng/field-ai-examples/blob/main/dev/data_processing/notebook_version/data_prep/parser_library.py)<br>  - [Update data pipeline config](https://github.com/databricks-field-eng/field-ai-examples/blob/main/dev/data_processing/notebook_version/data_prep/00_config.py#L29) |
+| | [Chunking](https://github.com/databricks-field-eng/field-ai-examples/blob/main/dev/data_processing/notebook_version/data_prep/03_chunk_docs.py) | - Chunking strategy<br>  - [Add or update existing chunking strategy](https://github.com/databricks-field-eng/field-ai-examples/blob/main/dev/data_processing/notebook_version/data_prep/chunker_library.py)<br>  - [Update data pipeline config](https://github.com/databricks-field-eng/field-ai-examples/blob/main/dev/data_processing/notebook_version/data_prep/00_config.py#L30-L35)<br>- Change chunk sizes of existing chunking strategy<br>  - [Update data pipeline config](https://github.com/databricks-field-eng/field-ai-examples/blob/main/dev/data_processing/notebook_version/data_prep/00_config.py#L30-L35)<br>- Add metadata to chunks<br>- Semantic chunking |
+| | [Embedding<br>model](https://github.com/databricks-field-eng/field-ai-examples/blob/main/dev/data_processing/notebook_version/data_prep/04_vector_index.py#L41) | - Change embedding model<br>  - [Update data pipeline config](https://github.com/databricks-field-eng/field-ai-examples/blob/main/dev/data_processing/notebook_version/data_prep/00_config.py#L18-L24) |
+| **RAG chain config changes**<br><br>1. If no changes to data pipeline, do *not* re-run data pipeline<br>2. Log new version of RAG chain using the updated index<br>3. Run evals on new chain | [LLM](#llm) | - Change LLM or its parameters<br>  - [Update RAG chain config](https://github.com/epec254/rag_code/blob/main/RAG%20Cookbook/B_pdf_rag_with_multi_turn_chat/2_rag_chain_config.yaml#L1-L4) |
+| | [Prompt<br>Template](/nbs/3-deep-dive.md#prompt-augmentation) | - Iterate on prompt template<br>  - [Update RAG chain config](https://github.com/epec254/rag_code/blob/main/RAG%20Cookbook/B_pdf_rag_with_multi_turn_chat/2_rag_chain_config.yaml#L5-L14) |
+| | [Hybrid search](/nbs/3-deep-dive.md#retrieval) | - Try hybrid search instead of semantic search<br>  - Update RAG chain code |
+| **RAG chain code changes**<br><br>1. If no changes to data pipeline, *do not* re-run data pipeline<br>2. Log new version of RAG chain using the updated index<br>3. Run evals on new chain | [Reranker](/nbs/3-deep-dive.md#retrieval) | - Add reranker step to RAG chain<br>  - [Update RAG chain code](https://github.com/epec254/rag_code/pull/19) |
+| | [Query<br>Expansion](/nbs/3-deep-dive.md#query-understanding) | - Add query expansion step<br>  - Update RAG chain code<br>  - NOTE: Implement this [example prompt](https://docs.llamaindex.ai/en/stable/examples/query_transformations/query_transform_cookbook/#query-rewriting-custom) into the multi turn |
+| | [Guardrails](/nbs/3-deep-dive.md#post-processing-guardrails) | - Add post-processing guardrails step to RAG chain<br>  - Create a version of this [chain](https://github.com/epec254/rag_code/tree/main/RAG%20Cookbook/B_pdf_rag_with_multi_turn_chat) that includes a sample guardrail prompt using the current advanced DBdemo as an example |
+-->
+</section>
+</section>
+<section id="deployment">
+<h1>Deployment<a class="headerlink" href="#deployment" title="Link to this heading">#</a></h1>
+<img alt="../_images/17_img.png" class="align-center" src="../_images/17_img.png" />
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./nbs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#"><strong>Step 3:</strong> Implement and evaluate changes</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-pipeline-changes">Data pipeline changes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rag-chain-changes">RAG chain changes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-a-potential-fix-that-could-improve-quality">Testing a potential fix that could improve quality</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment">Deployment</a></li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The Databricks GenAI Community
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

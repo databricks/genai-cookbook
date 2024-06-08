@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Section 2: Fundamentals of RAG over unstructured documents &#8212; Databricks Generative AI Cookbook</title>
+    <title>2. RAG fundamentals &#8212; Databricks Generative AI Cookbook</title>
   
   
   
@@ -74,8 +74,8 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Data pipeline" href="2-fundamentals-unstructured-data-pipeline.html" />
-    <link rel="prev" title="Section 1: Introduction to retrieval-augmented generation (RAG)" href="1-introduction-to-rag.html" />
+    <link rel="next" title="2.1. Data pipeline" href="2-fundamentals-unstructured-data-pipeline.html" />
+    <link rel="prev" title="1. RAG overview" href="1-introduction-to-rag.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -183,19 +183,43 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">All Notebooks</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html"><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)</a></li>
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#"><strong>Section 2:</strong> Fundamentals of RAG over unstructured documents</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">Data pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-rag.html">Retrieval, augmentation, and generation (RAG Chain)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">Evaluation &amp; monitoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">Governance and LLMops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html">1. RAG overview</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">2. RAG fundamentals</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">2.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-chain.html">2.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">2.3. Evaluation &amp; monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">2.4. Governance and LLMops</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="3-deep-dive.html"><strong>Section 3:</strong> Deep dive into RAG over unstructured documents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="4-evaluation.html"><strong>Section 4:</strong> Evaluation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="5-hands-on.html"><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="3-deep-dive.html">3. RAG quality knobs</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-data-pipeline.html">3.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-chain.html">3.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="4-evaluation.html">4. Evaluating RAG quality</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-eval-sets.html">4.5. Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-metrics.html">4.6. Assessing Performance: Metrics that Matter</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-infra.html">4.8. Enabling Measurement: Supporting Infrastructure</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-rag-development-workflow.html">5. RAG development workflow</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Implement</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-requirements.html">1. Gather requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-build-poc.html">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.4. Implement and evaluate changes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-deploy-and-monitor.html">5. Deploy &amp; monitor</a></li>
 </ul>
 
     </div>
@@ -379,7 +403,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Section 2: Fundamentals of RAG over unstructured documents</h1>
+    <h1>RAG fundamentals</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -393,13 +417,13 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="section-2-fundamentals-of-rag-over-unstructured-documents">
-<h1><strong>Section 2:</strong> Fundamentals of RAG over unstructured documents<a class="headerlink" href="#section-2-fundamentals-of-rag-over-unstructured-documents" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="rag-fundamentals">
+<h1><span class="section-number">2. </span>RAG fundamentals<a class="headerlink" href="#rag-fundamentals" title="Link to this heading">#</a></h1>
 <p>In <a class="reference internal" href="1-introduction-to-rag.html"><span class="doc std std-doc">section 1</span></a> of this guide, we introduced RAG, explained its functionality at a high level, and highlighted its advantages over standalone LLMs.</p>
 <p>This section will introduce the key components and principles behind developing RAG applications over unstructured data. In particular, we will discuss:</p>
 <ol class="arabic simple">
 <li><p><strong><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html"><span class="doc std std-doc">Data pipeline</span></a>:</strong> Transforming unstructured documents, such as collections of PDFs, into a format suitable for retrieval using the RAG application’s <strong>data pipeline</strong>.</p></li>
-<li><p><a class="reference internal" href="2-fundamentals-unstructured-rag.html"><span class="doc std std-doc"><strong>Retrieval, Augmentation, and Generation (RAG chain)</strong></span></a>: A series (or <strong>chain</strong>) of steps is called to:</p>
+<li><p><a class="reference internal" href="#./2-fundamentals-unstructured-rag"><span class="xref myst"><strong>Retrieval, Augmentation, and Generation (RAG chain)</strong></span></a>: A series (or <strong>chain</strong>) of steps is called to:</p>
 <ol class="arabic simple">
 <li><p>Understand the user’s question</p></li>
 <li><p>Retrieve the supporting data</p></li>
@@ -451,7 +475,7 @@ document.write(`
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)</p>
+        <p class="prev-next-title"><span class="section-number">1. </span>RAG overview</p>
       </div>
     </a>
     <a class="right-next"
@@ -459,7 +483,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Data pipeline</p>
+        <p class="prev-next-title"><span class="section-number">2.1. </span>Data pipeline</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

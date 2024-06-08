@@ -1,0 +1,629 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>3.1. Data pipeline &#8212; Databricks Generative AI Cookbook</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-6BZ4NTBHVJ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/3-deep-dive-data-pipeline';</script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3.2. Retrieval, augmentation, and generation (aka RAG Chain)" href="3-deep-dive-chain.html" />
+    <link rel="prev" title="3. RAG quality knobs" href="3-deep-dive.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo2.png" class="logo__image only-light" alt="Databricks Generative AI Cookbook - Home"/>
+    <script>document.write(`<img src="../_static/logo2.png" class="logo__image only-dark" alt="Databricks Generative AI Cookbook - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html">1. RAG overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html">2. RAG fundamentals</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">2.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-chain.html">2.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">2.3. Evaluation &amp; monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">2.4. Governance and LLMops</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="3-deep-dive.html">3. RAG quality knobs</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">3.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-chain.html">3.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="4-evaluation.html">4. Evaluating RAG quality</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-eval-sets.html">4.5. Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-metrics.html">4.6. Assessing Performance: Metrics that Matter</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-infra.html">4.8. Enabling Measurement: Supporting Infrastructure</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-rag-development-workflow.html">5. RAG development workflow</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Implement</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-requirements.html">1. Gather requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-build-poc.html">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.4. Implement and evaluate changes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-deploy-and-monitor.html">5. Deploy &amp; monitor</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/3-deep-dive-data-pipeline.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/nbs/3-deep-dive-data-pipeline.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Data pipeline</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#corpus-composition">3.1.1. Corpus composition</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parsing">3.1.2. Parsing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chunking">3.1.3. Chunking</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#embedding-model">3.1.4. Embedding model</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="data-pipeline">
+<h1><span class="section-number">3.1. </span>Data pipeline<a class="headerlink" href="#data-pipeline" title="Link to this heading">#</a></h1>
+<img alt="../_images/1_img2.png" class="align-center" src="../_images/1_img2.png" />
+<p>The foundation of any RAG application with unstructured data is the data pipeline. This pipeline is responsible for preparing the unstructured data in a format that can be effectively utilized by the RAG application. While this data pipeline can become arbitrarily complex, the following are the key components you need to think about when first building your RAG application:</p>
+<ol class="arabic simple">
+<li><p><strong>Corpus composition:</strong> Selecting the right data sources and content based on the specific use case</p></li>
+<li><p><strong>Parsing:</strong> Extracting relevant information from the raw data using appropriate parsing techniques</p></li>
+<li><p><strong>Chunking:</strong> Breaking down the parsed data into smaller, manageable chunks for efficient retrieval</p></li>
+<li><p><strong>Embedding:</strong> Converting the chunked text data into a numerical vector representation that captures its semantic meaning</p></li>
+</ol>
+<p>We discuss how to experiment with all of these data pipeline choices from a practical standpoint in <a class="reference internal" href="#/nbs/5-hands-on.md#data-pipeline-changes"><span class="xref myst">implementing data pipeline changes</span></a>.</p>
+<section id="corpus-composition">
+<h2><span class="section-number">3.1.1. </span>Corpus composition<a class="headerlink" href="#corpus-composition" title="Link to this heading">#</a></h2>
+<p>To state the obvious, without the right data corpus, your RAG application won’t be able to retrieve the information required to answer a user query. The right data will be entirely dependent on the specific requirements and goals of your application, making it crucial to dedicate time to understand the nuances of data available (see the <a class="reference internal" href="#/nbs/5-hands-on.md#requirements-questions"><span class="xref myst">requirements gathering section</span></a> for guidance on this).</p>
+<p>For example, when building a customer support bot, you might consider including:</p>
+<ul class="simple">
+<li><p>Knowledge base documents</p></li>
+<li><p>Frequently asked questions (FAQs)</p></li>
+<li><p>Product manuals and specifications</p></li>
+<li><p>Troubleshooting guides</p></li>
+</ul>
+<p>Engage domain experts and stakeholders from the outset of any project to help identify and curate relevant content that could improve the quality and coverage of your data corpus. They can provide insights into the types of queries that users are likely to submit, and help prioritize the most important information to include.</p>
+</section>
+<section id="parsing">
+<h2><span class="section-number">3.1.2. </span>Parsing<a class="headerlink" href="#parsing" title="Link to this heading">#</a></h2>
+<p>Having identified the data sources for your RAG application, the next step will be extracting the required information from the raw data. This process, known as parsing, involves transforming the unstructured data into a format that can be effectively utilized by the RAG application.</p>
+<p>The specific parsing techniques and tools you use will depend on the type of data you are working with. For example:</p>
+<ul class="simple">
+<li><p><strong>Text documents</strong> (e.g., PDFs, Word docs): Off-the-shelf libraries like <a class="reference external" href="https://github.com/Unstructured-IO/unstructured">unstructured</a> and <a class="reference external" href="https://pypdf2.readthedocs.io/en/3.x/">PyPDF2</a> can handle various file formats and provide options for customizing the parsing process.</p></li>
+<li><p><strong>HTML documents</strong>: HTML parsing libraries like <a class="reference external" href="https://beautiful-soup-4.readthedocs.io/en/latest/">BeautifulSoup</a> can be used to extract relevant content from web pages. With these you can navigate the HTML structure, select specific elements, and extract the desired text or attributes.</p></li>
+<li><p><strong>Images and scanned documents</strong>: Optical Character Recognition (OCR) techniques will typically be required to extract text from images. Popular OCR libraries include <a class="reference external" href="https://github.com/tesseract-ocr/tesseract">Tesseract</a>, <a class="reference external" href="https://aws.amazon.com/textract/ocr/">Amazon Textract</a>, <a class="reference external" href="https://azure.microsoft.com/en-us/products/ai-services/ai-vision/">Azure AI Vision OCR</a>, and <a class="reference external" href="https://cloud.google.com/vision">Google Cloud Vision API</a>.</p></li>
+</ul>
+<p>When parsing your data, consider the following best practices:</p>
+<ol class="arabic simple">
+<li><p><strong>Data cleaning:</strong> Preprocess the extracted text to remove any irrelevant or noisy information, such as headers, footers, or special characters. Be cognizant of reducing the amount of unnecessary or malformed information that your RAG chain will need to process.</p></li>
+<li><p><strong>Handling errors and exceptions:</strong> Implement error handling and logging mechanisms to identify and resolve any issues encountered during the parsing process. This will help you quickly identify and fix problems. Doing so often points to upstream issues with the quality of the source data.</p></li>
+<li><p><strong>Customizing parsing logic:</strong> Depending on the structure and format of your data, you may need to customize the parsing logic to extract the most relevant information. While it may require additional effort upfront, invest the time to do this if required - it often prevents a lot of downstream quality issues.</p></li>
+<li><p><strong>Evaluating parsing quality</strong>: Regularly assess the quality of the parsed data by manually reviewing a sample of the output. This can help you identify any issues or areas for improvement in the parsing process.</p></li>
+</ol>
+</section>
+<section id="chunking">
+<h2><span class="section-number">3.1.3. </span>Chunking<a class="headerlink" href="#chunking" title="Link to this heading">#</a></h2>
+<img alt="../_images/2_img1.png" class="align-center" src="../_images/2_img1.png" />
+<p>After parsing the raw data into a more structured format, the next step is to break it down into smaller, manageable units called <em>chunks</em>. Segmenting large documents into smaller, semantically concentrated chunks, ensures that retrieved data fits in the LLM’s context, while minimizing the inclusion of distracting or irrelevant information. The choices made on chunking will directly affect what retrieved data the LLM is provided, making it one of the first layers of optimization in a RAG application.</p>
+<p>When chunking your data, you will generally need to consider the following factors:</p>
+<ol class="arabic simple">
+<li><p><strong>Chunking strategy:</strong> The method you use to divide the original text into chunks. This can involve basic techniques such as splitting by sentences, paragraphs, or specific character/token counts, through to more advanced document-specific splitting strategies.</p></li>
+<li><p><strong>Chunk size:</strong> Smaller chunks may focus on specific details but lose some surrounding information. Larger chunks may capture more context but can also include irrelevant information.</p></li>
+<li><p><strong>Overlap between chunks:</strong> To ensure that important information is not lost when splitting the data into chunks, consider including some overlap between adjacent chunks. Overlapping can ensure continuity and context preservation across chunks.</p></li>
+<li><p><strong>Semantic coherence:</strong> When possible, aim to create chunks that are semantically coherent, meaning they contain related information and can stand on their own as a meaningful unit of text. This can be achieved by considering the structure of the original data, such as paragraphs, sections, or topic boundaries.</p></li>
+<li><p><strong>Metadata:</strong> Including relevant metadata within each chunk, such as the source document name, section heading, or product names can improve the retrieval process. This additional information in the chunk can help match retrieval queries to chunks.</p></li>
+</ol>
+<p>Finding the right chunking method is both iterative and context-dependent. There is no one-size-fits all approach; the optimal chunk size and method will depend on the specific use case and the nature of the data being processed. Broadly speaking, chunking strategies can be viewed as the following:</p>
+<ul class="simple">
+<li><p><strong>Fixed-size chunking:</strong> Split the text into chunks of a predetermined size, such as a fixed number of characters or tokens (e.g., <a class="reference external" href="https://python.langchain.com/v0.2/docs/how_to/character_text_splitter/">LangChain CharacterTextSplitter</a>). While splitting by an arbitrary number of characters/tokens is quick and easy to set up, it will typically not result in consistent semantically coherent chunks.</p></li>
+<li><p><strong>Paragraph-based chunking:</strong> Use the natural paragraph boundaries in the text to define chunks. This method can help preserve the semantic coherence of the chunks, as paragraphs often contain related information (e.g, <a class="reference external" href="https://python.langchain.com/v0.2/docs/how_to/recursive_text_splitter/">LangChain RecursiveCharacterTextSplitter</a>).</p></li>
+<li><p><strong>Format-specific chunking:</strong> Formats such as markdown or HTML have an inherent structure within them which can be used to define chunk boundaries (for example, markdown headers). Tools like LangChain’s <a class="reference external" href="https://python.langchain.com/v0.2/docs/how_to/markdown_header_metadata_splitter/#how-to-return-markdown-lines-as-separate-documents">MarkdownHeaderTextSplitter</a> or HTML <a class="reference external" href="https://python.langchain.com/v0.2/docs/how_to/HTML_header_metadata_splitter/">header</a>/<a class="reference external" href="https://python.langchain.com/v0.2/docs/how_to/HTML_section_aware_splitter/">section</a>-based splitters can be used for this purpose.</p></li>
+<li><p><strong>Semantic chunking:</strong> Techniques such as topic modeling can be applied to identify semantically coherent sections within the text. These approaches analyze the content or structure of each document to determine the most appropriate chunk boundaries based on shifts in topic. Although more involved than more basic approaches, semantic chunking can help create chunks that are more aligned with the natural semantic divisions in the text (see <a class="reference external" href="https://python.langchain.com/v0.2/docs/how_to/semantic-chunker/">LangChain SemanticChunker</a> for an example of this).</p></li>
+</ul>
+<img alt="../_images/3_img1.png" class="align-center" src="../_images/3_img1.png" />
+<p><strong>Example:</strong> Fixed-size chunking example using LangChain’s <a class="reference external" href="https://python.langchain.com/docs/modules/data_connection/document_transformers/text_splitters/recursive_text_splitter">RecursiveCharacterTextSplitter</a> with <code class="docutils literal notranslate"><span class="pre">chunk_size=100</span></code> and <code class="docutils literal notranslate"><span class="pre">chunk_overlap=20</span></code>. <a class="reference external" href="https://chunkviz.up.railway.app/">ChunkViz</a> provides an interactive way to visualize how different chunk size and chunk overlap values with Langchain’s character splitters affects resulting chunks.</p>
+</section>
+<section id="embedding-model">
+<h2><span class="section-number">3.1.4. </span>Embedding model<a class="headerlink" href="#embedding-model" title="Link to this heading">#</a></h2>
+<img alt="../_images/4_img1.png" class="align-center" src="../_images/4_img1.png" />
+<p>After chunking your data, the next step is to convert the text chunks into a vector representation using an embedding model. An embedding model is used to convert each text chunk into a vector representation that captures its semantic meaning. By representing chunks as dense vectors, embeddings allow for fast and accurate retrieval of the most relevant chunks based on their semantic similarity to a retrieval query. At query time, the retrieval query will be transformed using the same embedding model that was used to embed chunks in the data pipeline.</p>
+<p>When selecting an embedding model, consider the following factors:</p>
+<ul class="simple">
+<li><p><strong>Model choice:</strong> Each embedding model has its nuances, and the available benchmarks may not capture the specific characteristics of your data. Experiment with different off-the-shelf embedding models, even those that may be lower-ranked on standard leaderboards like <a class="reference external" href="https://huggingface.co/spaces/mteb/leaderboard">MTEB</a>. Some examples to consider include:</p>
+<ul>
+<li><p><a class="reference external" href="https://huggingface.co/Alibaba-NLP/gte-large-en-v1.5">GTE-Large-v1.5</a></p></li>
+<li><p><a class="reference external" href="https://platform.openai.com/docs/guides/embeddings">OpenAI’s text-embedding-ada-002, text-embedding-large, and text-embedding-small</a></p></li>
+</ul>
+</li>
+<li><p><strong>Max tokens:</strong> Be aware of the maximum token limit for your chosen embedding model. If you pass chunks that exceed this limit, they will be truncated, potentially losing important information. For example, <a class="reference external" href="https://huggingface.co/BAAI/bge-large-en-v1.5">bge-large-en-v1.5</a> has a maximum token limit of 512.</p></li>
+<li><p><strong>Model size:</strong> Larger embedding models generally offer better performance but require more computational resources. Strike a balance between performance and efficiency based on your specific use case and available resources.</p></li>
+<li><p><strong>Fine-tuning:</strong> If your RAG application deals with domain-specific language (e.g., internal company acronyms or terminology), consider fine-tuning the embedding model on domain-specific data. This can help the model better capture the nuances and terminology of your particular domain, and can often lead to improved retrieval performance.</p></li>
+</ul>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./nbs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="3-deep-dive.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><span class="section-number">3. </span>RAG quality knobs</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="3-deep-dive-chain.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><span class="section-number">3.2. </span>Retrieval, augmentation, and generation (aka RAG Chain)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#corpus-composition">3.1.1. Corpus composition</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parsing">3.1.2. Parsing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chunking">3.1.3. Chunking</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#embedding-model">3.1.4. Embedding model</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The Databricks GenAI Community
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

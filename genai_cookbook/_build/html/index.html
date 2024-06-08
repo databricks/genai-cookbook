@@ -74,7 +74,7 @@
     <link rel="icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Section 1: Introduction to retrieval-augmented generation (RAG)" href="nbs/1-introduction-to-rag.html" />
+    <link rel="next" title="1. RAG overview" href="nbs/1-introduction-to-rag.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -184,19 +184,43 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">All Notebooks</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn</span></p>
 <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="nbs/1-introduction-to-rag.html"><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="nbs/2-fundamentals-unstructured.html"><strong>Section 2:</strong> Fundamentals of RAG over unstructured documents</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="nbs/2-fundamentals-unstructured-data-pipeline.html">Data pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nbs/2-fundamentals-unstructured-rag.html">Retrieval, augmentation, and generation (RAG Chain)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nbs/2-fundamentals-unstructured-eval.html">Evaluation &amp; monitoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nbs/2-fundamentals-unstructured-llmops.html">Governance and LLMops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nbs/1-introduction-to-rag.html">1. RAG overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="nbs/2-fundamentals-unstructured.html">2. RAG fundamentals</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="nbs/2-fundamentals-unstructured-data-pipeline.html">2.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nbs/2-fundamentals-unstructured-chain.html">2.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nbs/2-fundamentals-unstructured-eval.html">2.3. Evaluation &amp; monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nbs/2-fundamentals-unstructured-llmops.html">2.4. Governance and LLMops</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="nbs/3-deep-dive.html"><strong>Section 3:</strong> Deep dive into RAG over unstructured documents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nbs/4-evaluation.html"><strong>Section 4:</strong> Evaluation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nbs/5-hands-on.html"><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="nbs/3-deep-dive.html">3. RAG quality knobs</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="nbs/3-deep-dive-data-pipeline.html">3.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nbs/3-deep-dive-chain.html">3.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="nbs/4-evaluation.html">4. Evaluating RAG quality</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="nbs/4-evaluation-eval-sets.html">4.5. Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nbs/4-evaluation-metrics.html">4.6. Assessing Performance: Metrics that Matter</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="nbs/4-evaluation-infra.html">4.8. Enabling Measurement: Supporting Infrastructure</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="nbs/5-rag-development-workflow.html">5. RAG development workflow</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Implement</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="nbs/5-hands-on-requirements.html">1. Gather requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nbs/5-hands-on-build-poc.html">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nbs/5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="nbs/5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="nbs/5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="nbs/5-hands-on-improve-quality-step-2.html">4.4. Implement and evaluate changes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="nbs/5-hands-on-deploy-and-monitor.html">5. Deploy &amp; monitor</a></li>
 </ul>
 
     </div>
@@ -392,8 +416,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rag-guide">RAG Guide</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#featured-notebooks">Featured Notebooks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-augmented-generation-rag">Retrieval-augmented generation (RAG)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#learn">Learn</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#implement">Implement</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -407,94 +434,98 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="databricks-mosaic-generative-ai-cookbook">
 <h1>Databricks Mosaic Generative AI Cookbook<a class="headerlink" href="#databricks-mosaic-generative-ai-cookbook" title="Link to this heading">#</a></h1>
-<section id="rag-guide">
-<h2>RAG Guide<a class="headerlink" href="#rag-guide" title="Link to this heading">#</a></h2>
-<p>Follow this guide to learn how RAG works, the required components of a production-ready, high-quality RAG application, and Databricks’ recommended developer workflow for delivering a high-quality RAG application that uses unstructured data.</p>
-<p>This guide assumes you have selected a use case that requires unstructured docs RAG.</p>
-<p>This guide is broken into 5 main sections:</p>
+<p>Databricks’ Generative AI Cookbook is a definitive how-to guide for building <em>high-quality</em> generative AI applications. <em>High-quality</em> applications are:</p>
 <ol class="arabic simple">
-<li><p>Introduction to retrieval-augmented generation (RAG)</p>
-<ul class="simple">
-<li><p>Overview of the RAG technique</p></li>
-<li><p>Key benefits of using RAG</p></li>
-<li><p>Types of RAG</p></li>
-</ul>
-</li>
-<li><p>Fundamentals of RAG over Unstructured Documents</p>
-<ul class="simple">
-<li><p>Understanding retrieval</p></li>
-<li><p>Components of a RAG application</p></li>
-</ul>
-</li>
-<li><p>Deep dive into RAG over Unstructured Documents</p>
-<ul class="simple">
-<li><p>Deep dive into the components of a RAG application</p></li>
-</ul>
-</li>
-<li><p>How to evaluate RAG applications</p>
-<ul class="simple">
-<li><p>Metrics to measure quality / cost / latency</p></li>
-<li><p>Developing an evaluation set to measure quality</p></li>
-<li><p>Infrastructure required to evaluate RAG apps</p></li>
-</ul>
-</li>
-<li><p>Practical hands-on guide to implementing high-quality RAG</p>
-<ul class="simple">
-<li><p>Databricks recommended developer workflow for building a RAG application</p></li>
-<li><p>How to iteratively improve the application’s quality</p></li>
-<li><p>Throughout, this section is supported by ready-to-use code examples</p></li>
-</ul>
-</li>
+<li><p><strong>Accurate:</strong> provides correct responses</p></li>
+<li><p><strong>Safe:</strong> does not deliver harmful or insecure responses</p></li>
+<li><p><strong>Governed:</strong> respects permissions &amp; access controls</p></li>
 </ol>
-<p>If you are less familiar with RAG, we suggest starting with section 1. If you are already familiar with RAG or simply want to get started quickly, start with section 5.  Section 5 refers back to the previous sections as needed to explain concepts.</p>
+<p>Developed in partnership with Mosaic AI’s research team, this cookbook lays Databricks best-practice development workflow for building high-quality RAG apps: <em>evaluation driven development.</em>  It outlines the most relevant knobs &amp; approaches that can increase quality and provides a comprehensive repository of sample code implementing those techniques.  This code &amp; cookbook will take you from initial POC to high-quality production-ready application.</p>
+<blockquote>
+<div><p>This first release focuses on retrieval-augmented generation (RAG).  Future releases will include the other popular generative AI techniques: agents &amp; function calling, prompt engineering, fine tuning, and pre-training.</p>
+</div></blockquote>
+<section id="retrieval-augmented-generation-rag">
+<h2>Retrieval-augmented generation (RAG)<a class="headerlink" href="#retrieval-augmented-generation-rag" title="Link to this heading">#</a></h2>
+<p>The RAG cookbook is divided into 2 sections:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#learn"><span class="xref myst"><strong>Learn:</strong></span></a> Understand the required components of a production-ready, high-quality RAG application</p></li>
+<li><p><a class="reference internal" href="#implement"><span class="xref myst"><strong>Implement:</strong></span></a> Use our sample code to follow Databricks’ recommended developer workflow for delivering a high-quality RAG application</p></li>
+</ol>
+<section id="learn">
+<h3>Learn<a class="headerlink" href="#learn" title="Link to this heading">#</a></h3>
+<p><strong>Table of contents</strong></p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="nbs/1-introduction-to-rag.html"><span class="doc std std-doc">RAG overview</span></a>: High level overview of the basic concepts within RAG</p></li>
+<li><p><a class="reference internal" href="nbs/2-fundamentals-unstructured.html"><span class="doc std std-doc">RAG fundamentals</span></a>: Introduction to the key components within a RAG application</p></li>
+<li><p><a class="reference internal" href="nbs/3-deep-dive.html"><span class="doc std std-doc">RAG quality knobs</span></a>: Explains the knobs that Databricks recommends tuning in order to improve RAG application quality</p></li>
+<li><p><a class="reference internal" href="nbs/4-evaluation.html"><span class="doc std std-doc">RAG quality evaluation deep dive</span></a>: Understand how RAG evaluation works, including creating evaluation sets, the quality metrics that matter, and required developer tooling</p></li>
+<li><p><a class="reference internal" href="nbs/5-rag-development-workflow.html"><span class="std std-doc">RAG development workflow</span></a>: Understand Databricks recommended development workflow for building, testing, and deploying a high-quality RAG application: evaluation-driven development</p></li>
+</ol>
+<p><strong>Getting started</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Time required</p></th>
+<th class="head"><p>Outcome</p></th>
+<th class="head"><p>Link</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>🕧 <br/> 10 minutes</p></td>
+<td><p>Sample RAG app deployed to web-based chat app that collects feedback</p></td>
+<td><p><a class="reference internal" href="#(https://DBDEMO)"><span class="xref myst">RAG Demo</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>🕧🕧🕧 <br/>60 minutes</p></td>
+<td><p>POC RAG app with <em>your data</em> deployed to a chat UI that can collect feedback from your business stakeholders</p></td>
+<td><p><a class="reference internal" href="nbs/5-hands-on-build-poc.html"><span class="std std-doc">Build a POC</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>🕧🕧 <br/>30 minutes</p></td>
+<td><p>Comprehensive quality/cost/latency evaluation of your POC app</p></td>
+<td><p><a class="reference internal" href="nbs/5-hands-on-evaluate-poc.html"><span class="std std-doc">Evaluate your POC</span></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
-<section id="featured-notebooks">
-<h2>Featured Notebooks<a class="headerlink" href="#featured-notebooks" title="Link to this heading">#</a></h2>
-<div class="sd-container-fluid sd-sphinx-override sd-mb-4 text-center docutils">
-<div class="sd-row sd-row-cols-3 sd-row-cols-xs-3 sd-row-cols-sm-3 sd-row-cols-md-3 sd-row-cols-lg-3 docutils">
-<div class="sd-col sd-d-flex-row docutils">
-<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
-<div class="sd-card-header bg-light docutils">
-<p class="sd-card-text">Section 1: Introduction to retrieval-augmented generation (RAG)</p>
+<section id="implement">
+<h3>Implement<a class="headerlink" href="#implement" title="Link to this heading">#</a></h3>
+<p><strong>Table of contents</strong></p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="nbs/5-hands-on-requirements.html"><span class="std std-doc">Gather Requirements</span></a>: Requirements you must discover from stakeholders before building a RAG app</p></li>
+<li><p><a class="reference internal" href="nbs/5-hands-on-build-poc.html"><span class="std std-doc">Deploy POC to Collect Stakeholder Feedback</span></a>: Launch a proof of concept (POC) to gather feedback from stakeholders and understand baseline quality</p></li>
+<li><p><a class="reference internal" href="nbs/5-hands-on-evaluate-poc.html"><span class="std std-doc">Evaluate POC’s Quality</span></a>: Assess the quality of your POC to identify areas for improvement</p></li>
+<li><p><a class="reference internal" href="nbs/5-hands-on-improve-quality.html"><span class="std std-doc">Root Cause &amp; Iteratively Fix Quality Issues</span></a>: Diagnose the root causes of any quality issues and apply iterative fixes to improve the app’s quality</p></li>
+<li><p><a class="reference internal" href="nbs/5-hands-on-deploy-and-monitor.html"><span class="std std-doc">Deploy &amp; Monitor</span></a>: Deploy the finalized RAG app to production and continuously monitor its performance to ensure sustained quality.</p></li>
+</ol>
+<p><strong>Getting started</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Time required</p></th>
+<th class="head"><p>Outcome</p></th>
+<th class="head"><p>Link</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>🕧 <br/> 5 minutes</p></td>
+<td><p>Understand how RAG works at a high-level</p></td>
+<td><p><a class="reference internal" href="nbs/1-introduction-to-rag.html"><span class="std std-doc">Intro to RAG</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>🕧🕧 <br/> 30 minutes</p></td>
+<td><p>Understand the key components in a RAG app</p></td>
+<td><p><a class="reference internal" href="nbs/2-fundamentals-unstructured.html"><span class="std std-doc">RAG fundamentals</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>🕧🕧🕧 <br/> 60 minutes</p></td>
+<td><p>Understand the knobs Databricks recommends tuning improve RAG app quality</p></td>
+<td><p><a class="reference internal" href="nbs/3-deep-dive.html"><span class="std std-doc">RAG quality knobs</span></a></p></td>
+</tr>
+</tbody>
+</table>
 </div>
-<div class="sd-card-body docutils">
-<p class="sd-card-text">Learn the basic concepts of retrieval-augmented generation (RAG) in this introdoctory notebook.</p>
-</div>
-<a class="sd-stretched-link sd-hide-link-text reference internal" href="nbs/1-introduction-to-rag.html"><span class="doc">Section 1: Introduction to retrieval-augmented generation (RAG)</span></a></div>
-</div>
-<div class="sd-col sd-d-flex-row docutils">
-<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
-<div class="sd-card-header bg-light docutils">
-<p class="sd-card-text">Section 2: Fundamentals of RAG over Unstructured Documents</p>
-</div>
-<div class="sd-card-body docutils">
-<p class="sd-card-text">Introduction to the key components and principles of developing RAG applications over unstructured data.</p>
-</div>
-<a class="sd-stretched-link sd-hide-link-text reference internal" href="nbs/2-fundamentals-unstructured.html"><span class="doc">Section 2: Fundamentals of RAG over unstructured documents</span></a></div>
-</div>
-<div class="sd-col sd-d-flex-row docutils">
-<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
-<div class="sd-card-header bg-light docutils">
-<p class="sd-card-text">Section 3: Deep dive into RAG over unstructured documents</p>
-</div>
-<div class="sd-card-body docutils">
-<p class="sd-card-text">A more detailed guide to refining each component of a RAG application over unstructured data.</p>
-</div>
-<a class="sd-stretched-link sd-hide-link-text reference internal" href="nbs/3-deep-dive.html"><span class="doc">Section 3: Deep dive into RAG over unstructured documents</span></a></div>
-</div>
-</div>
+</section>
+</section>
+<div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">All Notebooks</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="nbs/1-introduction-to-rag.html"><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nbs/2-fundamentals-unstructured.html"><strong>Section 2:</strong> Fundamentals of RAG over unstructured documents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nbs/3-deep-dive.html"><strong>Section 3:</strong> Deep dive into RAG over unstructured documents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nbs/4-evaluation.html"><strong>Section 4:</strong> Evaluation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nbs/5-hands-on.html"><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</a></li>
-</ul>
 </div>
-</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -532,7 +563,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)</p>
+        <p class="prev-next-title"><span class="section-number">1. </span>RAG overview</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -552,8 +583,11 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rag-guide">RAG Guide</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#featured-notebooks">Featured Notebooks</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-augmented-generation-rag">Retrieval-augmented generation (RAG)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#learn">Learn</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#implement">Implement</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

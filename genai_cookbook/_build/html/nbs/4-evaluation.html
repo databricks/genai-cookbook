@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Section 4: Evaluation &#8212; Databricks Generative AI Cookbook</title>
+    <title>4. Evaluating RAG quality &#8212; Databricks Generative AI Cookbook</title>
   
   
   
@@ -74,8 +74,8 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Section 5: Hands-on guide to implementing high-quality RAG" href="5-hands-on.html" />
-    <link rel="prev" title="Section 3: Deep dive into RAG over unstructured documents" href="3-deep-dive.html" />
+    <link rel="next" title="4.5. Establishing Ground Truth: Creating Evaluation Sets" href="4-evaluation-eval-sets.html" />
+    <link rel="prev" title="3.2. Retrieval, augmentation, and generation (aka RAG Chain)" href="3-deep-dive-chain.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -183,19 +183,43 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">All Notebooks</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html"><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html"><strong>Section 2:</strong> Fundamentals of RAG over unstructured documents</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">Data pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-rag.html">Retrieval, augmentation, and generation (RAG Chain)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">Evaluation &amp; monitoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">Governance and LLMops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html">1. RAG overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html">2. RAG fundamentals</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">2.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-chain.html">2.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">2.3. Evaluation &amp; monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">2.4. Governance and LLMops</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="3-deep-dive.html"><strong>Section 3:</strong> Deep dive into RAG over unstructured documents</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#"><strong>Section 4:</strong> Evaluation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="5-hands-on.html"><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="3-deep-dive.html">3. RAG quality knobs</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-data-pipeline.html">3.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-chain.html">3.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">4. Evaluating RAG quality</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-eval-sets.html">4.5. Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-metrics.html">4.6. Assessing Performance: Metrics that Matter</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-infra.html">4.8. Enabling Measurement: Supporting Infrastructure</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-rag-development-workflow.html">5. RAG development workflow</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Implement</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-requirements.html">1. Gather requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-build-poc.html">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.4. Implement and evaluate changes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-deploy-and-monitor.html">5. Deploy &amp; monitor</a></li>
 </ul>
 
     </div>
@@ -381,7 +405,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Section 4: Evaluation</h1>
+    <h1>Evaluating RAG quality</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -391,16 +415,16 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#establishing-ground-truth-creating-evaluation-sets">Establishing Ground Truth: Creating Evaluation Sets</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#assessing-performance-defining-metrics-that-matter">Assessing Performance: Defining Metrics that Matter</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-metrics">Retrieval metrics</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#response-metrics">Response metrics</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chain-metrics">Chain metrics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#establishing-ground-truth-creating-evaluation-sets">4.1. Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#assessing-performance-defining-metrics-that-matter">4.2. Assessing Performance: Defining Metrics that Matter</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-metrics">4.2.1. Retrieval metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#response-metrics">4.2.2. Response metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chain-metrics">4.2.3. Chain metrics</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enabling-measurement-building-supporting-infrastructure">Enabling Measurement: Building Supporting Infrastructure</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appendix">Appendix</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#precision-and-recall">Precision and Recall</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enabling-measurement-building-supporting-infrastructure">4.3. Enabling Measurement: Building Supporting Infrastructure</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appendix">4.4. Appendix</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#precision-and-recall">4.4.1. Precision and Recall</a></li>
 </ul>
 </li>
 </ul>
@@ -414,8 +438,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="section-4-evaluation">
-<h1><strong>Section 4:</strong> Evaluation<a class="headerlink" href="#section-4-evaluation" title="Link to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="evaluating-rag-quality">
+<h1><span class="section-number">4. </span>Evaluating RAG quality<a class="headerlink" href="#evaluating-rag-quality" title="Link to this heading">#</a></h1>
 <p>The old saying “you can’t manage what you can’t measure” is incredibly relevant (no pun intended) in the context of any generative AI application, RAG included. In order for your generative AI application to deliver high quality, accurate responses, you <strong>must</strong> be able to define and measure what “quality” means for your use case.</p>
 <p>This section deep dives into 3 critical components of evaluation:</p>
 <ol class="arabic simple">
@@ -424,7 +448,7 @@ document.write(`
 <li><p><a class="reference internal" href="#enabling-measurement-building-supporting-infrastructure"><span class="xref myst">Enabling Measurement: Building Supporting Infrastructure</span></a></p></li>
 </ol>
 <section id="establishing-ground-truth-creating-evaluation-sets">
-<h2>Establishing Ground Truth: Creating Evaluation Sets<a class="headerlink" href="#establishing-ground-truth-creating-evaluation-sets" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">4.1. </span>Establishing Ground Truth: Creating Evaluation Sets<a class="headerlink" href="#establishing-ground-truth-creating-evaluation-sets" title="Link to this heading">#</a></h2>
 <p>To measure quality, Databricks recommends creating a human-labeled Evaluation Set, which is a curated, representative set of queries, along with ground-truth answers and (optionally) the correct supporting documents that should be retrieved. Human input is crucial in this process, as it ensures that the Evaluation Set accurately reflects the expectations and requirements of the end-users.</p>
 <p>A good Evaluation Set has the following characteristics:</p>
 <ul class="simple">
@@ -441,7 +465,7 @@ document.write(`
 </ul>
 </section>
 <section id="assessing-performance-defining-metrics-that-matter">
-<h2>Assessing Performance: Defining Metrics that Matter<a class="headerlink" href="#assessing-performance-defining-metrics-that-matter" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">4.2. </span>Assessing Performance: Defining Metrics that Matter<a class="headerlink" href="#assessing-performance-defining-metrics-that-matter" title="Link to this heading">#</a></h2>
 <p>With an evaluation set, you are able to measure the performance of your RAG application across a number of different dimensions, including:</p>
 <ul class="simple">
 <li><p><strong>Retrieval quality</strong>: Retrieval metrics assess how successfully your RAG application retrieves relevant supporting data. Precision and recall are two key retrieval metrics.</p></li>
@@ -455,7 +479,7 @@ document.write(`
 </ul>
 <p>Take time to ensure that the LLM judge’s evaluations align with the RAG application’s success criteria. Some LLM-as-judge metrics still rely on the ground truth from the evaluation set, which the judge LLM uses to assess the application’s output.</p>
 <section id="retrieval-metrics">
-<h3>Retrieval metrics<a class="headerlink" href="#retrieval-metrics" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">4.2.1. </span>Retrieval metrics<a class="headerlink" href="#retrieval-metrics" title="Link to this heading">#</a></h3>
 <p>Retrieval metrics help you understand if your retriever is delivering relevant results. Retrieval metrics are largely based on precision and recall.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -481,7 +505,7 @@ document.write(`
 <p>See the <a class="reference internal" href="#appendix"><span class="xref myst">appendix</span></a> on precision and recall for more details.</p>
 </section>
 <section id="response-metrics">
-<h3>Response metrics<a class="headerlink" href="#response-metrics" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">4.2.2. </span>Response metrics<a class="headerlink" href="#response-metrics" title="Link to this heading">#</a></h3>
 <p>Response metrics assess the quality of the final output. “Quality” has many different dimensions when it comes to assessing LLM outputs, and the range of metrics reflects this.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -513,7 +537,7 @@ document.write(`
 <p>It is very important to collect both response and retrieval metrics. A RAG application can respond poorly in spite of retrieving the correct context; it can also provide good responses on the basis of faulty retrievals. Only by measuring both components can we accurately diagnose and address issues in the application.</p>
 </section>
 <section id="chain-metrics">
-<h3>Chain metrics<a class="headerlink" href="#chain-metrics" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">4.2.3. </span>Chain metrics<a class="headerlink" href="#chain-metrics" title="Link to this heading">#</a></h3>
 <p>Chain metrics access the overall performance of the whole RAG chain. Cost and latency can be just as important as quality when it comes to evaluating RAG applications. It is important to consider cost and latency requirements early in the process of developing a RAG application as these considerations can affect every part of the application, including both the retrieval method and the LLM used for generation.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -537,7 +561,7 @@ document.write(`
 </section>
 </section>
 <section id="enabling-measurement-building-supporting-infrastructure">
-<h2>Enabling Measurement: Building Supporting Infrastructure<a class="headerlink" href="#enabling-measurement-building-supporting-infrastructure" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">4.3. </span>Enabling Measurement: Building Supporting Infrastructure<a class="headerlink" href="#enabling-measurement-building-supporting-infrastructure" title="Link to this heading">#</a></h2>
 <p>Measuring quality is not easy and requires a significant infrastructure investment. This section details what you need to succeed and how Databricks provides these components.</p>
 <p><strong>Detailed trace logging.</strong> The core of your RAG application’s logic is a series of steps in the chain. In order to evaluate and debug quality, you need to implement instrumentation that tracks the chain’s inputs and outputs, along with each step of the chain and its associated inputs and outputs. The instrumentation you put in place should work the same way in development and production.</p>
 <p>In Databricks, MLflow Trace Logging provides this capability. With MLflow Trace Logging, you instrument your code in production, and get the same traces during development and in production. For more details, [link the docs].</p>
@@ -554,9 +578,9 @@ document.write(`
 <p>Online monitoring. [talk about LHM]</p>
 </section>
 <section id="appendix">
-<h2>Appendix<a class="headerlink" href="#appendix" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">4.4. </span>Appendix<a class="headerlink" href="#appendix" title="Link to this heading">#</a></h2>
 <section id="precision-and-recall">
-<h3>Precision and Recall<a class="headerlink" href="#precision-and-recall" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">4.4.1. </span>Precision and Recall<a class="headerlink" href="#precision-and-recall" title="Link to this heading">#</a></h3>
 <p>Retrieval metrics are based on the concept of Precision &amp; Recall.  Below is a quick primer on Precision &amp; Recall adapted from the excellent <a class="reference external" href="https://en.wikipedia.org/wiki/Precision_and_recall">Wikipedia article</a>.</p>
 <p>Precision measures “Of the items* I retrieved, what % of these items are actually relevant to my user’s query? Computing precision does NOT require your ground truth to contain ALL relevant items.</p>
 <a class="reference internal image-reference" href="../_images/2_img2.png"><img alt="../_images/2_img2.png" class="align-center" src="../_images/2_img2.png" style="width: 400px;" /></a>
@@ -565,6 +589,8 @@ document.write(`
 <p>* Items can either be a document or a chunk of a document.</p>
 </section>
 </section>
+<div class="toctree-wrapper compound">
+</div>
 </section>
 
     <script type="text/x-thebe-config">
@@ -598,20 +624,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="3-deep-dive.html"
+       href="3-deep-dive-chain.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><strong>Section 3:</strong> Deep dive into RAG over unstructured documents</p>
+        <p class="prev-next-title"><span class="section-number">3.2. </span>Retrieval, augmentation, and generation (aka RAG Chain)</p>
       </div>
     </a>
     <a class="right-next"
-       href="5-hands-on.html"
+       href="4-evaluation-eval-sets.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</p>
+        <p class="prev-next-title"><span class="section-number">4.5. </span>Establishing Ground Truth: Creating Evaluation Sets</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -631,16 +657,16 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#establishing-ground-truth-creating-evaluation-sets">Establishing Ground Truth: Creating Evaluation Sets</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#assessing-performance-defining-metrics-that-matter">Assessing Performance: Defining Metrics that Matter</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-metrics">Retrieval metrics</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#response-metrics">Response metrics</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chain-metrics">Chain metrics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#establishing-ground-truth-creating-evaluation-sets">4.1. Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#assessing-performance-defining-metrics-that-matter">4.2. Assessing Performance: Defining Metrics that Matter</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-metrics">4.2.1. Retrieval metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#response-metrics">4.2.2. Response metrics</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#chain-metrics">4.2.3. Chain metrics</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enabling-measurement-building-supporting-infrastructure">Enabling Measurement: Building Supporting Infrastructure</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appendix">Appendix</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#precision-and-recall">Precision and Recall</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enabling-measurement-building-supporting-infrastructure">4.3. Enabling Measurement: Building Supporting Infrastructure</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appendix">4.4. Appendix</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#precision-and-recall">4.4.1. Precision and Recall</a></li>
 </ul>
 </li>
 </ul>

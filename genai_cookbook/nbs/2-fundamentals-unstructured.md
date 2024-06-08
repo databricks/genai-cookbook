@@ -1,4 +1,4 @@
-# **Section 2:** Fundamentals of RAG over unstructured documents
+# RAG fundamentals
 
 In [section 1](1-introduction-to-rag) of this guide, we introduced RAG, explained its functionality at a high level, and highlighted its advantages over standalone LLMs.
 

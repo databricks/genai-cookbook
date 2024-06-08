@@ -1,0 +1,768 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>3.2. Retrieval, augmentation, and generation (aka RAG Chain) &#8212; Databricks Generative AI Cookbook</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-6BZ4NTBHVJ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/3-deep-dive-chain';</script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="4. Evaluating RAG quality" href="4-evaluation.html" />
+    <link rel="prev" title="3.1. Data pipeline" href="3-deep-dive-data-pipeline.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo2.png" class="logo__image only-light" alt="Databricks Generative AI Cookbook - Home"/>
+    <script>document.write(`<img src="../_static/logo2.png" class="logo__image only-dark" alt="Databricks Generative AI Cookbook - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html">1. RAG overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html">2. RAG fundamentals</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">2.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-chain.html">2.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">2.3. Evaluation &amp; monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">2.4. Governance and LLMops</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="3-deep-dive.html">3. RAG quality knobs</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-data-pipeline.html">3.1. Data pipeline</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">3.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="4-evaluation.html">4. Evaluating RAG quality</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-eval-sets.html">4.5. Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-metrics.html">4.6. Assessing Performance: Metrics that Matter</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-infra.html">4.8. Enabling Measurement: Supporting Infrastructure</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-rag-development-workflow.html">5. RAG development workflow</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Implement</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-requirements.html">1. Gather requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-build-poc.html">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.4. Implement and evaluate changes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-deploy-and-monitor.html">5. Deploy &amp; monitor</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/3-deep-dive-chain.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/nbs/3-deep-dive-chain.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Retrieval, augmentation, and generation (aka RAG Chain)</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#query-understanding">3.2.1. Query understanding</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval">3.2.2. Retrieval</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prompt-augmentation">3.2.3. Prompt augmentation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#llm">3.2.4. LLM</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#post-processing-guardrails">3.2.5. Post-processing &amp; guardrails</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="retrieval-augmentation-and-generation-aka-rag-chain">
+<h1><span class="section-number">3.2. </span>Retrieval, augmentation, and generation (aka RAG Chain)<a class="headerlink" href="#retrieval-augmentation-and-generation-aka-rag-chain" title="Link to this heading">#</a></h1>
+<img alt="../_images/5_img1.png" class="align-center" src="../_images/5_img1.png" />
+<p>The RAG chain takes a user query as input, retrieves relevant information given that query, and generates an appropriate response grounded on the retrieved data. While the exact steps within a RAG chain can vary widely depending on the use case and requirements, the following are the key components to consider when building your RAG chain:</p>
+<ol class="arabic simple">
+<li><p><strong>Query understanding:</strong> Analyzing and transforming user queries to better represent intent and extract relevant information, such as filters or keywords, to improve the retrieval process.</p></li>
+<li><p><strong>Retrieval:</strong> Finding the most relevant chunks of information given a retrieval query. In the unstructured data case, this typically involves one or a combination of semantic or keyword-based search.</p></li>
+<li><p><strong>Prompt augmentation:</strong> Combining a user query with retrieved information and instructions to guide the LLM towards generating high-quality responses.</p></li>
+<li><p><strong>LLM:</strong> Selecting the most appropriate model (and model parameters) for your application to optimize/balance performance, latency, and cost.</p></li>
+<li><p><strong>Post-processing and guardrails:</strong> Applying additional processing steps and safety measures to ensure the LLM-generated responses are on-topic, factually consistent, and adhere to specific guidelines or constraints.</p></li>
+</ol>
+<p>In the <a class="reference internal" href="#nbs/5-hands-on.md#rag-chain-changes"><span class="xref myst">implementing RAG chain changes</span></a> section we will demonstrate how to iterate over these various components of a chain.</p>
+<section id="query-understanding">
+<h2><span class="section-number">3.2.1. </span>Query understanding<a class="headerlink" href="#query-understanding" title="Link to this heading">#</a></h2>
+<p>Using the user query directly as a retrieval query can work for some queries. However, it is generally beneficial to reformulate the query before the retrieval step. Query understanding comprises a step (or series of steps) at the beginning of a chain to analyze and transform user queries to better represent intent, extract relevant information, and ultimately help the subsequent retrieval process. Approaches to transforming a user query to improve retrieval include:</p>
+<ol class="arabic simple">
+<li><p><strong>Query Rewriting:</strong> Query rewriting involves translating a user query into one or more queries that better represent the original intent. The goal is to reformulate the query in a way that increases the likelihood of the retrieval step finding the most relevant documents. This can be particularly useful when dealing with complex or ambiguous queries that might not directly match the terminology used in the retrieval documents.
+<br>
+<strong>Examples</strong>:</p>
+<ul class="simple">
+<li><p>Paraphrasing conversation history in a multi-turn chat</p></li>
+<li><p>Correcting spelling mistakes in the user’s query</p></li>
+<li><p>Replacing words or phrases in the user query with synonyms to capture a broader range of relevant documents</p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Query rewriting must be done in conjunction with changes to the retrieval component</p>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><strong>Filter extraction:</strong> In some cases, user queries may contain specific filters or criteria that can be used to narrow down the search results. Filter extraction involves identifying and extracting these filters from the query and passing them to the retrieval step as additional parameters. This can help improve the relevance of the retrieved documents by focusing on specific subsets of the available data.
+<br>
+<strong>Examples</strong>:</p>
+<ul class="simple">
+<li><p>Extracting specific time periods mentioned in the query, such as “articles from the last 6 months” or “reports from 2023”.</p></li>
+<li><p>Identifying mentions of specific products, services, or categories in the query, such as “Databricks Professional Services” or “laptops”.</p></li>
+<li><p>Extracting geographic entities from the query, such as city names or country codes.</p></li>
+</ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Filter extraction must be done in conjunction with changes to both metadata extraction [data pipeline] and retrieval [RAG chain] components. The metadata extraction step should ensure that the relevant metadata fields are available for each document/chunk, and the retrieval step should be implemented to accept and apply extracted filters.</p>
+</div>
+<p>In addition to query rewriting and filter extraction, another important consideration in query understanding is whether to use a single LLM call or multiple calls. While using a single call with a carefully crafted prompt can be efficient, there are cases where breaking down the query understanding process into multiple LLM calls can lead to better results. This, by the way, is a generally applicable rule of thumb when you are trying to implement a number of complex logic steps into a single prompt.</p>
+<p>For example, you might use one LLM call to classify the query intent, another to extract relevant entities, and a third to rewrite the query based on the extracted information. Although this approach may add some latency to the overall process, it can allow for more fine-grained control and potentially improve the quality of the retrieved documents.</p>
+<p>Here’s how a multi-step query understanding component might look for our a customer support bot:</p>
+<ol class="arabic simple">
+<li><p><strong>Intent classification:</strong> Use an LLM to classify the user’s query into predefined categories, such as “product information”, “troubleshooting”, or “account management”.</p></li>
+<li><p><strong>Entity extraction:</strong> Based on the identified intent, use another LLM call to extract relevant entities from the query, such as product names, reported errors, or account numbers.</p></li>
+<li><p><strong>Query rewriting:</strong> Use the extracted intent and entities to rewrite the original query into a more specific and targeted format, e.g., “My RAG chain is failing to deploy on Model Serving, I’m seeing the following error…”.</p></li>
+</ol>
+</section>
+<section id="retrieval">
+<h2><span class="section-number">3.2.2. </span>Retrieval<a class="headerlink" href="#retrieval" title="Link to this heading">#</a></h2>
+<p>The retrieval component of the RAG chain is responsible for finding the most relevant chunks of information given a retrieval query. In the context of unstructured data, retrieval typically involves one or a combination of semantic search, keyword-based search, and metadata filtering. The choice of retrieval strategy depends on the specific requirements of your application, the nature of the data, and the types of queries you expect to handle. Let’s compare these options:</p>
+<ol class="arabic simple">
+<li><p><strong>Semantic search:</strong> Semantic search uses an embedding model to convert each chunk of text into a vector representation that captures its semantic meaning. By comparing the vector representation of the retrieval query with the vector representations of the chunks, semantic search can retrieve documents that are conceptually similar, even if they don’t contain the exact keywords from the query.</p></li>
+<li><p><strong>Keyword-based search:</strong> Keyword-based search determines the relevance of documents by analyzing the frequency and distribution of shared words between the retrieval query and the indexed documents. The more often the same words appear in both the query and a document, the higher the relevance score assigned to that document.</p></li>
+<li><p><strong>Hybrid search:</strong> Hybrid search combines the strengths of both semantic and keyword-based search by employing a two-step retrieval process. First, it performs a semantic search to retrieve a set of conceptually relevant documents. Then, it applies keyword-based search on this reduced set to further refine the results based on exact keyword matches. Finally, it combines the scores from both steps to rank the documents.</p></li>
+</ol>
+<p>The following table contrasts each of these retrieval strategies against one another:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>Semantic search</p></th>
+<th class="head"><p>Keyword search</p></th>
+<th class="head"><p>Hybrid search</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Simple explanation</strong></p></td>
+<td><p>If the same <strong>concepts</strong> appear in the query and a potential document, they are relevant.</p></td>
+<td><p>If the same <strong>words</strong> appear in the query and a potential document, they are relevant. The <strong>more words</strong> from the query in the document, the more relevant that document is.</p></td>
+<td><p>Runs BOTH a semantic search and keyword search, then combines the results.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Example use case</strong></p></td>
+<td><p>Customer support where user queries are different than the words in the product manuals<br><br>e.g., <em>“how do i turn my phone on?”</em> and the manual section is called <em>“toggling the power”</em>.</p></td>
+<td><p>Customer support where queries contain specific, non descriptive technical terms.<br><br>e.g., <em>“what does model HD7-8D do?”</em></p></td>
+<td><p>Customer support queries that combined both semantic and technical terms.<br><br>e.g., <em>“how do I turn on my HD7-8D?”</em></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Technical approaches</strong></p></td>
+<td><p>Uses embeddings to represent text in a continuous vector space, enabling semantic search</p></td>
+<td><p>Relies on discrete token-based methods like <a class="reference external" href="https://en.wikipedia.org/wiki/Bag-of-words_model">bag-of-words</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Tf%E2%80%93idf">TF-IDF</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Okapi_BM25">BM25</a> for keyword matching.</p></td>
+<td><p>Use a re-ranking approach to combine the results, such as <a class="reference external" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html">reciprocal rank fusion</a> or a <a class="reference external" href="https://en.wikipedia.org/wiki/Learning_to_rank">re-ranking model</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Strengths</strong></p></td>
+<td><p>Retrieving contextually similar information to a query, even if the exact words are not used.</p></td>
+<td><p>Scenarios requiring precise keyword matches, ideal for specific term-focused queries such as product names.</p></td>
+<td><p>Combines the best of both approaches.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>In addition to these core retrieval strategies, there are several techniques you can apply to further enhance the retrieval process:</p>
+<ul class="simple">
+<li><p><strong>Query expansion:</strong> Query expansion can help capture a broader range of relevant documents by using multiple variations of the retrieval query. This can be achieved by either conducting individual searches for each expanded query, or using a concatenation of all expanded search queries in a single retrieval query.</p></li>
+</ul>
+<blockquote>
+<div><p><em><strong>Note:</strong> Query expansion must be done in conjunction with changes to the query understanding component [RAG chain]. The multiple variations of a retrieval query are typically generated in this step.</em></p>
+</div></blockquote>
+<ul class="simple">
+<li><p><strong>Re-ranking:</strong> After retrieving an initial set of chunks, apply additional ranking criteria (e.g., sort by time) or a reranker model to re-order the results. Re-ranking can help prioritize the most relevant chunks given a specific retrieval query. Reranking with cross-encoder models such as <a class="reference external" href="https://huggingface.co/mixedbread-ai/mxbai-rerank-large-v1">mxbai-rerank</a> and <a class="reference external" href="https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/ColbertRerank/">ColBERTv2</a> can yield an uplift in retrieval performance.</p></li>
+<li><p><strong>Metadata filtering:</strong> Use metadata filters extracted from the query understanding step to narrow down the search space based on specific criteria. Metadata filters can include attributes like document type, creation date, author, or domain-specific tags. By combining metadata filters with semantic or keyword-based search, you can create more targeted and efficient retrieval.</p></li>
+</ul>
+<blockquote>
+<div><p><em><strong>Note:</strong> Metadata filtering must be done in conjunction with changes to the query understanding [RAG chain] and metadata extraction [data pipeline] components.</em></p>
+</div></blockquote>
+</section>
+<section id="prompt-augmentation">
+<h2><span class="section-number">3.2.3. </span>Prompt augmentation<a class="headerlink" href="#prompt-augmentation" title="Link to this heading">#</a></h2>
+<p>Prompt augmentation is the step where the user query is combined with the retrieved information and instructions in a prompt template to guide the language model towards generating high-quality responses. Iterating on this template to optimize the prompt provided to the LLM (i.e., prompt engineering) will be required to ensure that the model is guided to produce accurate, grounded, and coherent responses.</p>
+<p>There are entire <a class="reference external" href="https://www.promptingguide.ai/">guides to prompt engineering</a>, but here are a number of considerations to keep in mind when you’re iterating on the prompt template:</p>
+<ol class="arabic simple">
+<li><p>Provide examples</p>
+<ul class="simple">
+<li><p>Include examples of well-formed queries and their corresponding ideal responses within the prompt template itself (i.e., <a class="reference external" href="https://arxiv.org/abs/2005.14165">few-shot learning</a>). This helps the model understand the desired format, style, and content of the responses.</p></li>
+<li><p>One useful way to come up with good examples is to identify types of queries your chain struggles with. Create gold-standard responses for those queries and include them as examples in the prompt.</p></li>
+<li><p>Ensure that the examples you provide are representative of user queries you anticipate at inference time. Aim to cover a diverse range of expected queries to help the model generalize better.</p></li>
+</ul>
+</li>
+<li><p>Parameterize your prompt template</p>
+<ul class="simple">
+<li><p>Design your prompt template to be flexible by parameterizing it to incorporate additional information beyond the retrieved data and user query. This could be variables such as current date, user context, or other relevant metadata.</p></li>
+<li><p>Injecting these variables into the prompt at inference time can enable more personalized or context-aware responses.</p></li>
+</ul>
+</li>
+<li><p>Consider Chain-of-Thought prompting</p>
+<ul class="simple">
+<li><p>For complex queries where direct answers aren’t readily apparent, consider <a class="reference external" href="https://arxiv.org/abs/2201.11903">Chain-of-Thought (CoT) prompting</a>. This prompt engineering strategy breaks down complicated questions into simpler, sequential steps, guiding the LLM through a logical reasoning process.</p></li>
+<li><p>By prompting the model to “think through the problem step-by-step,” you encourage it to provide more detailed and well-reasoned responses, which can be particularly effective for handling multi-step or open-ended queries.</p></li>
+</ul>
+</li>
+<li><p>Prompts may not transfer across models</p>
+<ul class="simple">
+<li><p>Recognize that prompts often do not transfer seamlessly across different language models. Each model has its own unique characteristics where a prompt that works well for one model may not be as effective for another.</p></li>
+<li><p>Experiment with different prompt formats and lengths, refer to online guides (e.g., <a class="reference external" href="https://cookbook.openai.com/">OpenAI Cookbook</a>, <a class="reference external" href="https://github.com/anthropics/anthropic-cookbook">Anthropic cookbook</a>), and be prepared to adapt and refine your prompts when switching between models.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="llm">
+<h2><span class="section-number">3.2.4. </span>LLM<a class="headerlink" href="#llm" title="Link to this heading">#</a></h2>
+<p>The generation component of the RAG chain takes the augmented prompt template from the previous step and passes it to a LLM. When selecting and optimizing an LLM for the generation component of a RAG chain, consider the following factors, which are equally applicable to any other steps that involve LLM calls:</p>
+<ol class="arabic simple">
+<li><p>Experiment with different off-the-shelf models</p>
+<ul class="simple">
+<li><p>Each model has its own unique properties, strengths, and weaknesses. Some models may have a better understanding of certain domains or perform better on specific tasks.</p></li>
+<li><p>As mentioned prior, keep in mind that the choice of model may also influence the prompt engineering process, as different models may respond differently to the same prompts.</p></li>
+<li><p>If there are multiple steps in your chain that require an LLM, such as calls for query understanding in addition to the generation step, consider using different models for different steps. More expensive, general-purpose models may be overkill for tasks like determining the intent of a user query.</p></li>
+</ul>
+</li>
+<li><p>Start small and scale up as needed</p>
+<ul class="simple">
+<li><p>While it may be tempting to immediately reach for the most powerful and capable models available (e.g., GPT-4, Claude), it’s often more efficient to start with smaller, more lightweight models.</p></li>
+<li><p>In many cases, smaller open-source alternatives like Llama 3 or DBRX can provide satisfactory results at a lower cost and with faster inference times. These models can be particularly effective for tasks that don’t require highly complex reasoning or extensive world knowledge.</p></li>
+<li><p>As you develop and refine your RAG chain, continuously assess the performance and limitations of your chosen model. If you find that the model struggles with certain types of queries or fails to provide sufficiently detailed or accurate responses, consider scaling up to a more capable model.</p></li>
+<li><p>Monitor the impact of changing models on key metrics such as response quality, latency, and cost to ensure that you’re striking the right balance for the requirements of your specific use case.</p></li>
+</ul>
+</li>
+<li><p>Optimize model parameters</p>
+<ul class="simple">
+<li><p>Experiment with different parameter settings to find the optimal balance between response quality, diversity, and coherence. For example, adjusting the temperature can control the randomness of the generated text, while max_tokens can limit the response length.</p></li>
+<li><p>Be aware that the optimal parameter settings may vary depending on the specific task, prompt, and desired output style. Iteratively test and refine these settings based on evaluation of the generated responses.</p></li>
+</ul>
+</li>
+<li><p>Task-specific fine-tuning</p>
+<ul class="simple">
+<li><p>As you refine performance, consider fine-tuning smaller models for specific sub-tasks within your RAG chain, such as query understanding.</p></li>
+<li><p>By training specialized models for individual tasks with the RAG chain, you can potentially improve the overall performance, reduce latency, and lower inference costs compared to using a single large model for all tasks.</p></li>
+</ul>
+</li>
+<li><p>Continued pre-training</p>
+<ul class="simple">
+<li><p>If your RAG application deals with a specialized domain or requires knowledge that is not well-represented in the pre-trained LLM, consider performing continued pre-training (CPT) on domain-specific data.</p></li>
+<li><p>Continued pre-training can improve a model’s understanding of specific terminology or concepts unique to your domain. In turn this can reduce the need for extensive prompt engineering or few-shot examples.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="post-processing-guardrails">
+<h2><span class="section-number">3.2.5. </span>Post-processing &amp; guardrails<a class="headerlink" href="#post-processing-guardrails" title="Link to this heading">#</a></h2>
+<p>After the LLM generates a response, it is often necessary to apply post-processing techniques or guardrails to ensure that the output meets the desired format, style, and content requirements. This final step (or multiple steps) in the chain can help maintain consistency and quality across the generated responses. If you are implementing post-processing and guardrails, consider some of the following:</p>
+<ol class="arabic simple">
+<li><p>Enforcing output format</p>
+<ul class="simple">
+<li><p>Depending on your use case, you may require the generated responses to adhere to a specific format, such as a structured template or a particular file type (e.g., JSON, HTML, Markdown etc).</p></li>
+<li><p>If structured output is required, libraries such as <a class="reference external" href="https://github.com/jxnl/instructor">Instructor</a> or <a class="reference external" href="https://github.com/outlines-dev/outlines">Outlines</a> provide good starting points to implement this kind of validation step.</p></li>
+<li><p>When developing, take time to ensure that the post-processing step is flexible enough to handle variations in the generated responses while maintaining the required format.</p></li>
+</ul>
+</li>
+<li><p>Maintaining style consistency</p>
+<ul class="simple">
+<li><p>If your RAG application has specific style guidelines or tone requirements (e.g., formal vs. casual, concise vs. detailed), a post-processing step can both check and enforce these style attributes across generated responses.</p></li>
+</ul>
+</li>
+<li><p>Content filters and safety guardrails</p>
+<ul class="simple">
+<li><p>Depending on the nature of your RAG application and the potential risks associated with generated content, it may be important to <a class="reference external" href="https://www.databricks.com/blog/implementing-llm-guardrails-safe-and-responsible-generative-ai-deployment-databricks">implement content filters or safety guardrails</a> to prevent the output of inappropriate, offensive, or harmful information.</p></li>
+<li><p>Consider using models like <a class="reference external" href="https://marketplace.databricks.com/details/a4bc6c21-0888-40e1-805e-f4c99dca41e4/Databricks_Llama-Guard-Model">Llama Guard</a> or APIs specifically designed for content moderation and safety, such as <a class="reference external" href="https://platform.openai.com/docs/guides/moderation">OpenAI’s moderation API</a>, to implement safety guardrails.</p></li>
+</ul>
+</li>
+<li><p>Handling hallucinations</p>
+<ul class="simple">
+<li><p>Defending against hallucinations can also be implemented as a post-processing step. This may involve cross-referencing the generated output with retrieved documents, or using additional LLMs to validate the factual accuracy of the response.</p></li>
+<li><p>Develop fallback mechanisms to handle cases where the generated response fails to meet the factual accuracy requirements, such as generating alternative responses or providing disclaimers to the user.</p></li>
+</ul>
+</li>
+<li><p>Error handling</p>
+<ul class="simple">
+<li><p>With any post-processing steps, implement mechanisms to gracefully deal with cases where the step encounters an issue or fails to generate a satisfactory response. This could involve generating a default response, or escalating the issue to a human operator for manual review.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./nbs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="3-deep-dive-data-pipeline.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><span class="section-number">3.1. </span>Data pipeline</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="4-evaluation.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><span class="section-number">4. </span>Evaluating RAG quality</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#query-understanding">3.2.1. Query understanding</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval">3.2.2. Retrieval</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prompt-augmentation">3.2.3. Prompt augmentation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#llm">3.2.4. LLM</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#post-processing-guardrails">3.2.5. Post-processing &amp; guardrails</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The Databricks GenAI Community
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

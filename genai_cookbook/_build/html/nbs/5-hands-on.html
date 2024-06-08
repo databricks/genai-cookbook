@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Section 5: Hands-on guide to implementing high-quality RAG &#8212; Databricks Generative AI Cookbook</title>
+    <title>1. Section 5: Hands-on guide to implementing high-quality RAG &#8212; Databricks Generative AI Cookbook</title>
   
   
   
@@ -74,7 +74,8 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Section 4: Evaluation" href="4-evaluation.html" />
+    <link rel="next" title="2. Evaluation-driven development" href="5-hands-on-eval-driven-dev.html" />
+    <link rel="prev" title="Enabling Measurement: Supporting Infrastructure" href="4-evaluation-infra.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -182,19 +183,55 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">All Notebooks</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html"><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html"><strong>Section 2:</strong> Fundamentals of RAG over unstructured documents</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn: how RAG works</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html">Introduction to retrieval-augmented generation (RAG)</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html">Fundamentals of RAG over unstructured documents</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">Data pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-rag.html">Retrieval, augmentation, and generation (RAG Chain)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-chain.html">Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">Evaluation &amp; monitoring</a></li>
 <li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">Governance and LLMops</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="3-deep-dive.html"><strong>Section 3:</strong> Deep dive into RAG over unstructured documents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="4-evaluation.html"><strong>Section 4:</strong> Evaluation</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#"><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="3-deep-dive.html">Deep dive into RAG over unstructured documents</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-data-pipeline.html">Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-chain.html">Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn: how to evaluate RAG apps</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="4-evaluation.html">Evaluation overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="4-evaluation-eval-sets.html">Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="4-evaluation-metrics.html">Assessing Performance: Metrics that Matter</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="4-evaluation-infra.html">Enabling Measurement: Supporting Infrastructure</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn: RAG development workflow</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">1. <strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-eval-driven-dev.html">2. Evaluation-driven development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-requirements.html">3. Gather requirements</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Build: POC</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-build-poc.html">4. Deploy POC to collect stakeholder feedback</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Build: Evaluate RAG POC's quality</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">Evaluate the POC’s quality</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Build: Debug &amp; iterate on RAG quality</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">Improve RAG quality</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html"><strong>Step 1:</strong> Understand RAG quality improvement levers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html"><strong>Step 2:</strong> Identify the root cause of quality issues</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-3.html"><strong>Step 3:</strong> Implement and evaluate changes</a></li>
+
+</ul>
+</details></li>
 </ul>
 
     </div>
@@ -390,60 +427,60 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-driven-development">Evaluation-driven development</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gather-requirements">Gather requirements</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-the-use-case-a-good-fit-for-rag">Is the use case a good fit for RAG?</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#requirements-questions">Requirements questions</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#user-experience">User Experience</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#data">Data</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-constraints">Performance constraints</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation">Evaluation</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#security">Security</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment">Deployment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-driven-development">1.1. Evaluation-driven development</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gather-requirements">1.2. Gather requirements</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-the-use-case-a-good-fit-for-rag">1.2.1. Is the use case a good fit for RAG?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#requirements-questions">1.2.2. Requirements questions</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#user-experience">1.2.2.1. User Experience</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#data">1.2.2.2. Data</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-constraints">1.2.2.3. Performance constraints</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation">1.2.2.4. Evaluation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#security">1.2.2.5. Security</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment">1.2.2.6. Deployment</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-collect-feedback-on-poc">Build &amp; Collect Feedback on POC</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-build-a-poc">How to build a POC</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#import-the-sample-code">1. Import the sample code.</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#configure-your-application">2. Configure your application</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-your-data">3. Prepare your data.</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#deploy-the-poc-chain-to-the-quality-lab-review-app">4. Deploy the POC chain to the Quality Lab Review App</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#share-the-review-app-with-stakeholders">5. Share the Review App with stakeholders</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-collect-feedback-on-poc">1.3. Build &amp; Collect Feedback on POC</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-build-a-poc">1.3.1. How to build a POC</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#import-the-sample-code">1.3.1.1. 1. Import the sample code.</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#configure-your-application">1.3.1.2. 2. Configure your application</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-your-data">1.3.1.3. 3. Prepare your data.</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#deploy-the-poc-chain-to-the-quality-lab-review-app">1.3.1.4. 4. Deploy the POC chain to the Quality Lab Review App</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#share-the-review-app-with-stakeholders">1.3.1.5. 5. Share the Review App with stakeholders</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluate-the-poc-s-quality">Evaluate the POC’s quality</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#etl-the-logs-to-an-evaluation-set-run-evaluation">1. ETL the logs to an Evaluation Set &amp; run evaluation</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#review-evaluation-results">2. Review evaluation results</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluate-the-poc-s-quality">1.4. Evaluate the POC’s quality</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#etl-the-logs-to-an-evaluation-set-run-evaluation">1.4.1. 1. ETL the logs to an Evaluation Set &amp; run evaluation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#review-evaluation-results">1.4.2. 2. Review evaluation results</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#improve-rag-quality">Improve RAG quality</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-understand-rag-quality-improvement-levers"><strong>Step 1:</strong> Understand RAG quality improvement levers</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-identify-the-root-cause-of-quality-issues"><strong>Step 2:</strong> Identify the root cause of quality issues</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-quality">Retrieval quality</a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-retrieval-quality">Debugging retrieval quality</a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-retrieval-quality">Common reasons for poor retrieval quality</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#improve-rag-quality">1.5. Improve RAG quality</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-understand-rag-quality-improvement-levers">1.5.1. <strong>Step 1:</strong> Understand RAG quality improvement levers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-identify-the-root-cause-of-quality-issues">1.5.2. <strong>Step 2:</strong> Identify the root cause of quality issues</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-quality">1.5.2.1. Retrieval quality</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-retrieval-quality">1.5.2.1.1. Debugging retrieval quality</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-retrieval-quality">1.5.2.1.2. Common reasons for poor retrieval quality</a></li>
 </ul>
 </li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generation-quality">Generation quality</a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-generation-quality">Debugging generation quality</a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-generation-quality">Common reasons for poor generation quality</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-implement-and-evaluate-changes"><strong>Step 3:</strong> Implement and evaluate changes</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#data-pipeline-changes">Data pipeline changes</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#rag-chain-changes">RAG chain changes</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-a-potential-fix-that-could-improve-quality">Testing a potential fix that could improve quality</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generation-quality">1.5.2.2. Generation quality</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-generation-quality">1.5.2.2.1. Debugging generation quality</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-generation-quality">1.5.2.2.2. Common reasons for poor generation quality</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Deployment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-implement-and-evaluate-changes">1.5.3. <strong>Step 3:</strong> Implement and evaluate changes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#data-pipeline-changes">1.5.3.1. Data pipeline changes</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#rag-chain-changes">1.5.3.2. RAG chain changes</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-a-potential-fix-that-could-improve-quality">1.5.3.3. Testing a potential fix that could improve quality</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">1.6. Deployment</a></li>
 </ul>
             </nav>
         </div>
@@ -456,7 +493,7 @@ document.write(`
                 <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="section-5-hands-on-guide-to-implementing-high-quality-rag">
-<h1><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG<a class="headerlink" href="#section-5-hands-on-guide-to-implementing-high-quality-rag" title="Link to this heading">#</a></h1>
+<h1><span class="section-number">1. </span><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG<a class="headerlink" href="#section-5-hands-on-guide-to-implementing-high-quality-rag" title="Link to this heading">#</a></h1>
 <p>This section walks you through Databricks recommended development workflow for building, testing, and deploying a high-quality RAG application: <strong>evaluation-driven development</strong>. This workflow is based on the Mosaic Research team’s best practices for building and evaluating high quality RAG applications. If quality is important to your business, Databricks recommends following an evaluation-driven workflow:</p>
 <ol class="arabic simple">
 <li><p>Define the requirements</p></li>
@@ -470,7 +507,7 @@ document.write(`
 <p>Mapping to this workflow, this section provides ready-to-run sample code for every step and every suggestion to improve quality.</p>
 <p>Throughout, we will demonstrate evaluation-driven development using one of Databricks’ internal use generative AI cases: using a RAG bot to help answer customer support questions in order to [1] reduce support costs [2] improve the customer experience.</p>
 <section id="evaluation-driven-development">
-<h2>Evaluation-driven development<a class="headerlink" href="#evaluation-driven-development" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">1.1. </span>Evaluation-driven development<a class="headerlink" href="#evaluation-driven-development" title="Link to this heading">#</a></h2>
 <p>There are two core concepts in <strong>evaluation-driven development:</strong></p>
 <ol class="arabic">
 <li><p><strong>Metrics:</strong> Defining high-quality</p>
@@ -488,11 +525,11 @@ document.write(`
 <p><em>&gt;&gt; Evaluation-driven development is known in the academic research community as “hill climbing” akin to climbing a hill to reach the peak - where the hill is your metric and the peak is 100% accuracy on your evaluation set.</em></p>
 </section>
 <section id="gather-requirements">
-<h2>Gather requirements<a class="headerlink" href="#gather-requirements" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">1.2. </span>Gather requirements<a class="headerlink" href="#gather-requirements" title="Link to this heading">#</a></h2>
 <img alt="../_images/2_img3.png" class="align-center" src="../_images/2_img3.png" />
 <p>Defining clear and comprehensive use case requirements is a critical first step in developing a successful RAG application. These requirements serve two primary purposes. Firstly, they help determine whether RAG is the most suitable approach for the given use case. If RAG is indeed a good fit, these requirements guide solution design, implementation, and evaluation decisions. Investing time at the outset of a project to gather detailed requirements can prevent significant challenges and setbacks later in the development process, and ensures that the resulting solution meets the needs of end-users and stakeholders. Well-defined requirements provide the foundation for the subsequent stages of the development lifecycle we’ll walk through.</p>
 <section id="is-the-use-case-a-good-fit-for-rag">
-<h3>Is the use case a good fit for RAG?<a class="headerlink" href="#is-the-use-case-a-good-fit-for-rag" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">1.2.1. </span>Is the use case a good fit for RAG?<a class="headerlink" href="#is-the-use-case-a-good-fit-for-rag" title="Link to this heading">#</a></h3>
 <p>The first thing you’ll need to establish is whether RAG is even the right approach for your use case. Given the hype around RAG, it’s tempting to view it as a possible solution for any problem. However, there are nuances as to when RAG is suitable versus not.</p>
 <p>RAG is a good fit when:</p>
 <ul class="simple">
@@ -511,7 +548,7 @@ document.write(`
 </ul>
 </section>
 <section id="requirements-questions">
-<h3>Requirements questions<a class="headerlink" href="#requirements-questions" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">1.2.2. </span>Requirements questions<a class="headerlink" href="#requirements-questions" title="Link to this heading">#</a></h3>
 <p>Having established that RAG is indeed a good fit for your use case, consider the following questions to capture concrete requirements. For each requirement, we have prioritized them:</p>
 <ul class="simple">
 <li><p>🟢 P0 : Must define this requirement before starting your POC</p></li>
@@ -519,7 +556,7 @@ document.write(`
 <li><p>⚪ P2: Nice to have requirement</p></li>
 </ul>
 <section id="user-experience">
-<h4>User Experience<a class="headerlink" href="#user-experience" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.2.2.1. </span>User Experience<a class="headerlink" href="#user-experience" title="Link to this heading">#</a></h4>
 <p><em>Define how users will interact with the RAG system and what kind of responses are expected</em></p>
 <ul class="simple">
 <li><p>🟢 P0 What will a typical request to the RAG chain look like? Ask stakeholders for examples of potential user queries.</p></li>
@@ -531,7 +568,7 @@ document.write(`
 </ul>
 </section>
 <section id="data">
-<h4>Data<a class="headerlink" href="#data" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.2.2.2. </span>Data<a class="headerlink" href="#data" title="Link to this heading">#</a></h4>
 <p><em>Determine the nature, source(s), and quality of the data that will be used in the RAG solution</em></p>
 <ul class="simple">
 <li><p>🟢 P0 What are the available sources to use?</p></li>
@@ -580,7 +617,7 @@ document.write(`
 </div>
 </section>
 <section id="performance-constraints">
-<h4>Performance constraints<a class="headerlink" href="#performance-constraints" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.2.2.3. </span>Performance constraints<a class="headerlink" href="#performance-constraints" title="Link to this heading">#</a></h4>
 <p><em>Capture performance and resource requirements for the RAG application</em></p>
 <ul class="simple">
 <li><p>🟡 P1 What is the maximum acceptable latency for generating the responses?</p>
@@ -599,7 +636,7 @@ document.write(`
 </ul>
 </section>
 <section id="evaluation">
-<h4>Evaluation<a class="headerlink" href="#evaluation" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.2.2.4. </span>Evaluation<a class="headerlink" href="#evaluation" title="Link to this heading">#</a></h4>
 <p><em>Establish how the RAG solution will be evaluated and improved over time</em></p>
 <ul class="simple">
 <li><p>🟢 P0 What is the business goal / KPI you want to impact? What is the baseline value and what is the target?</p></li>
@@ -615,7 +652,7 @@ document.write(`
 </ul>
 </section>
 <section id="security">
-<h4>Security<a class="headerlink" href="#security" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.2.2.5. </span>Security<a class="headerlink" href="#security" title="Link to this heading">#</a></h4>
 <p><em>Identify any security and privacy considerations</em></p>
 <ul class="simple">
 <li><p>🟢 P0 Are there sensitive/confidential data that needs to be handled with care?</p></li>
@@ -623,7 +660,7 @@ document.write(`
 </ul>
 </section>
 <section id="deployment">
-<h4>Deployment<a class="headerlink" href="#deployment" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.2.2.6. </span>Deployment<a class="headerlink" href="#deployment" title="Link to this heading">#</a></h4>
 <p><em>Understanding how the RAG solution will be integrated, deployed, and maintained</em></p>
 <ul class="simple">
 <li><p>🟡 P1 How should the RAG solution integrate with existing systems and workflows?</p></li>
@@ -674,7 +711,7 @@ document.write(`
 </section>
 </section>
 <section id="build-collect-feedback-on-poc">
-<h2>Build &amp; Collect Feedback on POC<a class="headerlink" href="#build-collect-feedback-on-poc" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">1.3. </span>Build &amp; Collect Feedback on POC<a class="headerlink" href="#build-collect-feedback-on-poc" title="Link to this heading">#</a></h2>
 <img alt="../_images/3_img3.png" class="align-center" src="../_images/3_img3.png" />
 <p>The first step in evaluation-driven development is to build a proof of concept (POC). A POC offers several benefits:</p>
 <ol class="arabic simple">
@@ -691,7 +728,7 @@ document.write(`
 <p>Said differently, these templates are not “3 lines of code that magically make a RAG” - rather, they are a well-structured RAG application that can be tuned for quality in the following steps of an evaluation-driven development workflow.</p>
 <p>This enables you to quickly deploy a POC, but transition quickly to quality iteration without needing to rewrite your code.</p>
 <section id="how-to-build-a-poc">
-<h3>How to build a POC<a class="headerlink" href="#how-to-build-a-poc" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">1.3.1. </span>How to build a POC<a class="headerlink" href="#how-to-build-a-poc" title="Link to this heading">#</a></h3>
 <p><strong>Expected time:</strong> 30-60 minutes</p>
 <p><strong>Requirements:</strong></p>
 <ul class="simple">
@@ -710,7 +747,7 @@ document.write(`
 <li><p>[follow these steps for models such as Azure OpenAI, OpenAI, Cohere, Anthropic, Google Gemini, etc e.g., external models]</p></li>
 </ul>
 <section id="import-the-sample-code">
-<h4>1. Import the sample code.<a class="headerlink" href="#import-the-sample-code" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.3.1.1. </span>1. Import the sample code.<a class="headerlink" href="#import-the-sample-code" title="Link to this heading">#</a></h4>
 <p>To get started, <a class="reference external" href="https://docs.databricks.com/en/repos/index.html">import this Git Repository to your Databricks Workspace</a>. This repository contains the entire set of sample code. Based on your data, select one of the following folders that contains the POC application code.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -753,7 +790,7 @@ document.write(`
 <img alt="../_images/6_img.png" class="align-center" src="../_images/6_img.png" />
 </section>
 <section id="configure-your-application">
-<h4>2. Configure your application<a class="headerlink" href="#configure-your-application" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.3.1.2. </span>2. Configure your application<a class="headerlink" href="#configure-your-application" title="Link to this heading">#</a></h4>
 <p>Follow the instructions in the <code class="docutils literal notranslate"><span class="pre">00_config</span></code> Notebook to configure the following settings:</p>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">RAG_APP_NAME</span></code>: The name of the RAG application. This is used to name the chain’s UC model and prepended to the output Delta Tables + Vector Indexes</p></li>
@@ -766,7 +803,7 @@ document.write(`
 <p>Run the <code class="docutils literal notranslate"><span class="pre">00_validate_config</span></code> to check that your configuration is valid and all resources are available. You will see an <code class="docutils literal notranslate"><span class="pre">rag_chain_config.yaml</span></code> file appear in your directory - we will do this in step 4 to deploy the application.</p>
 </section>
 <section id="prepare-your-data">
-<h4>3. Prepare your data.<a class="headerlink" href="#prepare-your-data" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.3.1.3. </span>3. Prepare your data.<a class="headerlink" href="#prepare-your-data" title="Link to this heading">#</a></h4>
 <p>The POC data pipeline is a Databricks Notebook based on Apache Spark that provides a default implementation of the parameters outlined below.</p>
 <p>To run this pipeline and generate your initial Vector Index:</p>
 <ol class="arabic simple">
@@ -801,7 +838,7 @@ document.write(`
 </div>
 </section>
 <section id="deploy-the-poc-chain-to-the-quality-lab-review-app">
-<h4>4. Deploy the POC chain to the Quality Lab Review App<a class="headerlink" href="#deploy-the-poc-chain-to-the-quality-lab-review-app" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.3.1.4. </span>4. Deploy the POC chain to the Quality Lab Review App<a class="headerlink" href="#deploy-the-poc-chain-to-the-quality-lab-review-app" title="Link to this heading">#</a></h4>
 <p>The POC chain is a RAG chain that provides a default implementation of the parameters outlined below.</p>
 <blockquote>
 <div><p>Note: The POC Chain uses MLflow code-based logging. To understand more about code-based logging, [link to docs].</p>
@@ -884,14 +921,14 @@ document.write(`
 </div>
 </section>
 <section id="share-the-review-app-with-stakeholders">
-<h4>5. Share the Review App with stakeholders<a class="headerlink" href="#share-the-review-app-with-stakeholders" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.3.1.5. </span>5. Share the Review App with stakeholders<a class="headerlink" href="#share-the-review-app-with-stakeholders" title="Link to this heading">#</a></h4>
 <p>You can now share your POC RAG application with your stakeholders to get their feedback.</p>
 <p>We suggest distributing your POC to at least 3 stakeholders and having them each ask 10 - 20 questions. It is important to have multiple stakeholders test your POC so you can have a diverse set of perspectives to include in your Evaluation Set.</p>
 </section>
 </section>
 </section>
 <section id="evaluate-the-poc-s-quality">
-<h2>Evaluate the POC’s quality<a class="headerlink" href="#evaluate-the-poc-s-quality" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">1.4. </span>Evaluate the POC’s quality<a class="headerlink" href="#evaluate-the-poc-s-quality" title="Link to this heading">#</a></h2>
 <img alt="../_images/11_img.png" class="align-center" src="../_images/11_img.png" />
 <p><strong>Expected time:</strong> 30-60 minutes</p>
 <p><strong>Requirements:</strong></p>
@@ -908,7 +945,7 @@ document.write(`
 </ul>
 <p>Now that your stakeholders have used your POC, we can use their feedback to measure the POC’s quality and establish a baseline.</p>
 <section id="etl-the-logs-to-an-evaluation-set-run-evaluation">
-<h3>1. ETL the logs to an Evaluation Set &amp; run evaluation<a class="headerlink" href="#etl-the-logs-to-an-evaluation-set-run-evaluation" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">1.4.1. </span>1. ETL the logs to an Evaluation Set &amp; run evaluation<a class="headerlink" href="#etl-the-logs-to-an-evaluation-set-run-evaluation" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
 <li><p>Open the <code class="docutils literal notranslate"><span class="pre">04_evaluate_poc_quality</span></code> Notebook.</p></li>
 <li><p>Adjust the configuration at the top to point to your Review App’s logs.</p></li>
@@ -951,7 +988,7 @@ document.write(`
 <img alt="../_images/13_img.png" class="align-center" src="../_images/13_img.png" />
 </section>
 <section id="review-evaluation-results">
-<h3>2. Review evaluation results<a class="headerlink" href="#review-evaluation-results" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">1.4.2. </span>2. Review evaluation results<a class="headerlink" href="#review-evaluation-results" title="Link to this heading">#</a></h3>
 <ol class="arabic simple">
 <li><p>Now, let’s open MLflow to inspect the results.</p></li>
 <li><p>In the Run tab, we can see each of the computed metrics. Refer to [metrics overview] section for an explanation of what each metric tells you about your application.</p></li>
@@ -962,7 +999,7 @@ document.write(`
 </section>
 </section>
 <section id="improve-rag-quality">
-<h2>Improve RAG quality<a class="headerlink" href="#improve-rag-quality" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">1.5. </span>Improve RAG quality<a class="headerlink" href="#improve-rag-quality" title="Link to this heading">#</a></h2>
 <img alt="../_images/14_img.png" class="align-center" src="../_images/14_img.png" />
 <p>While a basic RAG chain is relatively straightforward to implement, refining it to consistently produce high-quality outputs is often non-trivial. Identifying the root causes of issues and determining which levers of the solution to pull to improve output quality requires understanding the various components and their interactions.</p>
 <p>Simply vectorizing a set of documents, retrieving them via semantic search, and passing the retrieved documents to an LLM is not sufficient to guarantee optimal results. To yield high-quality outputs, you need to consider factors such as (but not limited to) chunking strategy of documents, choice of LLM and model parameters, or whether to include a query understanding step. As a result, ensuring high quality RAG outputs will generally involve iterating over both the data pipeline (e.g., chunking) and the RAG chain itself (e.g., choice of LLM).</p>
@@ -973,7 +1010,7 @@ document.write(`
 <li><p>Implementing and evaluating fixes to the identified root cause</p></li>
 </ol>
 <section id="step-1-understand-rag-quality-improvement-levers">
-<h3><strong>Step 1:</strong> Understand RAG quality improvement levers<a class="headerlink" href="#step-1-understand-rag-quality-improvement-levers" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">1.5.1. </span><strong>Step 1:</strong> Understand RAG quality improvement levers<a class="headerlink" href="#step-1-understand-rag-quality-improvement-levers" title="Link to this heading">#</a></h3>
 <p>From a conceptual point of view, it’s helpful to view RAG quality issues through the lens of two key aspects:</p>
 <ul class="simple">
 <li><p><strong>Retrieval quality</strong></p>
@@ -1017,11 +1054,11 @@ document.write(`
 <p>This overlap underscores the need for a holistic approach to RAG quality improvement. By understanding which components to change across both the data pipeline and RAG chain, and how these changes affect the overall solution, you can make targeted updates to improve RAG output quality.</p>
 </section>
 <section id="step-2-identify-the-root-cause-of-quality-issues">
-<h3><strong>Step 2:</strong> Identify the root cause of quality issues<a class="headerlink" href="#step-2-identify-the-root-cause-of-quality-issues" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">1.5.2. </span><strong>Step 2:</strong> Identify the root cause of quality issues<a class="headerlink" href="#step-2-identify-the-root-cause-of-quality-issues" title="Link to this heading">#</a></h3>
 <section id="retrieval-quality">
-<h4>Retrieval quality<a class="headerlink" href="#retrieval-quality" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.5.2.1. </span>Retrieval quality<a class="headerlink" href="#retrieval-quality" title="Link to this heading">#</a></h4>
 <section id="debugging-retrieval-quality">
-<h5>Debugging retrieval quality<a class="headerlink" href="#debugging-retrieval-quality" title="Link to this heading">#</a></h5>
+<h5><span class="section-number">1.5.2.1.1. </span>Debugging retrieval quality<a class="headerlink" href="#debugging-retrieval-quality" title="Link to this heading">#</a></h5>
 <p>Retrieval quality is arguably the most important component of a RAG application. If the most relevant chunks are not returned for a given query, the LLM will not have access to the necessary information to generate a high-quality response. Poor retrieval can thus lead to irrelevant, incomplete, or hallucinated output.</p>
 <p>As discussed in <a class="reference internal" href="4-evaluation.html"><span class="doc std std-doc">Section 4: Evaluation</span></a>, metrics such as precision and recall can be calculated using a set of evaluation queries and corresponding ground-truth chunks/documents. If evaluation results indicate that relevant chunks are not being returned, you will need to investigate further to identify the root cause. This step requires manual effort to analyze the underlying data. With Mosaic AI, this becomes considerably easier given the tight integration between the data platform (Unity Catalog and Vector Search), and experiment tracking (MLflow LLM evaluation and MLflow tracing).</p>
 <p>Here’s a step-by-step process to address <strong>retrieval quality</strong> issues:</p>
@@ -1044,7 +1081,7 @@ document.write(`
 </ol>
 </section>
 <section id="common-reasons-for-poor-retrieval-quality">
-<h5>Common reasons for poor retrieval quality<a class="headerlink" href="#common-reasons-for-poor-retrieval-quality" title="Link to this heading">#</a></h5>
+<h5><span class="section-number">1.5.2.1.2. </span>Common reasons for poor retrieval quality<a class="headerlink" href="#common-reasons-for-poor-retrieval-quality" title="Link to this heading">#</a></h5>
 <p>Each of these potential fixes are tagged as one of three types. Based on the type of change, you will follow different steps in section 3.</p>
 <!-- ![data-pipeline](../images/5-hands-on/data_pipeline.png) -->
 <table>
@@ -1096,9 +1133,9 @@ document.write(`
 </section>
 </section>
 <section id="generation-quality">
-<h4>Generation quality<a class="headerlink" href="#generation-quality" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.5.2.2. </span>Generation quality<a class="headerlink" href="#generation-quality" title="Link to this heading">#</a></h4>
 <section id="debugging-generation-quality">
-<h5>Debugging generation quality<a class="headerlink" href="#debugging-generation-quality" title="Link to this heading">#</a></h5>
+<h5><span class="section-number">1.5.2.2.1. </span>Debugging generation quality<a class="headerlink" href="#debugging-generation-quality" title="Link to this heading">#</a></h5>
 <p>Even with optimal retrieval, if the LLM component of a RAG chain cannot effectively utilize the retrieved context to generate accurate, coherent, and relevant responses, the final output quality will suffer. Issues with generation quality can arise as hallucinations, inconsistencies, or failure to concisely address the user’s query, to name a few.</p>
 <p>To identify generation quality issues, you can use the approach outlined in the <a class="reference internal" href="#section-4-evaluation"><span class="xref myst">Evaluation section</span></a>. If evaluation results indicate poor generation quality (e.g., low accuracy, coherence, or relevance scores), you’ll need to investigate further to identify the root cause.</p>
 <p>The following is a step-by-step process to address <strong>generation quality</strong> issues:</p>
@@ -1119,7 +1156,7 @@ document.write(`
 </ol>
 </section>
 <section id="common-reasons-for-poor-generation-quality">
-<h5>Common reasons for poor generation quality<a class="headerlink" href="#common-reasons-for-poor-generation-quality" title="Link to this heading">#</a></h5>
+<h5><span class="section-number">1.5.2.2.2. </span>Common reasons for poor generation quality<a class="headerlink" href="#common-reasons-for-poor-generation-quality" title="Link to this heading">#</a></h5>
 <p>Each of these potential fixes are tagged as one of three types. Based on the type of change, you will follow different steps in section 3.</p>
 <table>
 <thead>
@@ -1156,7 +1193,7 @@ document.write(`
 </section>
 </section>
 <section id="step-3-implement-and-evaluate-changes">
-<h3><strong>Step 3:</strong> Implement and evaluate changes<a class="headerlink" href="#step-3-implement-and-evaluate-changes" title="Link to this heading">#</a></h3>
+<h3><span class="section-number">1.5.3. </span><strong>Step 3:</strong> Implement and evaluate changes<a class="headerlink" href="#step-3-implement-and-evaluate-changes" title="Link to this heading">#</a></h3>
 <p>As discussed above, when working to improve the quality of the RAG system, changes can be broadly categorized into three buckets:</p>
 <ol class="arabic simple">
 <li><p><strong><img alt="Data pipeline" src="../_images/data_pipeline.png" /></strong> Data pipeline changes</p></li>
@@ -1165,7 +1202,7 @@ document.write(`
 </ol>
 <p>Depending on the specific issue you are trying to address, you may need to apply changes to one or both of these components. In some cases, simultaneous changes to both the data pipeline and RAG chain may be necessary to achieve the desired quality improvements.</p>
 <section id="data-pipeline-changes">
-<h4>Data pipeline changes<a class="headerlink" href="#data-pipeline-changes" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.5.3.1. </span>Data pipeline changes<a class="headerlink" href="#data-pipeline-changes" title="Link to this heading">#</a></h4>
 <p><strong>Data pipeline changes</strong> involve modifying how input data is processed, transformed, or stored before being used by the RAG chain. Examples of data pipeline changes include (and are not limited to):</p>
 <ul class="simple">
 <li><p>Trying a different chunking strategy</p></li>
@@ -1175,7 +1212,7 @@ document.write(`
 <p>Implementing a data pipeline change will generally require re-running the entire pipeline to create a new vector index. This process involves reprocessing the input documents, regenerating the vector embeddings, and updating the vector index with new embeddings and metadata.</p>
 </section>
 <section id="rag-chain-changes">
-<h4>RAG chain changes<a class="headerlink" href="#rag-chain-changes" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.5.3.2. </span>RAG chain changes<a class="headerlink" href="#rag-chain-changes" title="Link to this heading">#</a></h4>
 <p><strong>RAG chain changes</strong> involve modifying steps or parameters of the RAG chain itself, without necessarily changing the underlying vector database. Examples of RAG chain changes include (and are not limited to):</p>
 <ul class="simple">
 <li><p>Changing the LLM</p></li>
@@ -1186,7 +1223,7 @@ document.write(`
 <p>RAG chain updates may involve editing the <strong>RAG chain configuration file</strong> (e.g., changing the LLM parameters or prompt template), <em>or</em> modifying the actual <strong>RAG chain code</strong> (e.g., adding new processing steps or retrieval logic).</p>
 </section>
 <section id="testing-a-potential-fix-that-could-improve-quality">
-<h4>Testing a potential fix that could improve quality<a class="headerlink" href="#testing-a-potential-fix-that-could-improve-quality" title="Link to this heading">#</a></h4>
+<h4><span class="section-number">1.5.3.3. </span>Testing a potential fix that could improve quality<a class="headerlink" href="#testing-a-potential-fix-that-could-improve-quality" title="Link to this heading">#</a></h4>
 <p>Once you have identified a potential fix based on the debugging process outlined above, follow these steps to test your changes:</p>
 <ol class="arabic">
 <li><p>Make the necessary changes to the data pipeline or RAG chain code</p>
@@ -1264,7 +1301,7 @@ document.write(`
 </section>
 </section>
 <section id="id1">
-<h2>Deployment<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">1.6. </span>Deployment<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
 <img alt="../_images/17_img.png" class="align-center" src="../_images/17_img.png" />
 </section>
 </section>
@@ -1300,13 +1337,22 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="4-evaluation.html"
+       href="4-evaluation-infra.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><strong>Section 4:</strong> Evaluation</p>
+        <p class="prev-next-title">Enabling Measurement: Supporting Infrastructure</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="5-hands-on-eval-driven-dev.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><span class="section-number">2. </span>Evaluation-driven development</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
@@ -1324,60 +1370,60 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-driven-development">Evaluation-driven development</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gather-requirements">Gather requirements</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-the-use-case-a-good-fit-for-rag">Is the use case a good fit for RAG?</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#requirements-questions">Requirements questions</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#user-experience">User Experience</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#data">Data</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-constraints">Performance constraints</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation">Evaluation</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#security">Security</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment">Deployment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation-driven-development">1.1. Evaluation-driven development</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gather-requirements">1.2. Gather requirements</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#is-the-use-case-a-good-fit-for-rag">1.2.1. Is the use case a good fit for RAG?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#requirements-questions">1.2.2. Requirements questions</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#user-experience">1.2.2.1. User Experience</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#data">1.2.2.2. Data</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-constraints">1.2.2.3. Performance constraints</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluation">1.2.2.4. Evaluation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#security">1.2.2.5. Security</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#deployment">1.2.2.6. Deployment</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-collect-feedback-on-poc">Build &amp; Collect Feedback on POC</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-build-a-poc">How to build a POC</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#import-the-sample-code">1. Import the sample code.</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#configure-your-application">2. Configure your application</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-your-data">3. Prepare your data.</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#deploy-the-poc-chain-to-the-quality-lab-review-app">4. Deploy the POC chain to the Quality Lab Review App</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#share-the-review-app-with-stakeholders">5. Share the Review App with stakeholders</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-collect-feedback-on-poc">1.3. Build &amp; Collect Feedback on POC</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-build-a-poc">1.3.1. How to build a POC</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#import-the-sample-code">1.3.1.1. 1. Import the sample code.</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#configure-your-application">1.3.1.2. 2. Configure your application</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-your-data">1.3.1.3. 3. Prepare your data.</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#deploy-the-poc-chain-to-the-quality-lab-review-app">1.3.1.4. 4. Deploy the POC chain to the Quality Lab Review App</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#share-the-review-app-with-stakeholders">1.3.1.5. 5. Share the Review App with stakeholders</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluate-the-poc-s-quality">Evaluate the POC’s quality</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#etl-the-logs-to-an-evaluation-set-run-evaluation">1. ETL the logs to an Evaluation Set &amp; run evaluation</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#review-evaluation-results">2. Review evaluation results</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluate-the-poc-s-quality">1.4. Evaluate the POC’s quality</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#etl-the-logs-to-an-evaluation-set-run-evaluation">1.4.1. 1. ETL the logs to an Evaluation Set &amp; run evaluation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#review-evaluation-results">1.4.2. 2. Review evaluation results</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#improve-rag-quality">Improve RAG quality</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-understand-rag-quality-improvement-levers"><strong>Step 1:</strong> Understand RAG quality improvement levers</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-identify-the-root-cause-of-quality-issues"><strong>Step 2:</strong> Identify the root cause of quality issues</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-quality">Retrieval quality</a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-retrieval-quality">Debugging retrieval quality</a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-retrieval-quality">Common reasons for poor retrieval quality</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#improve-rag-quality">1.5. Improve RAG quality</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-understand-rag-quality-improvement-levers">1.5.1. <strong>Step 1:</strong> Understand RAG quality improvement levers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-identify-the-root-cause-of-quality-issues">1.5.2. <strong>Step 2:</strong> Identify the root cause of quality issues</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#retrieval-quality">1.5.2.1. Retrieval quality</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-retrieval-quality">1.5.2.1.1. Debugging retrieval quality</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-retrieval-quality">1.5.2.1.2. Common reasons for poor retrieval quality</a></li>
 </ul>
 </li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generation-quality">Generation quality</a><ul class="nav section-nav flex-column">
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-generation-quality">Debugging generation quality</a></li>
-<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-generation-quality">Common reasons for poor generation quality</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-implement-and-evaluate-changes"><strong>Step 3:</strong> Implement and evaluate changes</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#data-pipeline-changes">Data pipeline changes</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#rag-chain-changes">RAG chain changes</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-a-potential-fix-that-could-improve-quality">Testing a potential fix that could improve quality</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#generation-quality">1.5.2.2. Generation quality</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-generation-quality">1.5.2.2.1. Debugging generation quality</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#common-reasons-for-poor-generation-quality">1.5.2.2.2. Common reasons for poor generation quality</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Deployment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-implement-and-evaluate-changes">1.5.3. <strong>Step 3:</strong> Implement and evaluate changes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#data-pipeline-changes">1.5.3.1. Data pipeline changes</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#rag-chain-changes">1.5.3.2. RAG chain changes</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#testing-a-potential-fix-that-could-improve-quality">1.5.3.3. Testing a potential fix that could improve quality</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">1.6. Deployment</a></li>
 </ul>
   </nav></div>
 

@@ -4,15 +4,46 @@
 format: jb-book
 root: index
 parts:
-- caption: All Notebooks
+- caption: "Learn"
+  numbered: true
   chapters:
   - file: nbs/1-introduction-to-rag
   - file: nbs/2-fundamentals-unstructured
     sections:
     - file: nbs/2-fundamentals-unstructured-data-pipeline
-    - file: nbs/2-fundamentals-unstructured-rag
+    - file: nbs/2-fundamentals-unstructured-chain
     - file: nbs/2-fundamentals-unstructured-eval
     - file: nbs/2-fundamentals-unstructured-llmops
   - file: nbs/3-deep-dive
+    sections:
+    - file: nbs/3-deep-dive-data-pipeline
+    - file: nbs/3-deep-dive-chain
   - file: nbs/4-evaluation
-  - file: nbs/5-hands-on
+    sections:
+    - file: nbs/4-evaluation-eval-sets
+    - file: nbs/4-evaluation-metrics
+    - file: nbs/4-evaluation-infra
+  - file: nbs/5-rag-development-workflow
+- caption: "Implement"
+  numbered: true
+  chapters:
+  - file: nbs/5-hands-on-requirements
+# - caption: "Build: POC"
+#   numbered: true
+#   chapters:
+  - file: nbs/5-hands-on-build-poc
+# - caption: "Build: Evaluate RAG POC's quality"
+#   numbered: true
+#   chapters:
+  - file: nbs/5-hands-on-evaluate-poc
+# - caption: "Build: Debug & iterate on RAG quality"  
+#   numbered: true
+#   chapters:
+  - file: nbs/5-hands-on-improve-quality
+    sections:
+    - file: nbs/5-hands-on-improve-quality-step-1
+    - file: nbs/5-hands-on-improve-quality-step-2
+  - file: nbs/5-hands-on-deploy-and-monitor
+# - caption: "Deploy & monitor a RAG app"
+#   chapters:
+  

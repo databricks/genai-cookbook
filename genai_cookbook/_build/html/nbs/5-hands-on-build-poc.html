@@ -1,0 +1,774 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2. Deploy POC to collect stakeholder feedback &#8212; Databricks Generative AI Cookbook</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=3ee479438cf8b5e0d341" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=3ee479438cf8b5e0d341"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-6BZ4NTBHVJ"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-6BZ4NTBHVJ');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nbs/5-hands-on-build-poc';</script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3. Evaluate the POC’s quality" href="5-hands-on-evaluate-poc.html" />
+    <link rel="prev" title="1. Gather requirements" href="5-hands-on-requirements.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo2.png" class="logo__image only-light" alt="Databricks Generative AI Cookbook - Home"/>
+    <script>document.write(`<img src="../_static/logo2.png" class="logo__image only-dark" alt="Databricks Generative AI Cookbook - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html">1. RAG overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="2-fundamentals-unstructured.html">2. RAG fundamentals</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">2.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-chain.html">2.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-eval.html">2.3. Evaluation &amp; monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">2.4. Governance and LLMops</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="3-deep-dive.html">3. RAG quality knobs</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-data-pipeline.html">3.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-chain.html">3.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="4-evaluation.html">4. Evaluating RAG quality</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-eval-sets.html">4.5. Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-metrics.html">4.6. Assessing Performance: Metrics that Matter</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-infra.html">4.8. Enabling Measurement: Supporting Infrastructure</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-rag-development-workflow.html">5. RAG development workflow</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Implement</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-requirements.html">1. Gather requirements</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.4. Implement and evaluate changes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-deploy-and-monitor.html">5. Deploy &amp; monitor</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/databricks-genai-cookbook/cookbook/issues/new?title=Issue%20on%20page%20%2Fnbs/5-hands-on-build-poc.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/nbs/5-hands-on-build-poc.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Deploy POC to collect stakeholder feedback</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-build-a-poc">2.1. How to build a POC</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-the-sample-code">2.1.1. 1. Import the sample code.</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configure-your-application">2.1.2. 2. Configure your application</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-your-data">2.1.3. 3. Prepare your data.</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deploy-the-poc-chain-to-the-quality-lab-review-app">2.1.4. 4. Deploy the POC chain to the Quality Lab Review App</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#share-the-review-app-with-stakeholders">2.1.5. 5. Share the Review App with stakeholders</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="deploy-poc-to-collect-stakeholder-feedback">
+<h1><span class="section-number">2. </span>Deploy POC <em>to</em> collect stakeholder feedback<a class="headerlink" href="#deploy-poc-to-collect-stakeholder-feedback" title="Link to this heading">#</a></h1>
+<img alt="../_images/3_img3.png" class="align-center" src="../_images/3_img3.png" />
+<p>The first step in evaluation-driven development is to build a proof of concept (POC). A POC offers several benefits:</p>
+<ol class="arabic simple">
+<li><p>Provides a directional view on the feasibility of your use case with RAG</p></li>
+<li><p>Allows collecting initial feedback from stakeholders, which in turn enables you to create the first version of your Evaluation Set</p></li>
+<li><p>Establishes a baseline measurement of quality to start to iterate from</p></li>
+</ol>
+<p>Databricks recommends building your POC using the simplest RAG chain architecture and our recommended defaults for each knob/parameter.</p>
+<blockquote>
+<div><p><em>!! Important: our recommended default parameters are by no means perfect, nor are they intended to be. Rather, they are a place to start from - the next steps of our workflow guide you through iterating on these parameters.</em></p>
+<p><em>Why start from a simple POC? There are hundreds of possible combinations of knobs you can tune within your RAG application. You can easily spend weeks tuning these knobs, but if you do so before you can systematically evaluate your RAG, you’ll end up in what we call the POC doom loop - iterating on settings, but with no way to objectively know if you made an improvement – all while your stakeholders sit around impatiently waiting.</em></p>
+</div></blockquote>
+<p>The POC templates in this guide are designed with quality iteration in mind - that is, they are parameterized with the knobs that our research has shown are most important to tune in order to improve RAG quality. Each knob has a smart default.</p>
+<p>Said differently, these templates are not “3 lines of code that magically make a RAG” - rather, they are a well-structured RAG application that can be tuned for quality in the following steps of an evaluation-driven development workflow.</p>
+<p>This enables you to quickly deploy a POC, but transition quickly to quality iteration without needing to rewrite your code.</p>
+<section id="how-to-build-a-poc">
+<h2><span class="section-number">2.1. </span>How to build a POC<a class="headerlink" href="#how-to-build-a-poc" title="Link to this heading">#</a></h2>
+<p><strong>Expected time:</strong> 30-60 minutes</p>
+<p><strong>Requirements:</strong></p>
+<ul class="simple">
+<li><p>Data from your <a class="reference internal" href="#requirements-questions"><span class="xref myst">requirements</span></a> is available in your <a class="reference external" href="https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html">Lakehouse</a> inside a <a class="reference external" href="https://www.databricks.com/product/unity-catalog">Unity Catalog</a> <a class="reference external" href="https://docs.databricks.com/en/connect/unity-catalog/volumes.html">volume</a> or <a class="reference external" href="https://docs.databricks.com/en/delta/index.html">Delta Table</a></p></li>
+<li><p>Access to a <a class="reference external" href="https://docs.databricks.com/en/generative-ai/vector-search.html">Mosaic AI Vector Search</a> endpoint [<a class="reference external" href="https://docs.databricks.com/en/generative-ai/create-query-vector-search.html">instructions</a>]</p></li>
+<li><p>Write access to Unity Catalog schema</p></li>
+<li><p>A single-user cluster with DBR 14.3+</p></li>
+</ul>
+<p>At the end of this step, you will have deployed the Quality Lab Review App which allows your stakeholders to test and provide feedback on your POC. Detailed logs from your stakeholder’s usage and their feedback will flow to Delta Tables in your Lakehouse.</p>
+<img alt="../_images/4_img2.png" class="align-center" src="../_images/4_img2.png" />
+<p>Below is the technical architecture of the POC application.</p>
+<img alt="../_images/5_img2.png" class="align-center" src="../_images/5_img2.png" />
+<p>By default, the POC uses the open source models available on <a class="reference external" href="https://www.databricks.com/product/pricing/foundation-model-serving">Mosaic AI Foundation Model Serving</a>. However, because the POC uses Mosaic AI Model Serving, which supports <em>any foundation model</em>, using a different model is easy - simply configure that model in Model Serving and then replace the embedding_endpoint_name and llm_endpoint_name parameters in the POC code.</p>
+<ul class="simple">
+<li><p>[follow these steps for other open source models in the marketplace e.g., PT]</p></li>
+<li><p>[follow these steps for models such as Azure OpenAI, OpenAI, Cohere, Anthropic, Google Gemini, etc e.g., external models]</p></li>
+</ul>
+<section id="import-the-sample-code">
+<h3><span class="section-number">2.1.1. </span>1. Import the sample code.<a class="headerlink" href="#import-the-sample-code" title="Link to this heading">#</a></h3>
+<p>To get started, <a class="reference external" href="https://docs.databricks.com/en/repos/index.html">import this Git Repository to your Databricks Workspace</a>. This repository contains the entire set of sample code. Based on your data, select one of the following folders that contains the POC application code.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>File type</p></th>
+<th class="head"><p>Source</p></th>
+<th class="head"><p>POC application folder</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>PDF files</p></td>
+<td><p>UC Volume</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>JSON files w/ HTML content &amp; metadata</p></td>
+<td><p>UC Volume</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Powerpoint files</p></td>
+<td><p>UC Volume</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>DOCX files</p></td>
+<td><p>UC Volume</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>HTML content</p></td>
+<td><p>Delta Table</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Markdown or regular text</p></td>
+<td><p>Delta Table</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If you don’t have any data ready, and just want to follow along using the Databricks Customer Support Bot example, you can use this pipeline which uses a Delta Table of the Databricks Docs stored as HTML.</p>
+<p>If your data doesn’t meet one of the above requirements, [insert instructions on how to customize].</p>
+<p>Once you have imported the code, you will have the following notebooks:</p>
+<img alt="../_images/6_img.png" class="align-center" src="../_images/6_img.png" />
+</section>
+<section id="configure-your-application">
+<h3><span class="section-number">2.1.2. </span>2. Configure your application<a class="headerlink" href="#configure-your-application" title="Link to this heading">#</a></h3>
+<p>Follow the instructions in the <code class="docutils literal notranslate"><span class="pre">00_config</span></code> Notebook to configure the following settings:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RAG_APP_NAME</span></code>: The name of the RAG application. This is used to name the chain’s UC model and prepended to the output Delta Tables + Vector Indexes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UC_CATALOG</span></code> &amp; <code class="docutils literal notranslate"><span class="pre">UC_SCHEMA</span></code>: <a class="reference external" href="https://docs.databricks.com/en/data-governance/unity-catalog/create-catalogs.html#create-a-catalog">Create Unity Catalog</a> and a Schema where the output Delta Tables with the parsed/chunked documents and Vector Search indexes are stored</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UC_MODEL_NAME</span></code>: Unity Catalog location to log and store the chain’s model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VECTOR_SEARCH_ENDPOINT</span></code>: <a class="reference external" href="https://docs.databricks.com/en/generative-ai/create-query-vector-search.html#create-a-vector-search-endpoint">Create Vector Search Endpoint</a> to host the resulting vector index</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SOURCE_PATH</span></code>: <a class="reference external" href="https://docs.databricks.com/en/connect/unity-catalog/volumes.html#create-and-work-with-volumes">Create Volumes</a> for source documents as <code class="docutils literal notranslate"><span class="pre">SOURCE_PATH</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MLFLOW_EXPERIMENT_NAME</span></code>: MLflow Experiment to use for this application. Using the same experiment allows you to track runs across Notebooks and store a single history for your application.</p></li>
+</ol>
+<p>Run the <code class="docutils literal notranslate"><span class="pre">00_validate_config</span></code> to check that your configuration is valid and all resources are available. You will see an <code class="docutils literal notranslate"><span class="pre">rag_chain_config.yaml</span></code> file appear in your directory - we will do this in step 4 to deploy the application.</p>
+</section>
+<section id="prepare-your-data">
+<h3><span class="section-number">2.1.3. </span>3. Prepare your data.<a class="headerlink" href="#prepare-your-data" title="Link to this heading">#</a></h3>
+<p>The POC data pipeline is a Databricks Notebook based on Apache Spark that provides a default implementation of the parameters outlined below.</p>
+<p>To run this pipeline and generate your initial Vector Index:</p>
+<ol class="arabic simple">
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">02_poc_data_pipeline</span></code> Notebook and connect it to your single-user cluster</p></li>
+<li><p>Press Run All to execute the data pipeline</p></li>
+<li><p>In the last cell of the notebook, you can see the resulting Delta Tables and Vector Index.</p></li>
+</ol>
+<img alt="../_images/7_img.png" class="align-center" src="../_images/7_img.png" />
+<p>Parameters and their default values that are configured in <code class="docutils literal notranslate"><span class="pre">00_config</span></code>.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Knob</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="3-deep-dive.html#parsing"><span class="std std-ref">Parsing strategy</span></a></p></td>
+<td><p>Extracting relevant information from the raw data using appropriate parsing techniques</p></td>
+<td><p>Varies based on document type, but generally an open source parsing library</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="3-deep-dive.html#chunking"><span class="std std-ref">Chunking strategy</span></a></p></td>
+<td><p>Breaking down the parsed data into smaller, manageable chunks for efficient retrieval</p></td>
+<td><p>Token Text Splitter, which splits text along using a chunk size of 4000 tokens and a stride of 500 tokens.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="3-deep-dive.html#embedding-model"><span class="std std-ref">Embedding model</span></a></p></td>
+<td><p>Converting the chunked text data into a numerical vector representation that captures its semantic meaning</p></td>
+<td><p>GTE-Large-v1.5 on the Databricks FMAPI pay-per-token</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="deploy-the-poc-chain-to-the-quality-lab-review-app">
+<h3><span class="section-number">2.1.4. </span>4. Deploy the POC chain to the Quality Lab Review App<a class="headerlink" href="#deploy-the-poc-chain-to-the-quality-lab-review-app" title="Link to this heading">#</a></h3>
+<p>The POC chain is a RAG chain that provides a default implementation of the parameters outlined below.</p>
+<blockquote>
+<div><p>Note: The POC Chain uses MLflow code-based logging. To understand more about code-based logging, [link to docs].</p>
+</div></blockquote>
+<ol class="arabic simple">
+<li><p>Open the <code class="docutils literal notranslate"><span class="pre">03_deploy_poc_to_review_app</span></code> Notebook</p></li>
+<li><p>Run each cell of the Notebook.</p></li>
+<li><p>You will see the MLflow Trace that shows you how the POC application works. Adjust the input question to one that is relevant to your use case, and re-run the cell to “vibe check” the application.</p></li>
+</ol>
+<img alt="../_images/8_img.png" class="align-center" src="../_images/8_img.png" />
+<ol class="arabic simple" start="4">
+<li><p>Modify the default instructions to be relevant to your use case.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>   <span class="n">instructions_to_reviewer</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;## Instructions for Testing the </span><span class="si">{</span><span class="n">RAG_APP_NAME</span><span class="si">}</span><span class="s2">&#39;s Initial Proof of Concept (PoC)</span>
+
+<span class="s2">   Your inputs are invaluable for the development team. By providing detailed feedback and corrections, you help us fix issues and improve the overall quality of the application. We rely on your expertise to identify any gaps or areas needing enhancement.</span>
+
+<span class="s2">   1. **Variety of Questions**:</span>
+<span class="s2">      - Please try a wide range of questions that you anticipate the end users of the application will ask. This helps us ensure the application can handle the expected queries effectively.</span>
+
+<span class="s2">   2. **Feedback on Answers**:</span>
+<span class="s2">      - After asking each question, use the feedback widgets provided to review the answer given by the application.</span>
+<span class="s2">      - If you think the answer is incorrect or could be improved, please use &quot;Edit Answer&quot; to correct it. Your corrections will enable our team to refine the application&#39;s accuracy.</span>
+
+<span class="s2">   3. **Review of Returned Documents**:</span>
+<span class="s2">      - Carefully review each document that the system returns in response to your question.</span>
+<span class="s2">      - Use the thumbs up/down feature to indicate whether the document was relevant to the question asked. A thumbs up signifies relevance, while a thumbs down indicates the document was not useful.</span>
+
+<span class="s2">   Thank you for your time and effort in testing </span><span class="si">{</span><span class="n">RAG_APP_NAME</span><span class="si">}</span><span class="s2">. Your contributions are essential to delivering a high-quality product to our end users.&quot;&quot;&quot;</span>
+
+   <span class="nb">print</span><span class="p">(</span><span class="n">instructions_to_reviewer</span><span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Run the deployment cell to get a link to the Review App.</p></li>
+</ol>
+<img alt="../_images/9_img.png" class="align-center" src="../_images/9_img.png" />
+<ol class="arabic simple" start="6">
+<li><p>Grant individual users permissions to access the Review App.</p></li>
+</ol>
+<img alt="../_images/10_img.png" class="align-center" src="../_images/10_img.png" />
+<ol class="arabic simple" start="7">
+<li><p>Test the Review App by asking a few questions yourself and providing feedback.</p>
+<ul class="simple">
+<li><p>You can view the data in Delta Tables. Note that results can take up to 2 hours to appear in the Delta Tables.</p></li>
+</ul>
+</li>
+</ol>
+<p>Parameters and their default values configured in 00_config:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Knob</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="3-deep-dive.html#query-understanding"><span class="std std-ref">Query understanding</span></a></p></td>
+<td><p>Analyzing and transforming user queries to better represent intent and extract relevant information, such as filters or keywords, to improve the retrieval process.</p></td>
+<td><p>None, the provided query is directly embedded.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="3-deep-dive.html#retrieval"><span class="std std-ref">Retrieval</span></a></p></td>
+<td><p>Finding the most relevant chunks of information given a retrieval query. In the unstructured data case, this typically involves one or a combination of semantic or keyword-based search.</p></td>
+<td><p>Semantic search with K = 5 chunks retrieved</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="3-deep-dive.html#prompt-augmentation"><span class="std std-ref">Prompt augmentation</span></a></p></td>
+<td><p>Combining a user query with retrieved information and instructions to guide the LLM towards generating high-quality responses.</p></td>
+<td><p>A simple RAG prompt template</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="3-deep-dive.html#llm"><span class="std std-ref">LLM</span></a></p></td>
+<td><p>Selecting the most appropriate model (and model parameters) for your application to optimize/balance performance, latency, and cost.</p></td>
+<td><p>Databricks-dbrx-instruct hosted using Databricks FMAPI pay-per-token</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="3-deep-dive.html#post-processing-guardrails"><span class="std std-ref">Post processing &amp; guardrails</span></a></p></td>
+<td><p>Applying additional processing steps and safety measures to ensure the LLM-generated responses are on-topic, factually consistent, and adhere to specific guidelines or constraints.</p></td>
+<td><p>None</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="share-the-review-app-with-stakeholders">
+<h3><span class="section-number">2.1.5. </span>5. Share the Review App with stakeholders<a class="headerlink" href="#share-the-review-app-with-stakeholders" title="Link to this heading">#</a></h3>
+<p>You can now share your POC RAG application with your stakeholders to get their feedback.</p>
+<p>We suggest distributing your POC to at least 3 stakeholders and having them each ask 10 - 20 questions. It is important to have multiple stakeholders test your POC so you can have a diverse set of perspectives to include in your Evaluation Set.</p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./nbs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="5-hands-on-requirements.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><span class="section-number">1. </span>Gather requirements</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="5-hands-on-evaluate-poc.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><span class="section-number">3. </span>Evaluate the POC’s quality</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-build-a-poc">2.1. How to build a POC</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#import-the-sample-code">2.1.1. 1. Import the sample code.</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configure-your-application">2.1.2. 2. Configure your application</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-your-data">2.1.3. 3. Prepare your data.</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deploy-the-poc-chain-to-the-quality-lab-review-app">2.1.4. 4. Deploy the POC chain to the Quality Lab Review App</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#share-the-review-app-with-stakeholders">2.1.5. 5. Share the Review App with stakeholders</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The Databricks GenAI Community
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=3ee479438cf8b5e0d341"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=3ee479438cf8b5e0d341"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Evaluation &amp; monitoring &#8212; Databricks Generative AI Cookbook</title>
+    <title>2.3. Evaluation &amp; monitoring &#8212; Databricks Generative AI Cookbook</title>
   
   
   
@@ -74,8 +74,8 @@
     <link rel="icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Governance and LLMops" href="2-fundamentals-unstructured-llmops.html" />
-    <link rel="prev" title="Retrieval, augmentation, and generation (RAG Chain)" href="2-fundamentals-unstructured-rag.html" />
+    <link rel="next" title="2.4. Governance and LLMops" href="2-fundamentals-unstructured-llmops.html" />
+    <link rel="prev" title="2.2. Retrieval, augmentation, and generation (aka RAG Chain)" href="2-fundamentals-unstructured-chain.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -183,19 +183,43 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">All Notebooks</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Learn</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html"><strong>Section 1:</strong> Introduction to retrieval-augmented generation (RAG)</a></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="2-fundamentals-unstructured.html"><strong>Section 2:</strong> Fundamentals of RAG over unstructured documents</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">Data pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-rag.html">Retrieval, augmentation, and generation (RAG Chain)</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Evaluation &amp; monitoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">Governance and LLMops</a></li>
+<li class="toctree-l1"><a class="reference internal" href="1-introduction-to-rag.html">1. RAG overview</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="2-fundamentals-unstructured.html">2. RAG fundamentals</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-data-pipeline.html">2.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-chain.html">2.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">2.3. Evaluation &amp; monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2-fundamentals-unstructured-llmops.html">2.4. Governance and LLMops</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="3-deep-dive.html"><strong>Section 3:</strong> Deep dive into RAG over unstructured documents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="4-evaluation.html"><strong>Section 4:</strong> Evaluation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="5-hands-on.html"><strong>Section 5:</strong> Hands-on guide to implementing high-quality RAG</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="3-deep-dive.html">3. RAG quality knobs</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-data-pipeline.html">3.1. Data pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3-deep-dive-chain.html">3.2. Retrieval, augmentation, and generation (aka RAG Chain)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="4-evaluation.html">4. Evaluating RAG quality</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-eval-sets.html">4.5. Establishing Ground Truth: Creating Evaluation Sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-metrics.html">4.6. Assessing Performance: Metrics that Matter</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="4-evaluation-infra.html">4.8. Enabling Measurement: Supporting Infrastructure</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-rag-development-workflow.html">5. RAG development workflow</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Implement</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-requirements.html">1. Gather requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-build-poc.html">2. Deploy POC <em>to</em> collect stakeholder feedback</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-evaluate-poc.html">3. Evaluate the POC’s quality</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="5-hands-on-improve-quality.html">4. Root cause &amp; iteratively fix quality issues</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-1.html">4.1. Identify the root cause of quality issues</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="5-hands-on-improve-quality-step-2.html">4.4. Implement and evaluate changes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="5-hands-on-deploy-and-monitor.html">5. Deploy &amp; monitor</a></li>
 </ul>
 
     </div>
@@ -394,7 +418,7 @@ document.write(`
                 <article class="bd-article">
                   
   <section id="evaluation-monitoring">
-<h1>Evaluation &amp; monitoring<a class="headerlink" href="#evaluation-monitoring" title="Link to this heading">#</a></h1>
+<h1><span class="section-number">2.3. </span>Evaluation &amp; monitoring<a class="headerlink" href="#evaluation-monitoring" title="Link to this heading">#</a></h1>
 <p>Evaluation and monitoring are critical components to understand if your RAG application is performing to the <em>quality</em>, <em>cost</em>, and <em>latency</em> requirements dictated by your use case.  Technically, <strong>evaluation</strong> happens during development and <strong>monitoring</strong> happens once the application is deployed to production, but the fundamental components are similar.</p>
 <p>RAG over unstructured data is a complex system with many components that impact the application’s quality. Adjusting any single element can have cascading effects on the others. For instance, data formatting changes can influence the retrieved chunks and the LLM’s ability to generate relevant responses. Therefore, it’s crucial to evaluate each of the application’s components in addition to the application as a whole in order to iteratively refine it based on those assessments.</p>
 <p>Evaluation and monitoring of Generative AI applications, including RAG, differs from classical machine learning in several ways:</p>
@@ -462,12 +486,12 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="2-fundamentals-unstructured-rag.html"
+       href="2-fundamentals-unstructured-chain.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Retrieval, augmentation, and generation (RAG Chain)</p>
+        <p class="prev-next-title"><span class="section-number">2.2. </span>Retrieval, augmentation, and generation (aka RAG Chain)</p>
       </div>
     </a>
     <a class="right-next"
@@ -475,7 +499,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Governance and LLMops</p>
+        <p class="prev-next-title"><span class="section-number">2.4. </span>Governance and LLMops</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
