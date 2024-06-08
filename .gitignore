@@ -1,1 +1,4 @@
 .DS_Store
+env
+.env
+genai_cookbook/_build
