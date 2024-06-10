@@ -40,6 +40,11 @@ Each of these potential fixes are can be broadly categorized into three buckets:
 3. **![Chain code](../images/5-hands-on/chain_code.png)** changes
 
 Based on the type of change, you will follow different steps in the [implement and evaluate changes](./5-hands-on-improve-quality-step-2.md) step.
+
+```{important}
+Broadly, Databricks recommends using prompt engineering to iterate on the quality of your app's outputs.  The majority of the steps below involve prompt engineering.
+```
+
 <table>
 <thead>
 <tr>

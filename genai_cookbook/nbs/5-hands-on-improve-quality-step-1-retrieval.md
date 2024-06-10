@@ -71,12 +71,7 @@ Based on the type of change, you will follow different steps in the [implement a
 <tr>
 <td>Embedding model doesn&#39;t accurately understand the domain and/or key phrases in user queries</td>
 <td><ul><li>Check if semantically similar chunks are being retrieved for the same query</li></ul></td>
-<td><ul><li><img src="../_images/data_pipeline.png" alt="data-pipeline" height="20"/> Try different embedding models</li><li><img src="../_images/data_pipeline.png" alt="data-pipeline" height="20"/> Fine-tune embedding model on domain-specific data</li></ul></td>
-</tr>
-<tr>
-<td>Limited retrieval quality due to embedding model&#39;s lack of domain understanding</td>
-<td><ul><li>Look at retrieved results to check if they are semantically relevant but miss key domain-specific information</li></ul></td>
-<td><ul><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Hybrid search</li><li><img src="../_images/chain_code.png" alt="chain-code" height="20"/> Over-fetch retrieval results, and re-rank. Only feed top re-ranked results into the LLM context</li></ul></td>
+<td><ul><li><img src="../_images/data_pipeline.png" alt="data-pipeline" height="20"/> Try different embedding models</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Hybrid search</li><li><img src="../_images/chain_code.png" alt="chain-code" height="20"/> Over-fetch retrieval results, and re-rank. Only feed top re-ranked results into the LLM context</li><li><img src="../_images/data_pipeline.png" alt="data-pipeline" height="20"/> Fine-tune embedding model on domain-specific data</li></ul></td>
 </tr>
 <tr>
 <td>Relevant information missing from the vector database</td>
