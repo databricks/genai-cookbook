@@ -8,7 +8,7 @@ A good evaluation set has the following characteristics:
 
 - **Representative:** Accurately reflects the variety of requests the application will encounter in production.
 - **Challenging:** The set should include difficult and diverse cases to effectively test the model's capabilities.  Ideally, it will include adversarial examples such as questions attempting prompt injection or questions attempting to generate inappropriate responses from LLM.
-- **Continually updated:** The set must be periodically updated to reflect how the application is used in production and the changing nature of the indexed data.
+- **Continually updated:** The set must be periodically updated to reflect how the application is used in production, the changing nature of the indexed data, and any changes to the application requirements.
 
 Databricks recommends at least 30 questions in your evaluation set, and ideally 100 - 200. The best evaluation sets will grow over time to contain 1,000s of questions.
 

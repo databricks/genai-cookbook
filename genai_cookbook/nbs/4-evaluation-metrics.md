@@ -4,7 +4,7 @@ With an evaluation set, you are able to measure the performance of your RAG appl
 
 - **Retrieval quality**: Retrieval metrics assess how successfully your RAG application retrieves relevant supporting data. Precision and recall are two key retrieval metrics.
 - **Response quality**: Response quality metrics assess how well the RAG application responds to a user's request. Response metrics can measure, for instance, if the resulting answer is accurate per the ground-truth, how well-grounded the response was given the retrieved context (e.g., did the LLM hallucinate), or how safe the response was (e.g., no toxicity).
-- **Cost & latency:** Chain metrics capture the overall cost and performance of RAG applications. Overall latency and token consumption are examples of chain performance metrics.
+- **System performance (cost & latency):**  Metrics capture the overall cost and performance of RAG applications. Overall latency and token consumption are examples of chain performance metrics.
 
 It is very important to collect both response and retrieval metrics. A RAG application can respond poorly in spite of retrieving the correct context; it can also provide good responses on the basis of faulty retrievals. Only by measuring both components can we accurately diagnose and address issues in the application.
 
@@ -13,7 +13,9 @@ There are two key approaches to measuring performance across these metrics:
 - **Deterministic measurement:** Cost and latency metrics can be computed deterministically based on the application's outputs.  If your evaluation set includes a list of documents that contain the answer to a question, a subset of the retrieval metrics can also be computed deterministically.
 - **LLM judge based measurement** In this approach, a separate [LLM acts as a judge](https://arxiv.org/abs/2306.05685) to evaluate the quality of the RAG application's retrieval and responses.  Some LLM judges, such as answer correctness, compare the human-labeled ground truth vs. the app's outputs.  Other LLM judges, such as groundedness, do not require human-labeled ground truth to assess their app's outputs.
 
-Take time to ensure that the LLM judge's evaluations align with the RAG application's success criteria.
+```{important}
+For an LLM judge to be effective, it must be tuned to understand the use case. Doing so requires careful attention to understand where the judge does and does not work well, and then tuning the judge to improve it for the failure cases.
+```
 
 > [Mosaic AI Quality Lab](https://docs.databricks.com/generative-ai/agent-evaluation/index.html) provides an out-of-the-box implementation, using hosted LLM judge models, for each metric discussed on this page.  Quality Lab's documentation discusses the [details](https://docs.databricks.com/generative-ai/agent-evaluation/llm-judge-metrics.html) of how these metrics and judges are implemented and provides [capabilities](https://docs.databricks.com/generative-ai/agent-evaluation/advanced-agent-eval.html#provide-examples-to-the-built-in-llm-judges) to tune the judge's with your data to increase their accuracy
 

@@ -1,6 +1,6 @@
-## Evaluate the POC's quality
+## **Step 4:** Evaluate the POC's quality
 
-```{image} ../images/5-hands-on/11_img.png
+```{image} ../images/5-hands-on/workflow_baseline.png
 :align: center
 ```
 
@@ -10,7 +10,7 @@
 
 *Time varies based on the number of questions in your evaluation set.  For 100 questions, evaluation will take approximately 5 minutes.*
 
-**Overview & expected outcome**
+### **Overview & expected outcome**
 
 This step will use the evaluation set you just curated to evaluate your POC app and establish the baseline quality/cost/latency.  The evaluation results are used by the next step to root cause any quality issues.
 
@@ -18,12 +18,12 @@ Evaluation is done using [Mosaic AI Quality Lab](https://docs.databricks.com/gen
 
 The aggregated metrics and evaluation of each question in the evaluation set are logged to MLflow.  For more details, see the [evaluation outputs](https://docs.databricks.com/generative-ai/agent-evaluation/evaluate-agent.html#evaluation-outputs) documentation.
 
-**Requirements:**
+### **Requirements**
 
 - Your Evaluation Set is available
 - All requirements from previous steps
 
-**Instructions**
+### **Instructions**
 
 1. Open the `05_evaluate_poc_quality` Notebook and press Run All.
 

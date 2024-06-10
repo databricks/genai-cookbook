@@ -1,42 +1,49 @@
-### Identify the root cause of quality issues
+### **Step 5:** Identify the root cause of quality issues
+
+```{image} ../images/5-hands-on/workflow_iterate.png
+:align: center
+```
+<br/>
 
 **Expected time:** 60 minutes
 
-**Overview**
+#### **Requirements**
 
-Retrieval and generation are the 2 primary buckets of root causes.  To identify the root cause to focus on first, we will use the output of the Mosaic AI Quality Lab's LLM judges that you ran in the previous [step](./5-hands-on-evaluate-poc.md) to identify the root cause that most impacts your app's quality.
+1. Your Evaluation results for the POC are available in MLflow 
+    - If you followed the previous step, this will be the case!
+2. All requirements from previous steps
 
-To determine the root cause, use the output of the following metrics:
-- `retrieval/llm_judged/chunk_relevance/precision/average`
-- `response/llm_judged/groundedness/rating/percentage`
-- `response/llm_judged/correctness/rating/percentage`
-- `response/llm_judged/relevance_to_query/rating/percentage`
+#### **Overview**
 
-If you have human labeled ground-truth for which document should be retrieved for each question, you can optionally replace `retrieval/llm_judged/chunk_relevance/precision/average` with the score for `retrieval/ground_truth/document_recall/average`.
-
-**Requirements**
-
-- Your Evaluation results for the POC are available in MLflow 
-  - If you followed the previous step, this will be the case!
-- All requirements from previous steps
+Retrieval and generation are the 2 primary buckets of root causes.  To determine where we focus on first, we  use the output of the Mosaic AI Quality Lab's LLM judges that you ran in the previous [step](./5-hands-on-evaluate-poc.md) to identify the most frequent root cause that impacts your app's quality.  W
 
 
-**Instructions**
+Each row your evaluation set will be tagged as follows:
+1. **Overall assessment:** ![pass](../images/5-hands-on/pass.png) or ![fail](../images/5-hands-on/fail.png)
+2. **Root cause:** `Improve Retrieval` or `Improve Generation`
+3. **Root cause rationale:** A brief description of why the root cause was selected
 
-How you root cause your app depends on if your evaluation set contains the ground-truth responses to your questions - stored in `expected_response`.  If you have these available, use the first table below.  Otherwise, use the second table.
+#### **Instructions**
 
-1. Open the `06_root_cause_poc_quality_issues` Notebook
-2. Press Run All
-3. Review the output tables to determine the most frequent root cause in your application and follow the steps linked below:
-  - [Improve retriever](./5-hands-on-improve-quality-step-1-retrieval.md)
-  - [Improve LLM](./5-hands-on-improve-quality-step-1-generation.md)
+The approach depends on if your evaluation set contains the ground-truth responses to your questions - stored in `expected_response`.  If you have `expected_response` available, use the first table below.  Otherwise, use the second table.
 
-**_Root cause analysis with available ground truth_**
+1. Open the `B_quality_iteration/01_root_cause_quality_issues` Notebook
+2. Run the cells that are relevant to your use case e.g., if you do or don't have `expected_response`
+3. Review the output tables to determine the most frequent root cause in your application
+4. For each root cause, follow the steps below to further debug and identify potential fixes:
+    - [Debugging retrieval quality](./5-hands-on-improve-quality-step-1-retrieval.md)
+    - [Debugging generation quality](./5-hands-on-improve-quality-step-1-generation.md)
+
+##### Root cause analysis _with_ available ground truth
+
+```{note}
+If you have human labeled ground-truth for which document should be retrieved for each question, you can optionally substitute `retrieval/llm_judged/chunk_relevance/precision/average` with the score for `retrieval/ground_truth/document_recall/average`.
+```
 
 <table class="table">
   
   <tr>
-   <td>Retrieval precision >50% 
+   <td>Chunk relevance precision
    </td>
    <td>Groundedness
    </td>
@@ -52,7 +59,7 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
   </tr>
   <tr>
-   <td>❌
+   <td><div style="color:red">&lt;50%</div>
    </td>
    <td>❌
    </td>
@@ -62,13 +69,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td><strong>Retrieval is poor.</strong>
    </td>
-   <td>Improve Retriever
+   <td><code>Improve Retrieval</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>❌
+   <td><div style="color:red">&lt;50%</div>
    </td>
    <td>❌
    </td>
@@ -78,29 +85,29 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>LLM generates relevant response, but <strong>retrieval is poor</strong> e.g., the LLM ignores retrieval and uses its training knowledge to answer.
    </td>
-   <td>Improve Retriever
+   <td><code>Improve Retrieval</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>❌
+   <td><div style="color:red">&lt;50%</div>
    </td>
    <td>❌
    </td>
    <td>✅
    </td>
-   <td>Either
+   <td>✅ or ❌
    </td>
    <td><strong>Retrieval quality is poor</strong>, but LLM gets the answer correct regardless.
    </td>
-   <td>Improve Retriever
+   <td><code>Improve Retrieval</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>❌
+   <td><div style="color:red">&lt;50%</div>
    </td>
    <td>✅
    </td>
@@ -110,13 +117,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Response is grounded in retrieval, but <strong>retrieval is poor</strong>.
    </td>
-   <td>Improve Retriever
+   <td><code>Improve Retrieval</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>❌
+   <td><div style="color:red">&lt;50%</div>
    </td>
    <td>✅
    </td>
@@ -126,61 +133,61 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Relevant response grounded in the retrieved context, but <strong>retrieval may not be related to the expected answer.</strong>
    </td>
-   <td>Improve Retriever
+   <td><code>Improve Retrieval</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>❌
+   <td><div style="color:red">&lt;50%</div>
    </td>
    <td>✅
    </td>
    <td>✅
    </td>
-   <td>Either
+   <td>✅ or ❌
    </td>
-   <td>Retrieval is poor, but good enough for this question
+   <td>Retrieval finds enough information for the LLM to correctly answer. 🎉
    </td>
    <td>N/A
    </td>
-   <td>✅
+   <td><img src="../_images/pass.png" alt="pass" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>✅
+   <td><div style="color:green">&gt;50%</div>
    </td>
    <td>❌
    </td>
    <td>❌
    </td>
-   <td>Either
+   <td>✅ or ❌
    </td>
    <td>Hallucination
    </td>
-   <td>Improve LLM
+   <td><code>Improve Generation</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>✅
+   <td><div style="color:green">&gt;50%</div>
    </td>
    <td>❌
    </td>
    <td>✅
    </td>
-   <td>Either
+   <td>✅ or ❌
    </td>
    <td>Hallucination, correct but generates details not in context
    </td>
-   <td>Improve LLM
+   <td><code>Improve Generation</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>✅
+   <td><div style="color:green">&gt;50%</div>
    </td>
    <td>✅
    </td>
@@ -190,13 +197,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Good retrieval, but the LLM does not provide a relevant response.
    </td>
-   <td>Improve LLM
+   <td><code>Improve Generation</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>✅
+   <td><div style="color:green">&gt;50%</div>
    </td>
    <td>✅
    </td>
@@ -206,13 +213,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Good retrieval and relevant response, but not correct.
    </td>
-   <td>Improve LLM
+   <td><code>Improve Generation</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>✅
+   <td><div style="color:green">&gt;50%</div>
    </td>
    <td>✅
    </td>
@@ -224,7 +231,7 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>N/A
    </td>
-   <td>✅
+   <td><img src="../_images/pass.png" alt="pass" height="20"/> 
    </td>
   </tr>
 </table>
@@ -233,11 +240,11 @@ How you root cause your app depends on if your evaluation set contains the groun
 <br/>
 
 
-**_Root cause analysis WITHOUT available ground truth_**
+##### Root cause analysis _without_ available ground truth
 
 <table class="table">
   <tr>
-   <td>Retrieval precision >50% 
+   <td>Chunk relevance precision
    </td>
    <td>Groundedness
    </td>
@@ -251,7 +258,7 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
   </tr>
   <tr>
-   <td>❌
+   <td><div style="color:red">&lt;50%</div>
    </td>
    <td>❌
    </td>
@@ -259,13 +266,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Retrieval quality is poor
    </td>
-   <td>Improve Retriever
+   <td><code>Improve Retrieval</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>❌
+   <td><div style="color:red">&lt;50%</div>
    </td>
    <td>❌
    </td>
@@ -273,13 +280,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Retrieval quality is poor
    </td>
-   <td>Improve Retriever
+   <td><code>Improve Retrieval</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>❌
+   <td><div style="color:red">&lt;50%</div>
    </td>
    <td>✅
    </td>
@@ -287,13 +294,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Response is grounded in retrieval, but <strong>retrieval is poor</strong>.
    </td>
-   <td>Improve Retriever
+   <td><code>Improve Retrieval</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>❌
+   <td><div style="color:red">&lt;50%</div>
    </td>
    <td>✅
    </td>
@@ -301,13 +308,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Relevant response grounded in the retrieved context and relevant, but <strong>retrieval is poor</strong>.
    </td>
-   <td>Improve Retriever
+   <td><code>Improve Retrieval</code>
    </td>
-   <td>✅
+   <td><img src="../_images/pass.png" alt="pass" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>✅
+   <td><div style="color:green">&gt;50%</div>
    </td>
    <td>❌
    </td>
@@ -315,13 +322,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Hallucination
    </td>
-   <td>Improve LLM
+   <td><code>Improve Generation</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>✅
+   <td><div style="color:green">&gt;50%</div>
    </td>
    <td>❌
    </td>
@@ -329,13 +336,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Hallucination
    </td>
-   <td>Improve LLM
+   <td><code>Improve Generation</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>✅
+   <td><div style="color:green">&gt;50%</div>
    </td>
    <td>✅
    </td>
@@ -343,13 +350,13 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>Good retrieval & grounded, but LLM does not provide a relevant response.
    </td>
-   <td>Improve LLM
+   <td><code>Improve Generation</code>
    </td>
-   <td>❌
+   <td><img src="../_images/fail.png" alt="fail" height="20"/> 
    </td>
   </tr>
   <tr>
-   <td>✅
+   <td><div style="color:green">&gt;50%</div>
    </td>
    <td>✅
    </td>
@@ -359,7 +366,7 @@ How you root cause your app depends on if your evaluation set contains the groun
    </td>
    <td>None
    </td>
-   <td>✅
+   <td><img src="../_images/pass.png" alt="pass" height="20"/> 
    </td>
   </tr>
 </table>

@@ -1,21 +1,22 @@
-## RAG development workflow
+## Evaluation-driven development workflow
 
 
 <!-- ## Evaluation-driven development -->
-This section walks you through Databricks recommended development workflow for building, testing, and deploying a high-quality RAG application: **evaluation-driven development**. This workflow is based on the Mosaic Research team's best practices for building and evaluating high quality RAG applications. If quality is important to your business, Databricks recommends following an evaluation-driven workflow:
+This section walks you through Databricks recommended development workflow for building, testing, and deploying a high-quality RAG application: **evaluation-driven development**. This workflow is based on the Mosaic Research team's recommended best practices for building and evaluating high quality RAG applications. If quality is important to your business, Databricks recommends following an evaluation-driven workflow:
 
 1. Define the requirements
 2. Collect stakeholder feedback on a rapid proof of concept (POC)
 3. Evaluate the POC's quality
 4. Iteratively diagnose and fix quality issues
 5. Deploy to production
-6. Monitor in production
+6. Monitor in production 
 
-```{image} ../images/5-hands-on/1_img.png
+```{image} ../images/5-hands-on/workflow.png
 :align: center
 ```
 <br/>
-The [implement](./5-hands-on-requirements.md) section of this cookbook provides a guided implementation of this workflow with sample code.
+
+The [implement](./6-implement-overview) section of this cookbook provides a guided implementation of this workflow with sample code.
 
 There are two core concepts in **evaluation-driven development:**
 
@@ -29,8 +30,6 @@ There are two core concepts in **evaluation-driven development:**
 
 Anchoring against metrics and an evaluation set provides the following benefits:
 
-1. You can iteratively and confidently refine your application's quality during development - no more vibe checks or guessing if a change resulted in an improvement.
+1. You can iteratively and confidently refine your application's quality during development - no more guessing if a change resulted in an improvement.
 
 2. Getting alignment with business stakeholders on the readiness of the application for production becomes more straightforward when you can confidently state, *"we know our application answers the most critical questions to our business correctly and doesn't hallucinate."*
-
-> Evaluation-driven development is known in the academic research community as ["hill climbing"](https://en.wikipedia.org/wiki/Hill_climbing) akin to climbing a hill to reach the peak - where the hill is your metric and the peak is 100% accuracy on your evaluation set.

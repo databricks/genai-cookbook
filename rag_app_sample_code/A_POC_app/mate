@@ -1,0 +1,124 @@
+3c3
+< # MAGIC # POC PDF Data Preparation Pipeline
+---
+> # MAGIC # POC JSON file Data Preparation Pipeline
+20c20
+< # MAGIC %pip install -qqqq -U pypdf==4.1.0 databricks-vectorsearch transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.0 mlflow mlflow-skinny
+---
+> # MAGIC %pip install -qqqq -U databricks-vectorsearch transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.0 mlflow mlflow-skinny
+25d24
+< from pypdf import PdfReader
+134c133
+< # MAGIC ### PyPDF based parsing function
+---
+> # MAGIC # JSON files
+136c135,138
+< # MAGIC This function parses an individual PDF with `pypdf` library.
+---
+> # MAGIC `content_key`: JSON key containing the string content that should be chunked
+> # MAGIC
+> # MAGIC All other keys will be passed through as-is
+> # MAGIC
+139a142,143
+> import json
+> 
+145c149
+< def parse_bytes_pypdf(
+---
+> def parse_bytes_json(
+146a151
+>     content_key: str
+147a153
+> 
+149,150c155,167
+<         pdf = io.BytesIO(raw_doc_contents_bytes)
+<         reader = PdfReader(pdf)
+---
+>         # Decode the raw bytes from Spark
+>         json_str = raw_doc_contents_bytes.decode("utf-8")
+>         # Load the JSON contained in the bytes
+>         json_data = json.loads(json_str)
+>         
+>         # Load the known key to `parsed_content`
+>         json_data['parsed_content'] = json_data[content_key]
+>         
+>         # Remove that key
+>         del json_data[content_key]
+>         
+>         output = json_data
+>         status = "SUCCESS"
+152c169,170
+<         parsed_content = [page_content.extract_text() for page_content in reader.pages]
+---
+>     except json.JSONDecodeError as e:
+>         status = f"JSON decoding failed: {e}"
+154,155c172
+<             "num_pages": str(len(parsed_content)),
+<             "parsed_content": "\n".join(parsed_content),
+---
+>             "parsed_content": "",
+157,160c174,178
+< 
+<         return {
+<             "doc_parsed_contents": output,
+<             "parser_status": "SUCCESS",
+---
+>         warnings.warn(status)
+>     except UnicodeDecodeError as e:
+>         status = f"Unicode decoding failed: {e}"
+>         output = {
+>             "parsed_content": "",
+161a180
+>         warnings.warn(status)
+163,166c182,184
+<         warnings.warn(f"Exception {e} has been thrown during parsing")
+<         return {
+<             "doc_parsed_contents": {"num_pages": "", "parsed_content": ""},
+<             "parser_status": f"ERROR: {e}",
+---
+>         status = f"An unexpected error occurred: {e}"
+>         output = {
+>             "parsed_content": "",
+168a187,193
+>     return {
+>         "doc_parsed_contents": output,
+>         "parser_status": status,
+>     }
+> 
+> 
+> 
+177a203
+> parser_config = pipeline_config.get("parser")
+179c205,208
+<     parse_bytes_pypdf,
+---
+>     partial(
+>         parse_bytes_json,
+>         content_key=parser_config.get("config").get("content_key"),
+>     ),
+367a397,416
+> # Append the JSON's metadata to the chunked table
+> 
+> keys_df = spark.read.table(
+> destination_tables_config.get("parsed_docs_table_name")
+> )
+> 
+> df_keys_array = keys_df.select(func.explode(func.map_keys(keys_df.doc_parsed_contents)).alias("key")).distinct().toPandas()["key"].tolist()
+> 
+> metadata_df = parsed_files_df
+> 
+> if 'parsed_content' in df_keys_array:
+>     df_keys_array.remove('parsed_content')
+> 
+> for key in df_keys_array:
+>     metadata_df = metadata_df.withColumn(key, metadata_df.doc_parsed_contents[key])
+> 
+> metadata_df = metadata_df.drop("doc_parsed_contents").withColumnRenamed("path", "path_2")
+> 
+> chunked_files_df = chunked_files_df.join(metadata_df, func.expr("path_2 = path"), "inner").drop("path_2")
+> 
+389a439,442
+> 
+> 
+> # COMMAND ----------
+> 

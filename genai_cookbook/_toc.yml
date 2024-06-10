@@ -4,6 +4,9 @@
 format: jb-book
 root: index
 parts:
+- caption: "Overview"
+  chapters:
+    - file: index-2
 - caption: "Learn"
   numbered: true
   chapters:
@@ -25,7 +28,7 @@ parts:
     - file: nbs/4-evaluation-infra
   - file: nbs/5-rag-development-workflow
 - caption: "Implement"
-  numbered: true
+  numbered: false
   chapters:
   - file: nbs/5-hands-on-requirements
   - file: nbs/6-implement-overview
@@ -41,13 +44,15 @@ parts:
 # - caption: "Build: Debug & iterate on RAG quality"  
 #   numbered: true
 #   chapters:
-  - file: nbs/5-hands-on-improve-quality
+  # - file: nbs/5-hands-on-improve-quality
+  #   sections:
+  - file: nbs/5-hands-on-improve-quality-step-1
     sections:
-    - file: nbs/5-hands-on-improve-quality-step-1
-      sections:
-      - file: nbs/5-hands-on-improve-quality-step-1-retrieval
-      - file: nbs/5-hands-on-improve-quality-step-1-generation
-    - file: nbs/5-hands-on-improve-quality-step-2
+    - file: nbs/5-hands-on-improve-quality-step-1-retrieval
+    - file: nbs/5-hands-on-improve-quality-step-1-generation
+  - file: nbs/5-hands-on-improve-quality-step-2
+    sections:
+    - file: nbs/5-hands-on-improve-quality-step-2-data-pipeline
   - file: nbs/5-hands-on-deploy-and-monitor
 # - caption: "Deploy & monitor a RAG app"
 #   chapters:

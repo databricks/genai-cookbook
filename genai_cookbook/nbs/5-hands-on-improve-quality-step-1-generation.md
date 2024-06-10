@@ -1,16 +1,20 @@
-#### Generation quality
+#### Debugging generation quality
 
 ##### Debugging generation quality
 
-**You are on this page because your [root cause analysis](./5-hands-on-improve-quality-step-1.md) said that LLM generation quality was the issue to focus.**
+**You are on this page because your [root cause analysis](./5-hands-on-improve-quality-step-1.md) said that improving LLM generation was a root cause to address.**
 
 Even with optimal retrieval, if the LLM component of a RAG chain cannot effectively utilize the retrieved context to generate accurate, coherent, and relevant responses, the final output quality will suffer. Issues with generation quality can arise as hallucinations, inconsistencies, or failure to concisely address the user's query, to name a few.
 
 The following is a step-by-step process to address **generation quality** issues:
 
-1. Identify a set of test queries with low generation quality metrics.
 
-2. For each query, manually examine the generated response and compare it to the retrieved context and the ground-truth response.
+
+1. Open the `quality_iteration/01_root_cause_quality_issues` Notebook
+
+2. Use the queries to load MLflow traces of the records that retrieval quality issues.
+
+2. For each record, manually examine the generated response and compare it to the retrieved context and the ground-truth response.
 
 3. Look for patterns or common issues among the queries with low generation quality. Some examples:
    - Generating information not present in the retrieved context or outputting contradicting information with respect to the retrieved context (i.e., hallucination)
@@ -19,16 +23,23 @@ The following is a step-by-step process to address **generation quality** issues
 
 4. Based on the identified issues, hypothesize potential root causes and corresponding fixes. See the "[Common reasons for poor generation quality](#common-reasons-for-poor-generation-quality)" table below for guidance.
 
-5. Implement the proposed fix for the most promising or impactful root cause by following [step 4.2](./5-hands-on-improve-quality-step-2.md). This may involve modifying the RAG chain (e.g., adjusting the prompt template, trying a different LLM) or the data pipeline (e.g., adjusting the chunking strategy to provide more context).
+5. Follow the steps in [implement and evaluate changes](./5-hands-on-improve-quality-step-2.md) to implement and evaluate a potential fix.
+      - This may involve modifying the RAG chain (e.g., adjusting the prompt template, trying a different LLM) or the data pipeline (e.g., adjusting the chunking strategy to provide more context).
 
-6. Re-run evaluation on the updated system and compare generation quality metrics to the previous version.  Once generation quality is at a desired level, re-run the [root cause analysis](./5-hands-on-improve-quality-step-1.md) to determine if the overall chain has any additional issues that should be addressed.
+7. If the generation quality is still not satisfactory, repeat steps 4 - 5 for the next most promising fix until the desired performance is achieved.
 
-7. If the generation quality is still not satisfactory, repeat steps 4-6 for the next most promising fix until the desired performance is achieved.
+7. Re-run the [root cause analysis](./5-hands-on-improve-quality-step-1.md) to determine if the overall chain has any additional root causes that should be addressed.
+
 
 ##### Common reasons for poor generation quality
 
-Each of these potential fixes are tagged as one of three types. Based on the type of change, you will follow different steps in [step 4.2](./5-hands-on-improve-quality-step-2.md).
+Each of these potential fixes are can be broadly categorized into three buckets:
 
+1. **![Data pipeline](../images/5-hands-on/data_pipeline.png)** changes
+2. **![Chain config](../images/5-hands-on/chain_config.png)** changes
+3. **![Chain code](../images/5-hands-on/chain_code.png)** changes
+
+Based on the type of change, you will follow different steps in the [implement and evaluate changes](./5-hands-on-improve-quality-step-2.md) step.
 <table>
 <thead>
 <tr>

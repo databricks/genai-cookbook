@@ -1,11 +1,15 @@
-## Deploy POC to collect stakeholder feedback
+## **Step 2:** Deploy POC to collect stakeholder feedback
 
-```{image} ../images/5-hands-on/3_img.png
+```{image} ../images/5-hands-on/workflow_poc.png
 :align: center
 ```
 <br/>
 
 **Expected time:** 30-60 minutes
+
+**Requirements**
+1. Completed [start here](./6-implement-overview.md) steps
+2. Data from your [requirements](/nbs/5-hands-on-requirements.md#requirements-questions) is available in your [Lakehouse](https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html) inside a Unity Catalog [volume](https://docs.databricks.com/en/connect/unity-catalog/volumes.html) <!-- or [Delta Table](https://docs.databricks.com/en/delta/index.html)-->
 
 **Expected outcome**
 
@@ -14,6 +18,7 @@ At the end of this step, you will have deployed the [Quality Lab Review App](htt
 ```{image} ../images/5-hands-on/review_app2.gif
 :align: center
 ```
+<br/>
 
 **Overview**
 
@@ -23,18 +28,18 @@ The first step in evaluation-driven development is to build a proof of concept (
 2. Allows collecting initial feedback from stakeholders, which in turn enables you to create the first version of your Evaluation Set
 3. Establishes a baseline measurement of quality to start to iterate from
 
-Databricks recommends building your POC using the simplest RAG chain architecture and our recommended defaults for each knob/parameter.  
+Databricks recommends building your POC using the simplest RAG architecture and our recommended defaults for each knob/parameter.  
 
 
 ```{note}
 **Why start from a simple POC?** There are hundreds of possible combinations of knobs you can tune within your RAG application. You can easily spend weeks tuning these knobs, but if you do so before you can systematically evaluate your RAG, you'll end up in what we call the POC doom loop—iterating on settings, but with no way to objectively know if you made an improvement—all while your stakeholders sit around impatiently waiting.
 ```
 
-The POC template in this cookbook are designed with quality iteration in mind.  That is, they are parameterized with the knobs that our research has shown are most important to tune in order to improve RAG quality.  Said differently, these templates are not "3 lines of code that magically make a RAG"—rather, they are a well-structured RAG application that can be tuned for quality in the following steps of an evaluation-driven development workflow.  
+The POC template in this cookbook are designed with quality iteration in mind.  That is, they are parameterized with the knobs that our research has shown are important to tune in order to improve RAG quality.  Said differently, these templates are not "3 lines of code that magically make a RAG"—rather, they are a well-structured RAG application that can be tuned for quality in the following steps of an evaluation-driven development workflow.  
 
 This enables you to quickly deploy a POC, but transition quickly to quality iteration without needing to rewrite your code.
 
-Below is the technical architecture of the POC application.
+Below is the technical architecture of the POC application:
 
 ```{image} ../images/5-hands-on/5_img.png
 :align: center
@@ -46,12 +51,6 @@ By default, the POC uses the open source models available on [Mosaic AI Foundati
 - Follow [these steps](https://docs.databricks.com/en/machine-learning/foundation-models/deploy-prov-throughput-foundation-model-apis.html) for other open source models available in the Databricks Marketplace
 - Follow this [notebook](REPO_URL/helpers/Create_OpenAI_External_Model.py) or these [instructions](https://docs.databricks.com/en/generative-ai/external-models/index.html) for 3rd party models such as Azure OpenAI, OpenAI, Cohere, Anthropic, Google Gemini, etc.
 ```
-
-
-
-**Requirements**
-- Completed [start here](./6-implement-overview.md) steps
-- Data from your [requirements](/nbs/5-hands-on-requirements.md#requirements-questions) is available in your [Lakehouse](https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html) inside a [Unity Catalog](https://www.databricks.com/product/unity-catalog) [volume](https://docs.databricks.com/en/connect/unity-catalog/volumes.html) <!-- or [Delta Table](https://docs.databricks.com/en/delta/index.html)-->
 
 
 **Instructions**

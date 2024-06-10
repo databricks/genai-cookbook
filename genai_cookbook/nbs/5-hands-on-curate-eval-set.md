@@ -1,6 +1,6 @@
-## Curate an Evaluation Set from stakeholder feedback
+## **Step 3:** Curate an Evaluation Set from stakeholder feedback
 
-```{image} ../images/5-hands-on/11_img.png
+```{image} ../images/5-hands-on/workflow_evalset.png
 :align: center
 ```
 
@@ -10,7 +10,7 @@
 
 *Time varies based on the quality of the responses provided by your stakeholders.  If the responses are messy or contain lots of irrelevant queries, you will need to spend more time filtering and cleaning the data.*
 
-**Overview & expected outcome**
+#### **Overview & expected outcome**
 
 This step will bootstrap an evaluation set with the feedback that stakeholders have provided by using the Review App.  Note that you can bootstrap an evaluation set with *just* questions, so even if your stakeholders only chatted with the app vs. providing feedback, you can follow this step.
 
@@ -33,12 +33,12 @@ Across all of the above, if the user 👍 a chunk from the `retrieved_context`, 
 Databricks recommends that your Evaluation Set contain at least 30 questions to get started.  Read the [evaluation set deep dive](./4-evaluation-eval-sets.md) to learn more about what a "good" evaluation set is.
 ```
 
-**Requirements:**
+#### **Requirements**
 
 - Stakeholders have used your POC and provided feedback
 - All requirements from previous steps
 
-**Instructions**
+#### **Instructions**
 
 1. Open the `04_create_evaluation_set` Notebook and press Run All.
 

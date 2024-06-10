@@ -1,6 +1,6 @@
 ## **Prerequisite:** Gather requirements
 
-```{image} ../images/5-hands-on/2_img.png
+```{image} ../images/5-hands-on/workflow_gather.png
 :align: center
 ```
 <br/>
@@ -12,7 +12,7 @@ The first thing you'll need to establish is whether RAG is even the right approa
 
 RAG is a good fit when:
 
-- Reasoning over retrieved information (both unstructured and structured)
+- Reasoning over retrieved information (both unstructured and structured) *that doesn't entirely fit within the LLM's context window*
 - Synthesizing information from multiple sources (e.g., generating a summary of key points from different articles on a topic) 
 - Dynamic retrieval based on a user query is necessary (e.g., given a user query, determine what data source to retrieve from)
 - The use case requires generating novel content based on retrieved information (e.g., answering questions, providing explanations, offering recommendations)
@@ -20,10 +20,9 @@ RAG is a good fit when:
 Conversely, RAG may not be the best fit when:
 
 - The task does not require query-specific retrieval. For example, generating call transcript summaries; even if individual transcripts are provided as context in the LLM prompt, the retrieved information remains the same for each summary.
+- The entire set of information to retrieve can fit within the LLM's context window
 - Extremely low-latency responses are required (i.e., when responses are required in milliseconds)
-- The output is expected to be an exact copy of the retrieved information without modification (e.g., a search engine that returns verbatim snippets from documents) 
 - Simple rule-based or templated responses are sufficient (e.g., a customer support chatbot that provides predefined answers based on keywords)
-- Input data needs to be reformatted (e.g., a user provides some input text and expects it to be transformed to a table)
 
 ### Requirements to discover  
 

@@ -1,16 +1,21 @@
-#### Retrieval quality
+#### Debugging retrieval quality
 
 ##### How to debug retrieval quality
 
-**You are on this page because your [root cause analysis](./5-hands-on-improve-quality-step-1.md) said that retrieval quality was the issue to focus.**
+**You are on this page because your [root cause analysis](./5-hands-on-improve-quality-step-1.md) said that improving retrieval a the root cause to address.**
 
 Retrieval quality is arguably the most important component of a RAG application. If the most relevant chunks are not returned for a given query, the LLM will not have access to the necessary information to generate a high-quality response. Poor retrieval can thus lead to irrelevant, incomplete, or hallucinated output.  This step requires manual effort to analyze the underlying data. With Mosaic AI, this becomes considerably easier given the tight integration between the data platform (Unity Catalog and Vector Search), and experiment tracking (MLflow LLM evaluation and MLflow tracing).
 
+
+##### Instructions 
+
 Here's a step-by-step process to address **retrieval quality** issues:
 
-1. Load the queries from your root cause analysis that had low retrieval quality metrics.
+1. Open the `quality_iteration/01_root_cause_quality_issues` Notebook
 
-2. For each query, manually examine the retrieved chunks.  If available, compare them to the ground-truth retrieval documents.
+2. Use the queries to load MLflow traces of the records that retrieval quality issues.
+
+2. For each record, manually examine the retrieved chunks.  If available, compare them to the ground-truth retrieval documents.
 
 3. Look for patterns or common issues among the queries with low retrieval quality. Some examples might include:
    - Relevant information is missing from the vector database entirely
@@ -21,15 +26,23 @@ Here's a step-by-step process to address **retrieval quality** issues:
 
 4. Based on the identified issue, hypothesize potential root causes and corresponding fixes. See the [Common reasons for poor retrieval quality](#common-reasons-for-poor-retrieval-quality) table below for guidance on this.
 
-5. Implement the proposed fix for the most promising or impactful root cause by following [step 4.2](./5-hands-on-improve-quality-step-2.md). This may involve modifying the data pipeline (e.g., adjusting chunk size, trying a different embedding model) or modifying the RAG chain (e.g., implementing hybrid search, retrieving more chunks).
+5. Follow the steps in [implement and evaluate changes](./5-hands-on-improve-quality-step-2.md) to implement and evaluate a potential fix.
+      - This may involve modifying the data pipeline (e.g., adjusting chunk size, trying a different embedding model) or modifying the RAG chain (e.g., implementing hybrid search, retrieving more chunks).
 
-6. Re-run the evaluation on the updated system and compare the retrieval quality metrics to the previous version. Once retrieval quality is at a desired level, re-run the [root cause analysis](./5-hands-on-improve-quality-step-1.md) to determine if the overall chain has any additional issues that should be addressed.
+6. If retrieval quality is still not satisfactory, repeat steps 4-5 for the next most promising fixes until the desired performance is achieved.
 
-7. If retrieval quality is still not satisfactory, repeat steps 4-6 for the next most promising fixes until the desired performance is achieved.
+7. Re-run the [root cause analysis](./5-hands-on-improve-quality-step-1.md) to determine if the overall chain has any additional root causes that should be addressed.
+
 
 ##### Common reasons for poor retrieval quality
 
-Each of these potential fixes are tagged as one of three types. Based on the type of change, you will follow different steps in [step 4.2](./5-hands-on-improve-quality-step-2.md).
+Each of these potential fixes are can be broadly categorized into three buckets:
+
+1. **![Data pipeline](../images/5-hands-on/data_pipeline.png)** changes
+2. **![Chain config](../images/5-hands-on/chain_config.png)** changes
+3. **![Chain code](../images/5-hands-on/chain_code.png)** changes
+
+Based on the type of change, you will follow different steps in the [implement and evaluate changes](./5-hands-on-improve-quality-step-2.md) step.
 
 <table>
 <thead>
@@ -53,7 +66,7 @@ Each of these potential fixes are tagged as one of three types. Based on the typ
 <tr>
 <td>Chunks don&#39;t have enough information about the text from which they were taken</td>
 <td><ul><li>Assess if the lack of context for each chunk is causing confusion or ambiguity in the retrieved results</li></ul></td>
-<td><ul><li><img src="../_images/data_pipeline.png" alt="data-pipeline" height="20"/> Chain codeTry adding metadata &amp; titles to each chunk (e.g., section titles)</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Retrieve more chunks, and use an LLM with larger context size</li></ul></td>
+<td><ul><li><img src="../_images/data_pipeline.png" alt="data-pipeline" height="20"/> Try adding metadata &amp; titles to each chunk (e.g., section titles)</li><li><img src="../_images/chain_config.png" alt="chain-config" height="20"/> Retrieve more chunks, and use an LLM with larger context size</li></ul></td>
 </tr>
 <tr>
 <td>Embedding model doesn&#39;t accurately understand the domain and/or key phrases in user queries</td>

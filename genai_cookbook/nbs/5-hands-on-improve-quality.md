@@ -1,6 +1,6 @@
-## Root cause & iteratively fix quality issues
+## **Step 5:** Root cause & iteratively fix quality issues
 
-```{image} ../images/5-hands-on/14_img.png
+```{image} ../images/5-hands-on/workflow_iterate.png
 :align: center
 ```
 <br/>
