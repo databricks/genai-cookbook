@@ -2,7 +2,7 @@
 # Learn more at https://jupyterbook.org/customize/config.html
 
 title: Databricks Generative AI Cookbook
-author: The Databricks GenAI Community
+author: Databricks
 logo: logo2.png
 
 # Force re-execution of notebooks on each build.
