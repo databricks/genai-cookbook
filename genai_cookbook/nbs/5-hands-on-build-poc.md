@@ -148,7 +148,7 @@ The notebooks referenced below are relative to the specific POC you've chosen. F
 
    3. You will see the MLflow Trace that shows you how the POC application works. Adjust the input question to one that is relevant to your use case, and re-run the cell to "vibe check" the application.
 
-      ```{image} ../images/5-hands-on/8_img.png
+      ```{image} ../images/5-hands-on/mlflow_trace2.gif
       :align: center
       ```
 
