@@ -34,7 +34,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r build_requirements.txt
+          pip install -r dev/build_requirements.txt
       # Build the example book
       - name: Build book
         run: |

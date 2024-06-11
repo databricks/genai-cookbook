@@ -1,1 +1,2 @@
-# genai-cookbook
+# Databricks Generative AI Cookbook
+

@@ -1,0 +1,30 @@
+# Book settings
+# Learn more at https://jupyterbook.org/customize/config.html
+
+title: Databricks Generative AI Cookbook
+author: The Databricks GenAI Community
+logo: logo2.png
+
+# Force re-execution of notebooks on each build.
+# See https://jupyterbook.org/content/execute.html
+execute:
+  execute_notebooks: 'off'
+
+# Information about where the book exists on the web
+repository:
+  url: https://github.com/databricks-genai-cookbook/cookbook/
+  path_to_book: ./genai_cookbook  # Optional path to your book, relative to the repository root
+  branch: main  # Which branch of the repository should be used when creating links (optional)
+
+# Add GitHub buttons to your book
+# See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
+html:
+  favicon: images/index/favicon.ico
+  use_issues_button: true
+  use_repository_button: true
+  home_page_in_navbar: false
+  google_analytics_id: G-6BZ4NTBHVJ
+  use_multitoc_numbering: false
+sphinx:
+  config:
+    html_show_copyright: false

@@ -1,0 +1,685 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en-US" > <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en-US"> <!--<![endif]-->
+
+<head>
+  <!-- cookie consent -->
+  
+<!-- Combined Onetrust and Rudderstack Implementation Scripts -->
+<!-- Onetrust Initialization -->
+<script
+  type="text/javascript"
+  src="https://cdn.cookielaw.org/consent/92466579-1717-44d3-809d-a05fb02843ed/OtAutoBlock.js"
+></script>
+<script
+  src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
+  data-document-language="true"
+  type="text/javascript"
+  charset="UTF-8"
+  data-domain-script="92466579-1717-44d3-809d-a05fb02843ed"
+></script>
+<link
+  rel="stylesheet"
+  id="db-onetrust-style"
+  href="https://www.databricks.com/wp-content/uploads/db_onetrust.css"
+  media="all"
+/>
+<!-- Setting Rudderstack Write Key -->
+<script>
+  window.rudderstackKey = "2SOR9fvSr5Fi6tN2ihPbVHnX1SZ";
+</script>
+<!-- Rudderstack Initialization + Onetrust Integration + Rudderstack Custom Events -->
+<script
+  type="text/javascript"
+  src="https://www.databricks.com/sites/default/files/rudderstack/v1/db-rudderstack-events.js"
+></script>
+
+  <!-- cookie consent -->
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="X-UA-Compatible" content="IE=9" />
+  <meta content="Learn how to provision users to Databricks using SCIM-enabled IdPs." name="description" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <meta property="og:image" content="https://www.databricks.com/wp-content/uploads/2020/04/og-databricks.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:title" content="Sync users and groups from your identity provider">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://docs.databricks.com">
+  <meta property="og:description" content="" id="og-description">
+  <meta name="twitter:image" content="https://www.databricks.com/wp-content/uploads/2020/04/og-databricks.png">
+  <meta name="twitter:site" content="@databricks">
+  <meta name="twitter:creator" content="@databricks">
+  <meta property="twitter:description" content="">
+  
+  <title>Sync users and groups from your identity provider &#124; Databricks on AWS</title>
+  
+  
+  <link rel="canonical" href="https://docs.databricks.com/en/admin/users-groups/scim/index.html">
+  <!-- Start hreflang tag -->
+  <link
+  rel="alternate"
+  hreflang="en"
+  href="https://docs.databricks.com/en/admin/users-groups/scim/index.html"
+/>
+<link
+  rel="alternate"
+  hreflang="pt"
+  href="https://docs.databricks.com/pt/admin/users-groups/scim/index.html"
+/>
+<link
+  rel="alternate"
+  hreflang="ja"
+  href="https://docs.databricks.com/ja/admin/users-groups/scim/index.html"
+/>
+<link
+  rel="alternate"
+  hreflang="x-default"
+  href="https://docs.databricks.com/en/admin/users-groups/scim/index.html"
+/>
+  <!-- End hreflang tag -->
+  
+  
+  <link rel="shortcut icon" href="../../../_static/favicon.ico" />
+  
+
+  
+
+  
+
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;
+j.setAttributeNode(d.createAttribute('data-ot-ignore'));
+f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-T85FQ33');</script>
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;
+j.setAttributeNode(d.createAttribute('data-ot-ignore'));
+f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TWTKQQ');</script>
+    
+  <!-- End Google Tag Manager -->
+
+  
+  
+
+  <!-- go/brand fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- DM Mono: 400, italics, DM Sans: 400, 700, italics, no optical size-->
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:ital@0;1&family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+    rel="stylesheet">
+  <!-- go/brand fonts -->
+
+  
+<link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=bfa079d0" />
+<link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=a3def87e" />
+<link rel="stylesheet" type="text/css" href="../../../_static/css/dropdown.css?v=46590757" />
+<link rel="stylesheet" type="text/css" href="../../../_static/css/searchunify/main.css?v=96405b38" />
+  <script type="text/javascript">
+  // Set the static root for the theme
+  window.STATIC_ROOT = `../../../_static`;
+  var DOCUMENTATION_OPTIONS = {
+    URL_ROOT: '../../../',
+    VERSION: '1.0',
+    COLLAPSE_INDEX: false,
+    FILE_SUFFIX: '.html',
+    HAS_SOURCE: 'false'
+  };
+</script>
+<!--theme scripts-->
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/jquery.js?v=5be48651"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/underscore.js?v=ff3b9a9a"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/doctools.js?v=695de88e"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/language_data.js?v=a1340169"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/js/vendor/jquery.waypoints.min.js?v=aa86c767"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/js/localized.js?v=e71e2bb8"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/js/clipboard.js?v=ba7e99af"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/js/theme-nav.js?v=3af59ba7"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/js/code-language-tabs.js?v=c75739b1"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/js/embedded-notebook.js?v=45f58fb2"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/js/right-nav.js?v=301278ed"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/js/custom.js?v=db7f62de"></script>
+<script defer data-ot-ignore type="text/javascript" src="../../../_static/js/searchunify/search-loader.js?v=05d3e7ac"></script>
+
+
+<script type="text/javascript">
+  // Replace this with sphinxext-opengraph
+  window.onload = function () {
+    var description = document
+      .querySelector('meta[name="description"]')
+      .getAttribute("content");
+    let titleText = document.querySelector("h1").textContent;
+    document
+      .querySelector('meta[property="og:title"]')
+      .setAttribute("content", titleText);
+    document
+      .querySelector('meta[property="og:description"]')
+      .setAttribute("content", description);
+    document
+      .querySelector('meta[property="twitter:description"]')
+      .setAttribute("content", description);
+  };
+</script>
+
+  
+  <link rel="index" title="Index" href="../../../genindex.html" />
+  <link rel="search" title="Search" href="../../../search.html" />
+  <link rel="top" title="Databricks on AWS" href="../../../index.html" />
+  <link rel="up" title="Manage users, service principals, and groups" href="../index.html" />
+  <link rel="next" title="Configure SCIM provisioning using Microsoft Entra ID (Azure Active Directory)" href="aad.html" />
+  <link rel="prev" title="Manage workspace-local groups (legacy)" href="../workspace-local-groups.html" /> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T85FQ33"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TWTKQQ"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  
+  <nav class="wy-nav-top header su_header" role="navigation" aria-label="top navigation">
+    
+<nav class="wy-nav-top header su_header" role="navigation" aria-label="top navigation">
+  <div class="container-logo">
+    <ul class="mobile-menu-toggle">
+        <li class="menu-toggle">
+            <i data-toggle="wy-nav-top" class="wy-nav-top-menu-button db-icon db-icon-menu pull-left"></i>
+            
+            <a href="https://www.databricks.com/" class="wy-nav-top-logo"><img src="../../../_static/small-scale-lockup-full-color-rgb.svg" width="137" height="21"
+              alt="Databricks" /></a>   
+               
+              </li>
+    </ul>
+    <ul class="su_nav-menu">
+      <li class="menu-toggle">
+        <i data-toggle="wy-nav-top" class="wy-nav-top-menu-button db-icon db-icon-menu pull-left"></i>
+        
+          
+        
+        <a href="https://www.databricks.com/" class="wy-nav-top-logo"><img src="../../../_static/small-scale-lockup-full-color-rgb.svg" width="137" height="21"
+            alt="Databricks" /></a></li>
+        <li><a href="https://help.databricks.com/s/">Help Center</a></li>
+<li class="active">
+  <a href="https://docs.databricks.com/en/index.html"
+    >Documentation</a
+  >
+</li>
+<li><a href="https://kb.databricks.com/">Knowledge Base</a></li>
+    </ul>
+  </div>
+  <div class="su_nav-right">
+    <ul class="su_link-mobile">
+  <!-- Mobile header code can go here -->
+</ul>
+<ul class="right-try-list">
+    
+    <li><a href="https://community.databricks.com">Community</a></li>
+    <li><a href="https://help.databricks.com">Support</a></li>
+    <li><a href="mailto:doc-feedback@databricks.com?subject=Documentation Feedback">Feedback</a></li>
+    
+    <li class="try-databrick-item"><a href="https://databricks.com/try-databricks">Try Databricks</a></li>
+</ul>
+  </div>
+</nav>
+  </nav>
+
+  <div class="su_sub-header">
+  <div class="top-bar__container">
+    <div class="su_sub-header-inner top-bar">
+      <div class="su_subnav-menu-right">
+  <div id="auto" style="width: 100%;">
+    <div ng-controller="SearchautoController">
+      <div bind-html-compile="autocompleteHtml">
+        <form class="su__search-box-1" disabled="disabled">
+          <input class="su__search-input" type="search" name="Search box" id="su__search-b" placeholder="Search Documentation" disabled="disabled"/>
+          <button class="su__search-button" type="submit" class="button button-success" disabled="disabled">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path
+                d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                fill="#333"></path>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="top-bar__selectors">
+        <div class="translation-selector dropdown" translate="no">
+          <a href="javascript:void(0)" aria-haspopup="true"><img
+              src="../../../_static/icons/globe.png" /><span
+              class="translation-selector__current">English</span></a>
+          <ul aria-label="submenu">
+            <li>
+              <a href="../../../../en/admin/users-groups/scim/index.html" hreflang="en">English</a>
+            </li>
+            <li>
+              <a href="../../../../ja/admin/users-groups/scim/index.html" hreflang="ja">日本語</a>
+            </li>
+            <li>
+              <a href="../../../../pt/admin/users-groups/scim/index.html" hreflang="pt">Português</a>
+            </li>
+          </ul>
+          </li>
+        </div>
+        <div class="cloud-selector dropdown" translate="no">
+          
+          <a href="javascript:void(0)" aria-haspopup="true"><img src="../../../_static/icons/aws.svg" />Amazon
+            Web Services</a>
+          
+          
+          
+          <ul aria-label="submenu">
+            
+            <li>
+              <a href='https://learn.microsoft.com/azure/databricks/admin/users-groups/scim/'><img
+                  src="../../../_static/icons/azure.svg" />Microsoft Azure</a>
+            </li>
+            <li>
+              <a href="https://docs.gcp.databricks.com/admin/users-groups/scim/index.html"><img
+                  src="../../../_static/icons/gcp.svg" />Google Cloud Platform</a>
+            </li>
+            
+            
+            
+          </ul>
+          </li>
+        </div>
+        <script data-ot-ignore>
+          const lang = ["en", "ja", "pt"];
+          const currentLanguage = window.location.pathname.split("/")[1];
+          const langIndex = lang.indexOf(currentLanguage);
+          if (langIndex !== -1) {
+            // Fixup cloud selector 
+            const languageSelector = document.querySelector(".translation-selector__current");
+            const languageLink = document.querySelector(`.translation-selector > ul a[hreflang="${currentLanguage}"]`);
+            if (languageSelector && languageLink) {
+              languageSelector.textContent = languageLink.textContent;
+              languageLink.parentElement.parentElement.removeChild(languageLink.parentElement);
+            }
+            // Fixup links in cloud selector
+            Array.from(document.querySelectorAll(`.cloud-selector > ul a`)).forEach(link => {
+              link.pathname = `/${currentLanguage}${link.pathname}`;
+            });
+          }
+        </script>
+        <script type="text/plain" class="optanon-category-C0003">
+          if (langIndex !== -1) {
+            document.cookie = `lang=${currentLanguage}; expires=Fri, 31 Dec 9999 23:59:59 GMT;";`
+          }
+        </script>
+      </div>
+    </div>
+  </div>
+</div>
+  <page class="js-page-container">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side su_nav-side">
+<div class="wy-side-scroll">
+  <div class="wy-side-nav-search">
+    
+
+    
+
+    
+
+    
+  </div>
+
+  <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+    
+      <a href="../../../index.html" class="main-navigation-home">Databricks on AWS</a>
+    
+
+    
+      
+
+      
+        <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started/index.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/index.html">What is Databricks?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../databricksiq/index.html">DatabricksIQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/index.html">Release notes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Load &amp; manage data</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../connect/index.html">Connect to data sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../discover/index.html">Discover data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../query/index.html">Query data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ingestion/index.html">Ingest data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data-preparation/index.html">Prepare data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../lakehouse-monitoring/index.html">Monitor data and AI assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data-sharing/index.html">Share data (Delta Sharing)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../marketplace/index.html">Databricks Marketplace</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Work with data</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../workspace-index.html">Data engineering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../generative-ai/generative-ai.html">Generative AI &amp; LLMs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../machine-learning/index.html">Machine learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../machine-learning/model-serving/index.html">Model serving</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sql/index.html">Data warehousing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../delta/index.html">Delta Lake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../languages/index.html">Developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../integrations/index.html">Technology partners</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Administration</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Account and workspace administration</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../getting-started/admin-get-started.html">Get started with Databricks administration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../account-settings/index.html">Account administration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workspace/index.html">Workspace deployment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workspace-settings/index.html">Manage a workspace</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Identity management</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../best-practices.html">Identity best practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../users.html">Manage users</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../service-principals.html">Manage service principals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../groups.html">Manage groups</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Sync users and groups from your identity provider</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="aad.html">Configure SCIM provisioning using Microsoft Entra ID (Azure Active Directory)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="okta.html">Configure SCIM provisioning for Okta</a></li>
+<li class="toctree-l4"><a class="reference internal" href="onelogin.html">Configure SCIM provisioning for OneLogin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../clusters/policies.html">Compute policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../account-settings/audit-logs.html">Audit logs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../system-tables/index.html">System tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../security/index.html">Security and compliance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data-governance/index.html">Data governance (Unity Catalog)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../lakehouse-architecture/index.html">Lakehouse architecture</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference &amp; resources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../resources/index.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats-coming.html">What’s coming?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../archive/index.html">Documentation archive</a></li>
+</ul>
+
+      
+    
+  </div>
+
+  <div role="contentinfo">
+    
+  <p class="build_info notranslate"data-last-edit="May 03, 2024">
+    Updated May 03, 2024
+  </p>
+<script>
+  window.addEventListener('DOMContentLoaded',function(){
+    var h1=document.querySelector('h1');
+    var bi=document.querySelector('[data-last-edit]');
+    if(h1 && bi){
+      var ver = document.createElement('p');
+      ver.className = 'version_info';
+      ver.textContent = bi.getAttribute('data-last-edit');
+      h1.parentElement.insertBefore(ver, h1.nextElementSibling);
+    }
+  });
+</script>
+
+    <p>
+      
+        <a id='feedbacklink' href="mailto:doc-feedback@databricks.com?subject=Documentation Feedback">Send us feedback</a>
+      
+    </p>
+  </div>
+</div>
+</nav>
+    
+    
+<main class="wy-grid-for-nav su_nav-grid">
+  <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+    <div class="wy-nav-content su__nav_content">
+      <div class="rst-content">
+        
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation" class="wy-breadcrumbs-wrapper">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Documentation</a> <span class="db-icon db-icon-chevron-right"></span></li>
+    
+        <li><a href="../../index.html">Databricks administration introduction</a> <span class="db-icon db-icon-chevron-right"></span></li>
+    
+        <li><a href="../index.html">Manage users, service principals, and groups</a> <span class="db-icon db-icon-chevron-right"></span></li>
+    
+    
+      <li>Sync users and groups from your identity provider</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+</div>
+        
+        <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+          <div itemprop="articleBody">
+            
+    
+  <div class="section" id="sync-users-and-groups-from-your-identity-provider">
+<span id="sync-users-and-groups-from-youridp"></span><h1>Sync users and groups from your identity provider<a class="headerlink" href="#sync-users-and-groups-from-your-identity-provider" title="Permalink to this headline"> </a></h1>
+<p>This article describes how to configure your identity provider (IdP) and Databricks to provision users and groups to Databricks using <a class="reference external" href="http://www.simplecloud.info/">SCIM</a>, or System for Cross-domain Identity Management, an open standard that allows you to automate user provisioning.</p>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="about-scim-provisioning-in-databricks">
+<h2>About SCIM provisioning in Databricks<a class="headerlink" href="#about-scim-provisioning-in-databricks" title="Permalink to this headline"> </a></h2>
+<p>SCIM lets you use an identity provider (IdP) to create users in Databricks, give them the proper level of access, and remove access (deprovision them) when they leave your organization or no longer need access to Databricks.</p>
+<p>You can use a SCIM provisioning connector in your IdP or invoke the <a class="reference external" href="https://docs.databricks.com/api/workspace">Identity and Access Management SCIM APIs</a> to manage provisioning. You can also use these APIs to manage identities in Databricks directly, without an IdP.</p>
+<div class="section" id="account-level-and-workspace-level-scim-provisioning">
+<span id="account-workspace-scim"></span><h3>Account-level and workspace-level SCIM provisioning<a class="headerlink" href="#account-level-and-workspace-level-scim-provisioning" title="Permalink to this headline"> </a></h3>
+<p>You can either configure one SCIM provisioning connector from your identity provider to your Databricks account, using account-level SCIM provisioning, or configure separate SCIM provisioning connectors to each workspace, using workspace-level SCIM provisioning.</p>
+<ul class="simple">
+<li><p><strong>Account-level SCIM provisioning:</strong> Databricks recommends that you use account-level SCIM provisioning to create, update, and delete all users from the account. You manage the assignment of users and groups to workspaces within Databricks. Your workspaces must be <a class="reference internal" href="../index.html#enable-identity-federation"><span class="std std-ref">enabled for identity federation</span></a> to manage users’ workspace assignments.</p></li>
+</ul>
+<div class="figure align-default">
+<img alt="Account-level SCIM diagram" src="../../../_images/account-level-scim-diagram.png" />
+</div>
+<ul>
+<li><p><strong>Workspace-level SCIM provisioning (legacy and Public Preview):</strong> For workspaces that are not enabled for <a class="reference internal" href="../index.html#enable-identity-federation"><span class="std std-ref">identity federation</span></a>, you must manage account-level and workspace-level SCIM provisioning in parallel. You don’t need workspace-level SCIM provisioning for any workspaces that are enabled for identity federation.</p>
+<p>If you already have workspace-level SCIM provisioning set up for a workspace, Databricks recommends that you enable the workspace for identity federation, set up account-level SCIM provisioning, and turn off the workspace-level SCIM provisioner. See <a class="reference internal" href="#migrate"><span class="std std-ref">Migrate workspace-level SCIM provisioning to the account level</span></a>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline"> </a></h2>
+<p>To provision users and groups to Databricks using SCIM:</p>
+<ul class="simple">
+<li><p>Your Databricks account must have the <a class="reference external" href="https://databricks.com/product/pricing/platform-addons">Premium plan or above</a>.</p></li>
+<li><p>To provision users to your Databricks account using SCIM (including the SCIM REST APIs), you must be a Databricks account admin.</p></li>
+<li><p>To provision users to a Databricks workspace using SCIM (including the SCIM REST APIs), you must be a Databricks workspace admin.</p></li>
+</ul>
+<ul class="simple">
+<li><p>Databricks recommends that you configure single sign-on for users to log in to Databricks using your IdP. See <a class="reference internal" href="../../account-settings-e2/single-sign-on/index.html"><span class="doc">SSO in your Databricks account console</span></a>.</p></li>
+</ul>
+<p>For more information about admin privileges, see <a class="reference internal" href="../index.html"><span class="doc">Manage users, service principals, and groups</span></a>.</p>
+<p>You can have a maximum of 10,000 combined users and service principals and 5000 groups in an account. Each workspace can have a maximum of 10,000 combined users and service principals and 5000 groups.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When you use SCIM provisioning, user and group attributes stored in your identity provider can override changes you make using the Databricks admin settings page, account console, or <a class="reference external" href="https://docs.databricks.com/api/workspace/groups">SCIM (Groups) API</a>.</p>
+<p>For example, if a user is assigned the Allow Cluster Creation entitlement in your identity provider and you remove that entitlement using the Databricks <a class="reference internal" href="../../index.html#admin-settings"><span class="std std-ref">admin settings</span></a>, the user is re-granted that entitlement the next time the IdP syncs with Databricks, if the IdP is configured to provision that entitlement. The same behavior applies to groups.</p>
+</div>
+</div>
+<div class="section" id="provision-identities-to-your-databricks-account">
+<span id="provision-account"></span><h2>Provision identities to your Databricks account<a class="headerlink" href="#provision-identities-to-your-databricks-account" title="Permalink to this headline"> </a></h2>
+<p>You can use SCIM to provision users and groups from your identity provider to your Databricks account using a SCIM provisioning connector or directly using the SCIM APIs.</p>
+<div class="section" id="add-users-and-groups-to-your-databricks-account-using-an-idp-provisioning-connector">
+<h3>Add users and groups to your Databricks account using an IdP provisioning connector<a class="headerlink" href="#add-users-and-groups-to-your-databricks-account-using-an-idp-provisioning-connector" title="Permalink to this headline"> </a></h3>
+<p>You can sync users and groups from your IdP to your Databricks account using a SCIM provisioning connector.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If you already have SCIM connectors that sync identities directly to your workspaces, you must disable those SCIM connectors when the account-level SCIM connector is enabled. See <a class="reference internal" href="#migrate"><span class="std std-ref">Migrate workspace-level SCIM provisioning to the account level</span></a>.</p>
+</div>
+<p>To configure a SCIM connector to provision users and groups to your account:</p>
+<ol class="arabic">
+<li><p>As an account admin, log in to the Databricks <a class="reference external" href="https://accounts.cloud.databricks.com">account console</a>.</p></li>
+<li><p>In the sidebar, click <strong>Settings</strong>.</p></li>
+<li><p>Click <strong>User Provisioning</strong>.</p></li>
+<li><p>Click <strong>Enable user provisioning</strong>.</p>
+<p>Copy the SCIM token and the Account SCIM URL. You will use these to configure your IdP.</p>
+</li>
+<li><p>Log in to your IdP as a user who can configure a SCIM connector to provision users.</p></li>
+<li><p>Enter the following values in your IdP’s SCIM connector:</p>
+<ul class="simple">
+<li><p>For the SAML provisioning URL, enter the SCIM URL you copied from Databricks.</p></li>
+<li><p>For the provisioning API token, enter the SCIM token you copied from Databricks.</p></li>
+</ul>
+</li>
+</ol>
+<p>You can also follow these IdP-specific instructions for your IdP:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="aad.html"><span class="doc">Configure SCIM provisioning using Microsoft Entra ID (Azure Active Directory)</span></a></p></li>
+<li><p><a class="reference internal" href="okta.html"><span class="doc">Configure SCIM provisioning for Okta</span></a></p></li>
+<li><p><a class="reference internal" href="onelogin.html"><span class="doc">Configure SCIM provisioning for OneLogin</span></a></p></li>
+</ul>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When you remove a user from the account-level SCIM connector, that user is deactivated from the account and all of their workspaces, regardless of whether or not identity federation has been enabled. When you remove a group from the account-level SCIM connector, all users in that group are deactivated from the account and from any workspaces they had access to, (unless they are members of another group or have been directly granted access to the account-level SCIM connector).</p>
+</div>
+<div class="section" id="add-users-service-principals-and-groups-to-your-account-using-the-scim-api">
+<span id="add-identities-to-your-account-using-the-scim-api"></span><h3>Add users, service principals, and groups to your account using the SCIM API<a class="headerlink" href="#add-users-service-principals-and-groups-to-your-account-using-the-scim-api" title="Permalink to this headline"> </a></h3>
+<p>Account admins can add users, service principals, and groups to the Databricks account using the Account SCIM API. Account admins call the API on accounts.cloud.databricks.com (<code class="docutils literal notranslate"><span class="pre">{account_domain}/api/2.0/accounts/{account_id}/scim/v2/</span></code>) and can use either a SCIM token or OAuth to authenticate.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The SCIM token is restricted to the Account SCIM API <code class="docutils literal notranslate"><span class="pre">/api/2.0/accounts/{account_id}/scim/v2/</span></code> and cannot be used to authenticate to other Databricks REST APIs.</p>
+</div>
+<p>To get the SCIM token, do the following:</p>
+<ol class="arabic">
+<li><p>As an account admin, log in to the <a class="reference external" href="https://accounts.cloud.databricks.com">account console</a>.</p></li>
+<li><p>In the sidebar, click <strong>Settings</strong>.</p></li>
+<li><p>Click <strong>User Provisioning</strong>.</p>
+<p>If provisioning isn’t enabled, click <strong>Set up user provisioning</strong> and copy the token.</p>
+<p>If provisioning is already enabled, click <strong>Regenerate token</strong> and copy the token.</p>
+</li>
+</ol>
+<p>To use OAuth to authenticate, see <a class="reference internal" href="../../../dev-tools/auth/oauth-m2m.html"><span class="doc">OAuth machine-to-machine (M2M) authentication</span></a>.</p>
+<p>Workspace admins can add users and service principals using the same API. Workspace admins call the API on the workspace domain <code class="docutils literal notranslate"><span class="pre">{workspace-domain}/api/2.0/account/scim/v2/</span></code>.</p>
+</div>
+<div class="section" id="rotate-the-account-level-scim-token">
+<h3>Rotate the account-level SCIM token<a class="headerlink" href="#rotate-the-account-level-scim-token" title="Permalink to this headline"> </a></h3>
+<p>If the account-level SCIM token is compromised or if you have business requirements to rotate authentication tokens periodically, you can rotate the SCIM token.</p>
+<ol class="arabic simple">
+<li><p>As a Databricks account admin, log in to the account console.</p></li>
+<li><p>In the sidebar, click <strong>Settings</strong>.</p></li>
+<li><p>Click <strong>User Provisioning</strong>.</p></li>
+<li><p>Click <strong>Regenerate token</strong>. Make a note of the new token. The previous token will continue to work for 24 hours.</p></li>
+<li><p>Within 24 hours, update your SCIM application to use the new SCIM token.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="migrate-workspace-level-scim-provisioning-to-the-account-level">
+<span id="migrate"></span><h2>Migrate workspace-level SCIM provisioning to the account level<a class="headerlink" href="#migrate-workspace-level-scim-provisioning-to-the-account-level" title="Permalink to this headline"> </a></h2>
+<p>If you are enabling account-level SCIM provisioning and you already have workspace-level SCIM provisioning set up for some workspaces, Databricks recommends that you turn off the workspace-level SCIM provisioner and instead sync users and group to the account level.</p>
+<ol class="arabic">
+<li><p>Create a group in your identity provider that includes all of the users and groups that you are currently provisioning to Databricks using your workspace-level SCIM connectors.</p>
+<p>Databricks recommends that this group include all users in all workspaces in your account.</p>
+</li>
+<li><p>Configure a new SCIM provisioning connector to provision users and groups to your account, using the instructions in <a class="reference internal" href="#provision-account"><span class="std std-ref">Provision identities to your Databricks account</span></a>.</p>
+<p>Use the group or groups that you created in step 1. If you add a user that shares a username (email address) with an existing account user, those users are merged. Existing groups in the account are not affected.</p>
+</li>
+<li><p>Confirm that the new SCIM provisioning connector is successfully provisioning users and groups to your account.</p></li>
+<li><p>Shut down the old workspace-level SCIM connectors that were provisioning users and groups to your workspaces.</p>
+<p>Do not remove users and groups from the workspace-level SCIM connectors before shutting them down. Revoking access from a SCIM connector deactivates the user in the Databricks workspace. For more information, see <a class="reference internal" href="../users.html#deactivate-user-workspace"><span class="std std-ref">Deactivate a user in your Databricks workspace</span></a>.</p>
+</li>
+<li><p>Migrate workspace-local groups to account groups.</p>
+<p>If you have legacy groups in your workspaces, they are known as <em>workspace-local groups</em>. You cannot manage workspace-local groups using account-level interfaces. Databricks recommends that you convert them to account groups. See <a class="reference internal" href="../workspace-local-groups.html#migrate"><span class="std std-ref">Migrate workspace-local groups to account groups</span></a></p>
+</li>
+</ol>
+</div>
+<div class="section" id="provision-identities-to-a-databricks-workspace-legacy">
+<span id="provision-workspace"></span><h2>Provision identities to a Databricks workspace (legacy)<a class="headerlink" href="#provision-identities-to-a-databricks-workspace-legacy" title="Permalink to this headline"> </a></h2>
+<div class="preview admonition">
+<p class="admonition-title">Preview</p>
+<p>This feature is in <a class="reference internal" href="../../../release-notes/release-types.html"><span class="doc">Public Preview</span></a>.</p>
+</div>
+<p>If you want to use an IdP connector to provision users and groups and you have a workspace that is not identity federated, you must configure SCIM provisioning at the workspace level.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Workspace-level SCIM does not recognize account groups that are assigned to your identity federated workspace and workspace-level SCIM API calls will fail if they involve account groups. If your workspace is enabled for identity federation, Databricks recommends that you use the account-level SCIM API instead of the workspace-level SCIM API and that you set up account-level SCIM provisioning and turn off the workspace-level SCIM provisioner. For detailed instructions, see <a class="reference internal" href="#migrate"><span class="std std-ref">Migrate workspace-level SCIM provisioning to the account level</span></a>.</p>
+</div>
+<div class="section" id="add-users-and-groups-to-your-workspace-using-an-idp-provisioning-connector">
+<h3>Add users and groups to your workspace using an IdP provisioning connector<a class="headerlink" href="#add-users-and-groups-to-your-workspace-using-an-idp-provisioning-connector" title="Permalink to this headline"> </a></h3>
+<p>Follow the instructions in the appropriate IdP-specific article:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="aad.html"><span class="doc">Configure SCIM provisioning using Microsoft Entra ID (Azure Active Directory)</span></a></p></li>
+<li><p><a class="reference internal" href="okta.html"><span class="doc">Configure SCIM provisioning for Okta</span></a></p></li>
+<li><p><a class="reference internal" href="onelogin.html"><span class="doc">Configure SCIM provisioning for OneLogin</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="add-users-groups-and-service-principals-to-your-workspace-using-the-scim-api">
+<h3>Add users, groups, and service principals to your workspace using the SCIM API<a class="headerlink" href="#add-users-groups-and-service-principals-to-your-workspace-using-the-scim-api" title="Permalink to this headline"> </a></h3>
+<p>Workspace admins can add users, groups, and service principals to the Databricks account using workspace-level SCIM APIs. See <a class="reference external" href="https://docs.databricks.com/api/workspace/users">Workspace Users API</a>, <a class="reference external" href="https://docs.databricks.com/api/workspace/groups">Workspace Groups API</a>, and <a class="reference external" href="https://docs.databricks.com/api/workspace/serviceprincipals">Workspace Service Principals API</a></p>
+</div>
+</div>
+</div>
+
+
+    
+          </div>
+        </div>
+        <div  class="suapp-rating">
+  <div id="suPageRateApp">
+     <su-app></su-app>
+   </div> 
+ </div>
+<hr> 
+<footer>
+  <div role="contentinfo">
+      <p class="copyright">
+          &copy; Databricks 2024. All rights reserved. Apache, Apache Spark, Spark, and the Spark logo are trademarks of the <a href="http://www.apache.org/">Apache Software Foundation</a>.
+      </p>
+      <p> 
+        
+          <a id='feedbacklink' href="mailto:doc-feedback@databricks.com?subject=Documentation Feedback">Send us feedback</a>
+        
+     | <a href="https://databricks.com/privacy-policy">Privacy Policy</a> | <a href="https://databricks.com/terms-of-use">Terms of Use</a></p>
+
+  </div> 
+
+</footer>
+      </div>
+    </div>
+  </section>
+</main>
+
+
+    { # 's' variable stands for the search page here. TODO: Fix it. #}
+    
+    <a class="dais_block--link" href="https://www.databricks.com/dataaisummit?utm_source=databricks&utm_medium=web&utm_campaign=7018y000001f7cvqai&utm_offer=docs" target="_blank" title="DATA+AU Summit 2024">
+  <img src="../../../_static/images/dais/docs-dais-promo-image.png" alt="DATA+AU Summit 2024"/>
+</a>
+    
+  </page>
+ 
+
+
+</body>
+
+</html>
