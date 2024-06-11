@@ -9,6 +9,12 @@ The implement section is coupled with a repository of sample code designed to wo
 
 Follow these steps to load the sample code to your Databricks workspace and configure the global settings for the application.
 
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+:class: tip
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+```
+
+
 ### **Requirements**
 
 1. A Databricks workspace with [serverless](https://docs.databricks.com/en/admin/workspace-settings/serverless.html) and Unity Catalog enabled
@@ -32,7 +38,7 @@ Follow these steps to load the sample code to your Databricks workspace and conf
     ```
 <br/>
 
-2. Open the [`rag_app_sample_code/00_global_config`](REPO_URL/implement_sample_code/00_global_config.py) Notebook and adjust the settings there.
+2. Open the [`rag_app_sample_code/00_global_config`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/00_global_config.py) Notebook and adjust the settings there.
 
     ```python
     # The name of the RAG application.  This is used to name the chain's UC model and prepended to the output Delta Tables + Vector Indexes
@@ -55,6 +61,6 @@ Follow these steps to load the sample code to your Databricks workspace and conf
     SOURCE_PATH = f"/Volumes/{UC_CATALOG}/{UC_SCHEMA}/source_docs"
     ```
 
-3. Open and run the [`01_validate_config_and_create_resources`](REPO_URL/implement_sample_code/01_validate_config_and_create_resources.py) Notebook
+3. Open and run the [`01_validate_config_and_create_resources`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/01_validate_config_and_create_resources.py) Notebook
 
 > Proceed to the [Deploy POC](./5-hands-on-build-poc.md) step.

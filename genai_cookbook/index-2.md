@@ -42,8 +42,8 @@ This cookbook is intended for use with the Databricks platform.  Specifically:
 > This first release focuses on retrieval-augmented generation (RAG).  Future releases will include the other popular generative AI techniques: agents & function calling, prompt engineering, fine tuning, and pre-training.
 
 The RAG cookbook is divided into 2 sections:
-1. [**Learn:**](#learn) Understand the required components of a production-ready, high-quality RAG application
-2. [**Implement:**](#implement) Use our sample code to follow an evaluation-driven workflow for delivering a high-quality RAG application
+1. **Learn:** Understand the required components of a production-ready, high-quality RAG application
+2. **Implement:** Use our sample code to follow an evaluation-driven workflow for delivering a high-quality RAG application
 
 ## Code-based quick starts
 

@@ -10,6 +10,11 @@
 
 *Time varies based on the number of questions in your evaluation set.  For 100 questions, evaluation will take approximately 5 minutes.*
 
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+:class: tip
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+```
+
 ### **Overview & expected outcome**
 
 This step will use the evaluation set you just curated to evaluate your POC app and establish the baseline quality/cost/latency.  The evaluation results are used by the next step to root cause any quality issues.
@@ -25,7 +30,7 @@ The aggregated metrics and evaluation of each question in the evaluation set are
 
 ### **Instructions**
 
-1. Open the `05_evaluate_poc_quality` Notebook and press Run All.
+1. Open the `05_evaluate_poc_quality` Notebook within your chosen POC directory and press Run All.
 
 2. Inspect the results of evaluation in the Notebook or using MLflow.
 
