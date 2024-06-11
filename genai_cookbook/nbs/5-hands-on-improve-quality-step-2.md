@@ -15,6 +15,12 @@
 You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
 ```
 
+#### Expected outcome
+
+```{image} ../images/5-hands-on/mlflow-eval-agent.gif
+:align: center
+```
+
 <!--
 #### Overview
 
