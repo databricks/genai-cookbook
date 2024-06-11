@@ -37,10 +37,10 @@ eval_data = [
         # Optional, user specified to identify each row
         "request_id": "your-request-id",
         # Optional: correct response to the question
-        # If provided, Quality Lab can compute additional metrics.
+        # If provided, Agent Evaluation can compute additional metrics.
         "expected_response": "There's no significant difference.",
         # Optional: Which documents should be retrieved.
-        # If provided, Quality Lab can compute additional metrics.
+        # If provided, Agent Evaluation can compute additional metrics.
         "expected_retrieved_context": [
             {
                 # URI of the relevant document to answer the request

@@ -17,11 +17,11 @@ There are two key approaches to measuring performance across these metrics:
 For an LLM judge to be effective, it must be tuned to understand the use case. Doing so requires careful attention to understand where the judge does and does not work well, and then tuning the judge to improve it for the failure cases.
 ```
 
-> [Mosaic AI Quality Lab](https://docs.databricks.com/generative-ai/agent-evaluation/index.html) provides an out-of-the-box implementation, using hosted LLM judge models, for each metric discussed on this page.  Quality Lab's documentation discusses the [details](https://docs.databricks.com/generative-ai/agent-evaluation/llm-judge-metrics.html) of how these metrics and judges are implemented and provides [capabilities](https://docs.databricks.com/generative-ai/agent-evaluation/advanced-agent-eval.html#provide-examples-to-the-built-in-llm-judges) to tune the judge's with your data to increase their accuracy
+> [Mosaic AI Agent Evaluation](https://docs.databricks.com/generative-ai/agent-evaluation/index.html) provides an out-of-the-box implementation, using hosted LLM judge models, for each metric discussed on this page.  Agent Evaluation's documentation discusses the [details](https://docs.databricks.com/generative-ai/agent-evaluation/llm-judge-metrics.html) of how these metrics and judges are implemented and provides [capabilities](https://docs.databricks.com/generative-ai/agent-evaluation/advanced-agent-eval.html#provide-examples-to-the-built-in-llm-judges) to tune the judge's with your data to increase their accuracy
 
 ### Metric overview
 
-Below is a summary of the metrics that Databricks recommends for measuring the quality, cost, and latency of your RAG application.  These metrics are implemented in [Mosaic AI Quality Lab](https://docs.databricks.com/generative-ai/agent-evaluation/index.html).
+Below is a summary of the metrics that Databricks recommends for measuring the quality, cost, and latency of your RAG application.  These metrics are implemented in [Mosaic AI Agent Evaluation](https://docs.databricks.com/generative-ai/agent-evaluation/index.html).
 
 <table class="table">
 <thead>

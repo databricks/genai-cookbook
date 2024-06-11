@@ -14,7 +14,7 @@
 
 This step will bootstrap an evaluation set with the feedback that stakeholders have provided by using the Review App.  Note that you can bootstrap an evaluation set with *just* questions, so even if your stakeholders only chatted with the app vs. providing feedback, you can follow this step.
 
-Visit [documentation](https://docs.databricks.com/generative-ai/agent-evaluation/evaluation-set.html#evaluation-set-schema) to understand the Quality Lab Evaluation Set schema - these fields are referenced below.
+Visit [documentation](https://docs.databricks.com/generative-ai/agent-evaluation/evaluation-set.html#evaluation-set-schema) to understand the Agent Evaluation Evaluation Set schema - these fields are referenced below.
 
 At the end of this step, you will have an Evaluation Set that contains:
 

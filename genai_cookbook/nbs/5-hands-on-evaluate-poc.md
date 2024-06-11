@@ -14,7 +14,7 @@
 
 This step will use the evaluation set you just curated to evaluate your POC app and establish the baseline quality/cost/latency.  The evaluation results are used by the next step to root cause any quality issues.
 
-Evaluation is done using [Mosaic AI Quality Lab](https://docs.databricks.com/generative-ai/agent-evaluation/index.html) and looks comprehensively across all aspects of quality, cost, and latency outlined in the [metrics](./4-evaluation-metrics.md) section of this cookbook.  
+Evaluation is done using [Mosaic AI Agent Evaluation](https://docs.databricks.com/generative-ai/agent-evaluation/index.html) and looks comprehensively across all aspects of quality, cost, and latency outlined in the [metrics](./4-evaluation-metrics.md) section of this cookbook.  
 
 The aggregated metrics and evaluation of each question in the evaluation set are logged to MLflow.  For more details, see the [evaluation outputs](https://docs.databricks.com/generative-ai/agent-evaluation/evaluate-agent.html#evaluation-outputs) documentation.
 

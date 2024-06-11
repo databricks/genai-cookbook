@@ -15,7 +15,7 @@
 
 #### **Overview**
 
-Retrieval and generation are the 2 primary buckets of root causes.  To determine where we focus on first, we  use the output of the Mosaic AI Quality Lab's LLM judges that you ran in the previous [step](./5-hands-on-evaluate-poc.md) to identify the most frequent root cause that impacts your app's quality.  W
+Retrieval and generation are the 2 primary buckets of root causes.  To determine where we focus on first, we  use the output of the Mosaic AI Agent Evaluation's LLM judges that you ran in the previous [step](./5-hands-on-evaluate-poc.md) to identify the most frequent root cause that impacts your app's quality.  W
 
 
 Each row your evaluation set will be tagged as follows:

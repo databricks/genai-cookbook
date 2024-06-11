@@ -10,15 +10,15 @@ Measuring quality is not easy and requires a significant infrastructure investme
 
 This interface must track the application's outputs and associated feedback in a structured manner, storing the full application trace and detailed feedback in a data table.
 
-> In Databricks, the [Quality Lab Review App](https://docs.databricks.com/generative-ai/agent-evaluation/human-evaluation.html) provides this capability. 
+> In Databricks, the [Agent Evaluation Review App](https://docs.databricks.com/generative-ai/agent-evaluation/human-evaluation.html) provides this capability. 
 
 **Quality / cost / latency metric framework.** You need a way to define the metrics that comprehensively measure the quality of each component of your chain and the end-to-end application. Ideally, the framework would provide a suite of standard metrics out of the box, in addition to supporting customization, so you can add metrics that test specific aspects of quality that are unique to your business.
 
-> In Databricks, [Mosaic AI Quality Lab](https://docs.databricks.com/generative-ai/agent-evaluation/index.html) provides an out-of-the-box implementation, using hosted LLM judge models, for the necessary quality/cost/latency metrics.
+> In Databricks, [Mosaic AI Agent Evaluation](https://docs.databricks.com/generative-ai/agent-evaluation/index.html) provides an out-of-the-box implementation, using hosted LLM judge models, for the necessary quality/cost/latency metrics.
 
 **Evaluation harness.** You need a way to quickly and efficiently get outputs from your chain for every question in your evaluation set, and then evaluate each output on the relevant metrics. This harness must be as efficient as possible, since you will run evaluation after every experiment that you try to improve quality.
 
-> In Databricks, [Mosaic AI Quality Lab](https://docs.databricks.com/generative-ai/agent-evaluation/index.html) provides an [evaluation harness](https://docs.databricks.com/generative-ai/agent-evaluation/evaluate-agent.html) that is integrated with MLflow.
+> In Databricks, [Mosaic AI Agent Evaluation](https://docs.databricks.com/generative-ai/agent-evaluation/index.html) provides an [evaluation harness](https://docs.databricks.com/generative-ai/agent-evaluation/evaluate-agent.html) that is integrated with MLflow.
 
 **Evaluation set management.** Your evaluation set is a living, breathing set of questions that you will update iteratively over the course of your application's development and production lifecycle.
 

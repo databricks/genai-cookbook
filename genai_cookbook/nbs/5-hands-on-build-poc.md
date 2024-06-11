@@ -13,7 +13,7 @@
 
 **Expected outcome**
 
-At the end of this step, you will have deployed the [Quality Lab Review App](https://docs.databricks.com/generative-ai/agent-evaluation/human-evaluation.html) which allows your stakeholders to test and provide feedback on your POC. Detailed logs from your stakeholder's usage and their feedback will flow to Delta Tables in your Lakehouse.
+At the end of this step, you will have deployed the [Agent Evaluation Review App](https://docs.databricks.com/generative-ai/agent-evaluation/human-evaluation.html) which allows your stakeholders to test and provide feedback on your POC. Detailed logs from your stakeholder's usage and their feedback will flow to Delta Tables in your Lakehouse.
 
 ```{image} ../images/5-hands-on/review_app2.gif
 :align: center

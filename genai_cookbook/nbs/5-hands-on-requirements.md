@@ -83,7 +83,7 @@ Consider creating an inventory table to consolidate this information, for exampl
 - 🟢 What is the business goal / KPI you want to impact? What is the baseline value and what is the target?
 - 🟢 Which users or stakeholders will provide initial and ongoing feedback?
 - 🟢 What metrics should be used to assess the quality of generated responses? 
-  - Note: Databricks Quality Lab provides a recommended set of metrics to yo use
+  - Note: Databricks Agent Evaluation provides a recommended set of metrics to yo use
 - 🟡 What is the set of questions the RAG app must be good at to go to production?
 - 🟡 Does an [evaluation set](/nbs/4-evaluation.md#establishing-ground-truth-creating-evaluation-sets) exist? Is it possible to get an evaluation set of user queries, along with ground-truth answers and (optionally) the correct supporting documents that should be retrieved?
 - 🟡 How will user feedback be collected and incorporated into the system?

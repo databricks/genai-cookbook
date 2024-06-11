@@ -32,7 +32,7 @@ To get started, deploy a *quality-ready POC* to stakeholders.  A quality-ready P
 3. Review the POC's parameters in the `00_config` Notebook
 4. Run `02_validate_config` to ensure that all necessary resources are set up
 4. Run `02_poc_data_pipeline` to create a Vector Index from your data using Databricks Vector Search
-5. Run `03_deploy_poc_to_review_app` to deploy the app to a [Quality Lab Review App]()
+5. Run `03_deploy_poc_to_review_app` to deploy the app to a [Agent Evaluation Review App]()
 6. Share the app's URL your stakeholders so they can chat with it and provide feedback
 
 **IMAGE OF REVIEW APP**

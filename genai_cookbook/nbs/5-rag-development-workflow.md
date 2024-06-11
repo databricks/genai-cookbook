@@ -22,7 +22,7 @@ There are two core concepts in **evaluation-driven development:**
 
 1. [**Metrics:**](./4-evaluation-metrics.md) Defining what high-quality means
 
-   *Similar to how you set business goals each year, you need to define what high-quality means for your use case.* *Databricks' Quality Lab provides a suggested set of* *N metrics to use, the most important of which is answer accuracy or correctness - is the RAG application providing the right answer?*
+   *Similar to how you set business goals each year, you need to define what high-quality means for your use case.* *Databricks' Agent Evaluation provides a suggested set of* *N metrics to use, the most important of which is answer accuracy or correctness - is the RAG application providing the right answer?*
 
 2. [**Evaluation set:**](./4-evaluation-eval-sets.md) Objectively measuring the metrics
 
