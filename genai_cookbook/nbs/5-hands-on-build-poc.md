@@ -11,6 +11,11 @@
 1. Completed [start here](./6-implement-overview.md) steps
 2. Data from your [requirements](/nbs/5-hands-on-requirements.md#requirements-questions) is available in your [Lakehouse](https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html) inside a Unity Catalog [volume](https://docs.databricks.com/en/connect/unity-catalog/volumes.html) <!-- or [Delta Table](https://docs.databricks.com/en/delta/index.html)-->
 
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+:class: tip
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+```
+
 **Expected outcome**
 
 At the end of this step, you will have deployed the [Agent Evaluation Review App](https://docs.databricks.com/generative-ai/agent-evaluation/human-evaluation.html) which allows your stakeholders to test and provide feedback on your POC. Detailed logs from your stakeholder's usage and their feedback will flow to Delta Tables in your Lakehouse.
@@ -57,20 +62,20 @@ By default, the POC uses the open source models available on [Mosaic AI Foundati
 
 
 
-1. **Open the POC code folder within `01_POC_app` based on your type of data:**
+1. **Open the POC code folder within [`A_POC_app`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app) based on your type of data:**
 
    <br/>
 
    | File type                  | Source                 | POC application folder |
    |----------------------------|------------------------|------------------------|
-   | PDF files                  | UC Volume              |   `pdf_uc_volume`                     |
-   | Powerpoint files           | UC Volume              |        `pptx_uc_volume`                |
-   | DOCX files                 | UC Volume              |        `docx_uc_volume`                |
-   | JSON files w/ text/markdown/HTML content & metadata | UC Volume  |              `json_uc_volume`          |  
+   | PDF files                  | UC Volume              |   [`pdf_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/pdf_uc_volume)                     |
+   | Powerpoint files           | UC Volume              |        [`pptx_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/pptx_uc_volume)                |
+   | DOCX files                 | UC Volume              |        [`docx_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/docx_uc_volume)                |
+   | JSON files w/ text/markdown/HTML content & metadata | UC Volume  |              [`json_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/html_uc_volume)          |  
    <!--| HTML content               | Delta Table            |                        |
    | Markdown or regular text   | Delta Table            |                        | -->
 
-   If your data doesn't meet one of the above requirements, you can customize the parsing function (`parser_udf`) within `02_poc_data_pipeline` to work with your file types.
+   If your data doesn't meet one of the above requirements, you can customize the parsing function (`parser_udf`) within `02_poc_data_pipeline` in the above POC directories to work with your file types.
 
    Inside the POC folder, you will see the following notebooks:
 
@@ -78,11 +83,15 @@ By default, the POC uses the open source models available on [Mosaic AI Foundati
 :align: center
 ```
 
+```{tip}
+The notebooks referenced below are relative to the specific POC you've chosen. For example, if you see a reference to `00_config` and you've chosen `pdf_uc_volume`, you'll find the relevant `00_config` notebook at [`A_POC_app/pdf_uc_volume/00_config`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/A_POC_app/pdf_uc_volume/00_config.py).
+```
+
 <br/>
 
 2. **Optionally, review the default parameters**
 
-   Open the `00_config` Notebook to view the POC's applications default parameters for the data pipeline and RAG chain.
+   Open the `00_config` Notebook within the POC directory you chose above to view the POC's applications default parameters for the data pipeline and RAG chain.
 
 
    ```{note}
@@ -91,11 +100,11 @@ By default, the POC uses the open source models available on [Mosaic AI Foundati
 
 3. **Validate the configuration**
 
-   Run the `00_validate_config` to check that your configuration is valid and all resources are available. You will see an `rag_chain_config.yaml` file appear in your directory - we will use this in step 4 to deploy the application.
+   Run the `01_validate_config` to check that your configuration is valid and all resources are available. You will see an `rag_chain_config.yaml` file appear in your directory - we will use this in step 4 to deploy the application.
 
 4. **Run the data pipeline**
 
-   The POC data pipeline is a Databricks Notebook based on Apache Spark.  Open the `02_poc_data_pipeline` Notebook and press Run All to execute the pipeline. The pipeline will:
+   The POC data pipeline is a Databricks Notebook based on Apache Spark. Open the `02_poc_data_pipeline` Notebook and press Run All to execute the pipeline. The pipeline will:
 
    1. Load the raw documents from the UC Volume
    2. Parse each document, saving the results to a Delta Table
@@ -129,7 +138,7 @@ By default, the POC uses the open source models available on [Mosaic AI Foundati
 
    The default POC chain is a multi-turn conversation RAG chain built using LangChain.
 
-   ```{note}
+   ```{tip}
    The POC Chain uses MLflow code-based logging. To understand more about code-based logging, visit the [docs](https://docs.databricks.com/generative-ai/create-log-agent.html#code-based-vs-serialization-based-logging).
    ```
 

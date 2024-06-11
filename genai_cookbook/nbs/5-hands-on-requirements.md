@@ -6,6 +6,11 @@
 <br/>
 Defining clear and comprehensive use case requirements is a critical first step in developing a successful RAG application. These requirements serve two primary purposes. Firstly, they help determine whether RAG is the most suitable approach for the given use case. If RAG is indeed a good fit, these requirements guide solution design, implementation, and evaluation decisions. Investing time at the outset of a project to gather detailed requirements can prevent significant challenges and setbacks later in the development process, and ensures that the resulting solution meets the needs of end-users and stakeholders. Well-defined requirements provide the foundation for the subsequent stages of the development lifecycle we'll walk through.
 
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+:class: tip
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+```
+
 ### Is the use case a good fit for RAG?
 
 The first thing you'll need to establish is whether RAG is even the right approach for your use case. Given the hype around RAG, it's tempting to view it as a possible solution for any problem. However, there are nuances as to when RAG is suitable versus not.

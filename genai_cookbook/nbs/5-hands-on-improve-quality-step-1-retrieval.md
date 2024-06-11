@@ -11,7 +11,7 @@ Retrieval quality is arguably the most important component of a RAG application.
 
 Here's a step-by-step process to address **retrieval quality** issues:
 
-1. Open the `quality_iteration/01_root_cause_quality_issues` Notebook
+1. Open the [`B_quality_iteration/01_root_cause_quality_issues`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/01_root_cause_quality_issues.py) Notebook
 
 2. Use the queries to load MLflow traces of the records that retrieval quality issues.
 

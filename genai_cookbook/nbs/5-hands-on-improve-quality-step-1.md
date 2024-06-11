@@ -13,6 +13,11 @@
     - If you followed the previous step, this will be the case!
 2. All requirements from previous steps
 
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+:class: tip
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+```
+
 #### **Overview**
 
 Retrieval and generation are the 2 primary buckets of root causes.  To determine where we focus on first, we  use the output of the Mosaic AI Agent Evaluation's LLM judges that you ran in the previous [step](./5-hands-on-evaluate-poc.md) to identify the most frequent root cause that impacts your app's quality.  W
@@ -27,7 +32,7 @@ Each row your evaluation set will be tagged as follows:
 
 The approach depends on if your evaluation set contains the ground-truth responses to your questions - stored in `expected_response`.  If you have `expected_response` available, use the first table below.  Otherwise, use the second table.
 
-1. Open the `B_quality_iteration/01_root_cause_quality_issues` Notebook
+1. Open the [`B_quality_iteration/01_root_cause_quality_issues`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/01_root_cause_quality_issues.py) Notebook
 2. Run the cells that are relevant to your use case e.g., if you do or don't have `expected_response`
 3. Review the output tables to determine the most frequent root cause in your application
 4. For each root cause, follow the steps below to further debug and identify potential fixes:
