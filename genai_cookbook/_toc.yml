@@ -27,7 +27,7 @@ parts:
     - file: nbs/4-evaluation-metrics
     - file: nbs/4-evaluation-infra
   - file: nbs/5-rag-development-workflow
-- caption: "10 minute demo"
+- caption: "Product demo"
   chapters:
   - file: 10-min-demo/Mosaic-AI-Agents-10-Minute-Demo.ipynb
 #   - file: 10-min-demo/Mosaic-AI-Agents-10-Minute-Demo-Notebook.html
