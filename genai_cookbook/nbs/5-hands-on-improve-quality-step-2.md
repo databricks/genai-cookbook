@@ -8,7 +8,7 @@
 #### Requirements
 
 1. Based on your [root cause analysis](./5-hands-on-improve-quality-step-1.md), you have identified a potential fixes to either [retrieval](./5-hands-on-improve-quality-step-1-retrieval.md) or [generation](./5-hands-on-improve-quality-step-1-generation.md) to implement and evaluate
-2. Your POC application (or another baseline chain) is logged to an MLflow Run w/ a Agent Evaluation evaluation stored in the same Run
+2. Your POC application (or another baseline chain) is logged to an MLflow Run with an Agent Evaluation evaluation stored in the same Run
 
 ```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
 :class: tip

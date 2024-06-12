@@ -20,8 +20,7 @@ You can find all of the sample code referenced throughout this section [here](ht
 
 #### **Overview**
 
-Retrieval and generation are the 2 primary buckets of root causes.  To determine where we focus on first, we  use the output of the Mosaic AI Agent Evaluation's LLM judges that you ran in the previous [step](./5-hands-on-evaluate-poc.md) to identify the most frequent root cause that impacts your app's quality.  W
-
+Retrieval and generation are the 2 primary buckets of root causes.  To determine where we focus on first, we use the output of the [Mosaic AI Agent Evaluation](https://docs.databricks.com/en/generative-ai/agent-evaluation/index.html)'s LLM judges that you ran in the previous [step](./5-hands-on-evaluate-poc.md) to identify the most frequent root cause that impacts your app's quality.
 
 Each row your evaluation set will be tagged as follows:
 1. **Overall assessment:** ![pass](../images/5-hands-on/pass.png) or ![fail](../images/5-hands-on/fail.png)
