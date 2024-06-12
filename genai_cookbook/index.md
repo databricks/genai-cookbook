@@ -14,7 +14,7 @@ The Databricks Generative AI Cookbook is a definitive how-to guide for building 
 Developed in partnership with Mosaic AI's research team, this cookbook lays out Databricks best-practice development workflow for building high-quality RAG apps: *evaluation driven development.* It outlines the most relevant knobs & approaches that can increase RAG application quality and provides a comprehensive repository of sample code implementing those techniques. 
 
 ```{important}
-- Only have 10 minutes and want to see a demo of Mosaic AI Agent Framework & Agent Evaluation?  Start [here](https://ai-cookbook.io/10-min-demo/mosaic-ai-agents-demo-dbx-notebook.html).
+- Only have a few minutes and want to see a demo of Mosaic AI Agent Framework & Agent Evaluation?  Start [here](https://ai-cookbook.io/10-min-demo/mosaic-ai-agents-demo-dbx-notebook.html).
 - Want to hop into code and deploy a RAG POC using your data?  Start [here](./nbs/6-implement-overview.md).
 - Don't have any data, but want to deploy a sample RAG application?  Start here.
 ```
@@ -49,9 +49,9 @@ The RAG cookbook is divided into 2 sections:
 
 | Time required | Outcome | Link |
 |------ | ---- | ---- |
-| 🕧 <br/> 10 minutes | Sample RAG app deployed to web-based chat app that collects feedback | [RAG Demo](https://ai-cookbook.io/10-min-demo/mosaic-ai-agents-demo-dbx-notebook.html) |
-| 🕧🕧🕧 <br/>60 minutes | POC RAG app with *your data* deployed to a chat UI that can collect feedback from your business stakeholders | [Build & deploy a POC](./nbs/5-hands-on-build-poc.md)|
-| 🕧🕧 <br/>30 minutes | Comprehensive quality/cost/latency evaluation of your POC app | - [Evaluate your POC](./nbs/5-hands-on-evaluate-poc.md) <br/> - [Identify the root causes of quality issues](./nbs/5-hands-on-improve-quality-step-1.md) |
+| 🕧 <br/> 30 minutes | Sample RAG app deployed to web-based chat app that collects feedback | [RAG Demo](https://ai-cookbook.io/10-min-demo/mosaic-ai-agents-demo-dbx-notebook.html) |
+| 🕧🕧🕧 <br/>2 hours | POC RAG app with *your data* deployed to a chat UI that can collect feedback from your business stakeholders | [Build & deploy a POC](./nbs/5-hands-on-build-poc.md)|
+| 🕧🕧 <br/>1 hour | Comprehensive quality/cost/latency evaluation of your POC app | - [Evaluate your POC](./nbs/5-hands-on-evaluate-poc.md) <br/> - [Identify the root causes of quality issues](./nbs/5-hands-on-improve-quality-step-1.md) |
 
 
 
