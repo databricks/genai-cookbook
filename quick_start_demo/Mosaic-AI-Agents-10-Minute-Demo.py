@@ -91,7 +91,9 @@ user_name = w.current_user.me().user_name.split("@")[0].replace(".", "")
 # UC Catalog & Schema where outputs tables/indexs are saved
 # If this catalog/schema does not exist, you need create catalog/schema permissions.
 UC_CATALOG = f'{user_name}_catalog'
+UC_CATALOG = "rag_m1_release"
 UC_SCHEMA = f'rag_{user_name}'
+UC_SCHEMA = "10_mins"
 
 # UC Model name where the POC chain is logged
 UC_MODEL_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{user_name}_agent_quick_start"
@@ -103,8 +105,6 @@ VECTOR_SEARCH_ENDPOINT = f'{user_name}_vector_search'
 # COMMAND ----------
 
 # MAGIC %md ## Check if the UC Catalog & Vector Search endpoint exist; create otherwise
-
-# COMMAND ----------
 
 # COMMAND ----------
 
