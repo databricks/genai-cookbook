@@ -39,7 +39,7 @@ jobs:
       - name: Build book
         run: |
           jupyter-book build genai_cookbook/
-          cp ./genai_cookbook/10-min-demo/mosaic-ai-agents-dbx-notebook.html ./genai_cookbook/_build/html/10-min-demo/mosaic-ai-agents-dbx-notebook.html
+          cp ./genai_cookbook/10-min-demo/mosaic-ai-agents-demo-dbx-notebook.html ./genai_cookbook/_build/html/10-min-demo/mosaic-ai-agents-demo-dbx-notebook.html
       # Upload the book's HTML as an artifact
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
