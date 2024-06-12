@@ -1,8 +1,8 @@
 ---
-title: Databricks Generative AI Cookbook
+title: Databricks GenAI Cookbook
 ---
 
-# Databricks Generative AI Cookbook
+# GenAI Cookbook
 
 **TLDR;** this cookbook and its sample code will take you from initial POC to high-quality production-ready application using [Mosaic AI Agent Evaluation](https://docs.databricks.com/generative-ai/agent-evaluation/index.html) and [Mosaic AI Agent Framework](https://docs.databricks.com/generative-ai/retrieval-augmented-generation.html) on the Databricks platform.
 
