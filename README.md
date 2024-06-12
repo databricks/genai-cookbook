@@ -10,7 +10,7 @@ This repo provides [learning materials](https://ai-cookbook.io/) and [production
   - Best practices for how to experiment with each knob
 
 The [provided code](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code) is intended for use with the Databricks platform.  Specifically:
-- [Mosaic AI Agent Framework]() which provides a fast developer workflow with enterprise-ready LLMops & governance
-- [Mosaic AI Agent Evaluation]() which provides reliable, quality measurement using proprietary AI-assisted LLM judges to measure quality metrics that are powered by human feedback collected through an intuitive web-based chat UI
+- [Mosaic AI Agent Framework](https://docs.databricks.com/en/generative-ai/retrieval-augmented-generation.html) which provides a fast developer workflow with enterprise-ready LLMops & governance
+- [Mosaic AI Agent Evaluation](https://docs.databricks.com/en/generative-ai/agent-evaluation/index.html) which provides reliable, quality measurement using proprietary AI-assisted LLM judges to measure quality metrics that are powered by human feedback collected through an intuitive web-based chat UI
 
 ![Alt text](rag_app_sample_code/dbxquality.png)

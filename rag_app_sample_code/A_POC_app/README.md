@@ -13,26 +13,25 @@ To get started, deploy a *quality-ready POC* to stakeholders.  A quality-ready P
 
 1. Clone this repo into your Databricks workspace
 2. Adjust the `00_global_config` to point to your Unity Catalog schema and data sources.
-2. Select a folder within `01_POC_app` folder that corresponds to the data you are using
+2. Select a folder within `A_POC_app` folder that corresponds to the data you are using
 
 *Each POC app is configured with reccomended default settings*
 
-| File type                        | Source            | POC application folder |
-|----------------------------------|-------------------|------------------------|
-| PDF (`.pdf`) files                        |   UC Volume                |        [Single-turn chat]()        \|  [Multi-turn chat]()        |
-| PowerPoint (`.pptx`) files                 |       UC Volume            |         [Single-turn chat]()        \|  [Multi-turn chat]()        |
-| Word (`.docx`) files                       |    UC Volume               |         [Single-turn chat]()        \|  [Multi-turn chat]()        |
-| HTML (`.html`)files                     |    UC Volume               |               [Single-turn chat]()        \|  [Multi-turn chat]()        |
-<!-- | HTML text                     |    Delta Table               |               [Single-turn chat]()        \|  [Multi-turn chat]()        | -->
-<!-- | Markdown or regular text         |        Delta Table           |            [Single-turn chat]()        \|  [Multi-turn chat]()        | -->
-<!-- | JSON files        |         UC Volume          |          [Single-turn chat]()        \|  [Multi-turn chat]()        | -->
+| File type                  | Source                 | POC application folder |
+   |----------------------------|------------------------|------------------------|
+   | PDF files                  | UC Volume              |   [`pdf_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/pdf_uc_volume)                     |
+   | Powerpoint files           | UC Volume              |        [`pptx_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/pptx_uc_volume)                |
+   | DOCX files                 | UC Volume              |        [`docx_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/docx_uc_volume)                |
+   | JSON files w/ text/markdown/HTML content & metadata | UC Volume  |              [`json_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/html_uc_volume)          |  
+   <!--| HTML content               | Delta Table            |                        |
+   | Markdown or regular text   | Delta Table            |                        | -->
 
 > *In contrast to the "3 lines of magic code" POC, there is necessarily more complexity in the code base. However, we have organized this complexity to make quality iteration easy.*
 
 3. Review the POC's parameters in the `00_config` Notebook
 4. Run `02_validate_config` to ensure that all necessary resources are set up
 4. Run `02_poc_data_pipeline` to create a Vector Index from your data using Databricks Vector Search
-5. Run `03_deploy_poc_to_review_app` to deploy the app to a [Agent Evaluation Review App]()
+5. Run `03_deploy_poc_to_review_app` to deploy the app to an [Agent Evaluation Review App](https://docs.databricks.com/en/generative-ai/agent-evaluation/human-evaluation.html)
 6. Share the app's URL your stakeholders so they can chat with it and provide feedback
 
 **IMAGE OF REVIEW APP**
