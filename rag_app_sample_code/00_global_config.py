@@ -25,7 +25,7 @@ import mlflow
 
 # By default, will use the current user name to create a unique UC catalog/schema & vector search endpoint
 user_email = spark.sql("SELECT current_user() as username").collect()[0].username
-user_name = user_email.split("@")[0].replace(".", "")
+user_name = user_email.split("@")[0].replace(".", "").lower()[:35]
 
 # COMMAND ----------
 
