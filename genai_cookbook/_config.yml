@@ -13,14 +13,14 @@ execute:
 # Information about where the book exists on the web
 repository:
   url: https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code
-  path_to_book: ./genai_cookbook  # Optional path to your book, relative to the repository root
+  path_to_book: ../genai_cookbook  # Optional path to your book, relative to the repository root
   branch: main  # Which branch of the repository should be used when creating links (optional)
 
 # Add GitHub buttons to your book
 # See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
 html:
   favicon: images/index/favicon.ico
-  use_issues_button: true
+  use_issues_button: false
   use_repository_button: true
   home_page_in_navbar: false
   google_analytics_id: G-6BZ4NTBHVJ
