@@ -88,13 +88,13 @@ data_pipeline_config = {
 # Names of the output Delta Tables tables & Vector Search index
 destination_tables_config = {
     # Staging table with the raw files & metadata
-    "raw_files_table_name": f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}_poc_raw_files_bronze",
+    "raw_files_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{RAG_APP_NAME}_poc_raw_files_bronze`",
     # Parsed documents
-    "parsed_docs_table_name": f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}_poc_parsed_docs_silver",
+    "parsed_docs_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{RAG_APP_NAME}_poc_parsed_docs_silver`",
     # Chunked documents that are loaded into the Vector Index
-    "chunked_docs_table_name": f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}_poc_chunked_docs_gold",
+    "chunked_docs_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{RAG_APP_NAME}_poc_chunked_docs_gold`",
     # Destination Vector Index
-    "vectorsearch_index_name": f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}_poc_chunked_docs_gold_index",
+    "vectorsearch_index_name": f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}_poc_chunked_docs_index",
 }
 
 # COMMAND ----------
@@ -173,7 +173,7 @@ rag_chain_config = {
             # The column name in the retriever's response that contains the returned chunk.
             "chunk_text": "chunked_text",
             # The template of the chunk returned by the retriever - used to format the chunk for presentation to the LLM.
-            "document_uri": "url",
+            "document_uri": "path",
         },
         # Prompt template used to format the retrieved information to present to the LLM to help in answering the user's question
         "chunk_template": "Passage: {chunk_text}\n",
