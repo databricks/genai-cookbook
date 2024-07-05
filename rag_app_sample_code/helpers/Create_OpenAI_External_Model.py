@@ -44,7 +44,7 @@ else:
     print(f"Secret scope `{SCOPE_NAME}` exists")
 
 existing_secrets = [secret.key for secret in w.secrets.list_secrets(scope=SCOPE_NAME)]
-if SCOPE_NAME not in existing_scopes:
+if SECRET_TO_SAVE not in existing_secrets:
     print(f"Saving secret to `{SCOPE_NAME}.{SECRET_NAME}`")
     w.secrets.put_secret(scope=SCOPE_NAME, key=SECRET_NAME, string_value=SECRET_TO_SAVE)
 else:
