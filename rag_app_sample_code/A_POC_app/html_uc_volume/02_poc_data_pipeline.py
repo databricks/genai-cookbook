@@ -37,12 +37,6 @@ dbr_majorversion = int(spark.conf.get("spark.databricks.clusterUsageTags.sparkVe
 if dbr_majorversion >= 14:
   spark.conf.set("spark.sql.execution.pythonUDF.arrow.enabled", True)
 
-# Helper function for display Delta Table URLs
-def get_table_url(table_fqdn):
-    split = table_fqdn.split(".")
-    browser_url = du.get_browser_hostname()
-    url = f"https://{browser_url}/explore/data/{split[0]}/{split[1]}/{split[2]}"
-    return url
 
 # COMMAND ----------
 
@@ -435,7 +429,7 @@ if create_index:
         embedding_model_endpoint_name=embedding_config['embedding_endpoint_name']
     )
 
-tag_delta_table(destination_tables_config["vectorsearch_index_name"], data_pipeline_config)
+tag_delta_table(destination_tables_config["vectorsearch_index_table_name"], data_pipeline_config)
 mlflow.log_input(mlflow.data.load_delta(table_name=destination_tables_config.get("chunked_docs_table_name")), context="chunked_docs")
 
 # COMMAND ----------

@@ -29,3 +29,10 @@ def tag_delta_table(table_fqn, config):
     for sql in sqls:
         # print(sql)
         spark.sql(sql)
+
+# Helper function for display Delta Table URLs
+def get_table_url(table_fqdn):
+    split = table_fqdn.replace('`', '').split(".")
+    browser_url = du.get_browser_hostname()
+    url = f"https://{browser_url}/explore/data/{split[0]}/{split[1]}/{split[2]}"
+    return url

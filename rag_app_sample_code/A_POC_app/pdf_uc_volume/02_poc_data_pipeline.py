@@ -41,12 +41,6 @@ dbr_majorversion = int(spark.conf.get("spark.databricks.clusterUsageTags.sparkVe
 if dbr_majorversion >= 14:
   spark.conf.set("spark.sql.execution.pythonUDF.arrow.enabled", True)
 
-# Helper function for display Delta Table URLs
-def get_table_url(table_fqdn):
-    split = table_fqdn.split(".")
-    browser_url = du.get_browser_hostname()
-    url = f"https://{browser_url}/explore/data/{split[0]}/{split[1]}/{split[2]}"
-    return url
 
 # COMMAND ----------
 
@@ -404,7 +398,7 @@ force_delete = False
 
 def find_index(endpoint_name, index_name):
     all_indexes = vsc.list_indexes(name=VECTOR_SEARCH_ENDPOINT).get("vector_indexes", [])
-    return destination_tables_config["vectorsearch_index_name"] in map(lambda i: i.get("name"), all_indexes)
+    return index_name in map(lambda i: i.get("name"), all_indexes)
 
 if find_index(endpoint_name=VECTOR_SEARCH_ENDPOINT, index_name=destination_tables_config["vectorsearch_index_name"]):
     if force_delete:
@@ -419,19 +413,18 @@ if create_index:
     print("Embedding docs & creating Vector Search Index, this can take 15 minutes or much longer if you have a larger number of documents.")
     print(f'Check status at: {get_table_url(destination_tables_config["vectorsearch_index_name"])}')
 
-    source_table_name = destination_tables_config["chunked_docs_table_name"].replace("`", "")
-
+    
     vsc.create_delta_sync_index_and_wait(
         endpoint_name=VECTOR_SEARCH_ENDPOINT,
         index_name=destination_tables_config["vectorsearch_index_name"],
         primary_key="chunk_id",
-        source_table_name=source_table_name,
+        source_table_name=destination_tables_config["chunked_docs_table_name"].replace("`", ""),
         pipeline_type=vectorsearch_config['pipeline_type'],
         embedding_source_column="chunked_text",
         embedding_model_endpoint_name=embedding_config['embedding_endpoint_name']
     )
 
-tag_delta_table(destination_tables_config["vectorsearch_index_name"], data_pipeline_config)
+tag_delta_table(destination_tables_config["vectorsearch_index_table_name"], data_pipeline_config)
 
 # COMMAND ----------
 
@@ -477,3 +470,7 @@ chain_config = {
 mlflow.log_dict(chain_config, "chain_config.json")
 
 mlflow.end_run()
+
+# COMMAND ----------
+
+

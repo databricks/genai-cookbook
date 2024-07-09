@@ -94,8 +94,9 @@ destination_tables_config = {
     # Chunked documents that are loaded into the Vector Index
     "chunked_docs_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{RAG_APP_NAME}_poc_chunked_docs_gold`",
     # Destination Vector Index
-    "vectorsearch_index_name": f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}_poc_chunked_docs_gold_index",
+    "vectorsearch_index_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{RAG_APP_NAME}_poc_chunked_docs_gold_index`",
 }
+destination_tables_config["vectorsearch_index_name"] = destination_tables_config["vectorsearch_index_table_name"].replace("`", "")
 
 # COMMAND ----------
 
