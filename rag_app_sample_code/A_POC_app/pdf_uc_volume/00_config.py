@@ -3,7 +3,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install -U -qqqq install pyyaml mlflow mlflow-skinny
+# MAGIC %pip install -U -qqqq pyyaml mlflow mlflow-skinny
 
 # COMMAND ----------
 
