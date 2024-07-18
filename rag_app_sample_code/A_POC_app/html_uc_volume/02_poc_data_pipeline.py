@@ -87,9 +87,7 @@ mlflow.log_dict(data_pipeline_config, "data_pipeline_config.json")
 # MAGIC
 # MAGIC In Bronze/Silver/Gold terminology, this is your Bronze table.
 # MAGIC
-# MAGIC **NOTE:** You will have to upload some PDF files to this volume. See the `sample_pdfs` folder of this repo for some example PDFs to upload to the UC Volume.
-# MAGIC
-# MAGIC TODO: Another notebook to load sample PDFs if the customer does't have them
+# MAGIC **NOTE:** You will have to upload some HTML files to this volume.
 
 # COMMAND ----------
 
@@ -126,11 +124,9 @@ mlflow.log_input(mlflow.data.load_delta(table_name=destination_tables_config.get
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Step 2: Parse the PDF files into text
+# MAGIC ## Step 2: Parse the HTML files into text
 # MAGIC
 # MAGIC In Bronze/Silver/Gold terminology, this is your Silver table.
-# MAGIC
-# MAGIC Although not reccomended for your POC, if you want to change the parsing library or adjust it's settings, modify the contents of the `parse_bytes_pypdf` UDF.
 
 # COMMAND ----------
 
@@ -246,7 +242,7 @@ mlflow.log_input(mlflow.data.load_delta(table_name=destination_tables_config.get
 # MAGIC
 # MAGIC In Bronze/Silver/Gold terminology, this is your Gold table.
 # MAGIC
-# MAGIC Although not reccomended for your POC, if you want to change the chunking library or adjust it's settings, modify the contents of the `parse_bytes_pypdf` UDF.
+# MAGIC Although not reccomended for your POC, if you want to change the chunking library or adjust it's settings, modify the contents of the `chunk_parsed_content_langrecchar` function.
 
 # COMMAND ----------
 
