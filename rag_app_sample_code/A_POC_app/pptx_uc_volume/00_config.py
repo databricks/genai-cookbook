@@ -182,7 +182,7 @@ rag_chain_config = {
             # The column name in the retriever's response that contains the returned chunk.
             "chunk_text": "chunked_text",
             # The template of the chunk returned by the retriever - used to format the chunk for presentation to the LLM.
-            "document_uri": "url",
+            "document_uri": "path",
         },
         # Prompt template used to format the retrieved information to present to the LLM to help in answering the user's question
         "chunk_template": "Passage: {chunk_text}\n",
