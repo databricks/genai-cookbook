@@ -203,7 +203,7 @@ destination_tables_config = {
     # Chunked documents that are loaded into the Vector Index
     "chunked_docs_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{config_short_name}_chunked_docs_gold`",
     # Destination Vector Index
-    "vectorsearch_index_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{config_short_name}_chunked_docs_gold_index`",
+    "vectorsearch_index_name": f"{UC_CATALOG}.{UC_SCHEMA}.{config_short_name}_chunked_docs_gold_index",
     # Streaming checkpoints, used to only process each file once
     "checkpoint_path": f"{CHECKPOINTS_VOLUME_PATH}/{config_short_name}",
 }
