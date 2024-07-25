@@ -197,13 +197,13 @@ mlflow_run_name = f"data_pipeline_{config_short_name}"
 # Names of the output Delta Tables tables & Vector Search index
 destination_tables_config = {
     # Staging table with the raw files & metadata
-    "raw_files_table_name": f"{UC_CATALOG}.{UC_SCHEMA}.{config_short_name}_raw_files_bronze",
+    "raw_files_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{config_short_name}_raw_files_bronze`",
     # Parsed documents
-    "parsed_docs_table_name": f"{UC_CATALOG}.{UC_SCHEMA}.{config_short_name}_parsed_docs_silver",
+    "parsed_docs_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{config_short_name}_parsed_docs_silver`",
     # Chunked documents that are loaded into the Vector Index
-    "chunked_docs_table_name": f"{UC_CATALOG}.{UC_SCHEMA}.{config_short_name}_chunked_docs_gold",
+    "chunked_docs_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{config_short_name}_chunked_docs_gold`",
     # Destination Vector Index
-    "vectorsearch_index_name": f"{UC_CATALOG}.{UC_SCHEMA}.{config_short_name}_chunked_docs_gold_index",
+    "vectorsearch_index_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{config_short_name}_chunked_docs_gold_index`",
     # Streaming checkpoints, used to only process each file once
     "checkpoint_path": f"{CHECKPOINTS_VOLUME_PATH}/{config_short_name}",
 }
