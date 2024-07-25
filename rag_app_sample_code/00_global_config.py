@@ -38,7 +38,7 @@ UC_CATALOG = f'{user_name}_catalog'
 UC_SCHEMA = f'rag_{user_name}'
 
 ## UC Model name where the POC chain is logged
-UC_MODEL_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}"
+UC_MODEL_NAME = f"`{UC_CATALOG}`.`{UC_SCHEMA}`.{RAG_APP_NAME}"
 
 # Vector Search endpoint where index is loaded
 # If this does not exist, it will be created
@@ -52,7 +52,7 @@ SOURCE_PATH = f"/Volumes/{UC_CATALOG}/{UC_SCHEMA}/source_docs"
 ##### We suggest accepting these defaults unless you need to change them. ######
 ############################
 
-EVALUATION_SET_FQN = f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}_evaluation_set"
+EVALUATION_SET_FQN = f"`{UC_CATALOG}`.`{UC_SCHEMA}`.{RAG_APP_NAME}_evaluation_set"
 
 # MLflow experiment name
 # Using the same MLflow experiment for a single app allows you to compare runs across Notebooks

@@ -96,7 +96,7 @@ UC_SCHEMA = f'rag_{user_name}'
 UC_SCHEMA = "10_mins"
 
 # UC Model name where the POC chain is logged
-UC_MODEL_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{user_name}_agent_quick_start"
+UC_MODEL_NAME = f"`{UC_CATALOG}`.`{UC_SCHEMA}`.{user_name}_agent_quick_start"
 
 # Vector Search endpoint where index is loaded
 # If this does not exist, it will be created
@@ -197,8 +197,8 @@ print(f"PASS: Vector Search endpoint `{VECTOR_SEARCH_ENDPOINT}` exists")
 # COMMAND ----------
 
 # UC locations to store the chunked documents & index
-CHUNKS_DELTA_TABLE = f"{UC_CATALOG}.{UC_SCHEMA}.databricks_docs_chunked2"
-CHUNKS_VECTOR_INDEX = f"{UC_CATALOG}.{UC_SCHEMA}.databricks_docs_chunked_index2"
+CHUNKS_DELTA_TABLE = f"`{UC_CATALOG}`.`{UC_SCHEMA}`.databricks_docs_chunked2"
+CHUNKS_VECTOR_INDEX = f"`{UC_CATALOG}`.`{UC_SCHEMA}`.databricks_docs_chunked_index2"
 
 # COMMAND ----------
 
@@ -263,7 +263,7 @@ index = vsc.create_delta_sync_index_and_wait(
 chain_config = {
     "llm_model_serving_endpoint_name": "databricks-dbrx-instruct",  # the foundation model we want to use
     "vector_search_endpoint_name": VECTOR_SEARCH_ENDPOINT,  # Endoint for vector search
-    "vector_search_index": f"{UC_CATALOG}.{UC_SCHEMA}.{CHUNKS_VECTOR_INDEX}",
+    "vector_search_index": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.{CHUNKS_VECTOR_INDEX}",
     "llm_prompt_template": """You are an assistant that answers questions. Use the following pieces of retrieved context to answer the question. Some pieces of context may be irrelevant, in which case you should not use them to form the answer.\n\nContext: {context}""", # LLM Prompt template
 }
 
