@@ -11,7 +11,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install -qqqq -U markdownify==0.12.1 databricks-vectorsearch transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.0 mlflow mlflow-skinny
+# MAGIC %pip install -qqqq -U markdownify==0.12.1 databricks-vectorsearch transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.2 mlflow mlflow-skinny
 
 # COMMAND ----------
 

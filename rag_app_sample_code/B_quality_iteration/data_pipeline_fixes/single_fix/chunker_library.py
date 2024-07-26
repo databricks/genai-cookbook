@@ -21,12 +21,12 @@
 # COMMAND ----------
 
 # DBTITLE 1,Dependencies for langchain based split chunker
-# MAGIC %pip install -U -qqq transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.0
+# MAGIC %pip install -U -qqq transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.2
 
 # COMMAND ----------
 
 # DBTITLE 1,Dependencies for langchain markdown splitter
-# MAGIC %pip install -U -qqq langchain-text-splitters==0.2.0
+# MAGIC %pip install -U -qqq langchain-text-splitters==0.2.2
 
 # COMMAND ----------
 
