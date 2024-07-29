@@ -17,7 +17,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install -qqqq -U pypdf==4.1.0 databricks-vectorsearch transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.0 mlflow mlflow-skinny
+# MAGIC %pip install -qqqq -U pypdf==4.1.0 databricks-vectorsearch transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.2 mlflow mlflow-skinny
 # MAGIC dbutils.library.restartPython()
 
 # COMMAND ----------
