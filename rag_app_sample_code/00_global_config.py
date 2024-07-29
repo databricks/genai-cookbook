@@ -38,7 +38,7 @@ UC_CATALOG = f'{user_name}_catalog'
 UC_SCHEMA = f'rag_{user_name}'
 
 ## UC Model name where the POC chain is logged
-UC_MODEL_NAME = f"`{UC_CATALOG}`.`{UC_SCHEMA}`.{RAG_APP_NAME}"
+UC_MODEL_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}"
 
 # Vector Search endpoint where index is loaded
 # If this does not exist, it will be created

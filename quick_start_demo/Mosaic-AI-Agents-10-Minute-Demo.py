@@ -96,7 +96,7 @@ UC_SCHEMA = f'rag_{user_name}'
 UC_SCHEMA = "10_mins"
 
 # UC Model name where the POC chain is logged
-UC_MODEL_NAME = f"`{UC_CATALOG}`.`{UC_SCHEMA}`.{user_name}_agent_quick_start"
+UC_MODEL_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{user_name}_agent_quick_start"
 
 # Vector Search endpoint where index is loaded
 # If this does not exist, it will be created
