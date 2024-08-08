@@ -97,6 +97,7 @@ destination_tables_config = {
     "vectorsearch_index_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{RAG_APP_NAME}_poc_chunked_docs_gold_index`",
 }
 destination_tables_config["vectorsearch_index_name"] = destination_tables_config["vectorsearch_index_table_name"].replace("`", "")
+
 # COMMAND ----------
 
 # MAGIC %md
@@ -148,8 +149,8 @@ print(f"Writing to: {json.dumps(destination_tables_config, indent=4)}\n")
 # If you are not sure, use the `multi_turn_rag_chain`.
 
 # CHAIN_CODE_FILE = "single_turn_rag_chain"
-
-CHAIN_CODE_FILE = "multi_turn_rag_chain"
+# CHAIN_CODE_FILE = "multi_turn_rag_chain"
+CHAIN_CODE_FILE = "pyfunc_multi_turn_rag_chain"
 
 # COMMAND ----------
 
@@ -161,7 +162,7 @@ rag_chain_config = {
         "vector_search_endpoint_name": VECTOR_SEARCH_ENDPOINT,
         # Databricks Model Serving endpoint name
         # This is the generator LLM where your LLM queries are sent.
-        "llm_endpoint_name": "databricks-dbrx-instruct",
+        "llm_endpoint_name": "databricks-meta-llama-3-1-70b-instruct",
     },
     "retriever_config": {
         # Vector Search index that is created by the data pipeline
@@ -229,3 +230,9 @@ with open('rag_chain_config.yaml', 'w') as f:
 # COMMAND ----------
 
 # MAGIC %run ../z_shared_utilities
+
+# COMMAND ----------
+
+# MAGIC %environment
+# MAGIC "client": "1"
+# MAGIC "base_environment": ""

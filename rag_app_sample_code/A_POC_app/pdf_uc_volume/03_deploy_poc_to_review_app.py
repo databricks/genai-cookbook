@@ -7,12 +7,25 @@
 import os
 import mlflow
 import time
+
+import mlflow
+from mlflow.models.resources import DatabricksServingEndpoint, DatabricksVectorSearchIndex
 from databricks import agents
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import EndpointStateReady, EndpointStateConfigUpdate
 from databricks.sdk.errors import NotFound, ResourceDoesNotExist
 
 w = WorkspaceClient()
+
+# COMMAND ----------
+
+# Get the API endpoint and token for the current notebook context
+DATABRICKS_HOST = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get() 
+DATABRICKS_TOKEN = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+
+# Set these as environment variables
+os.environ["DATABRICKS_HOST"] = DATABRICKS_HOST
+os.environ["DATABRICKS_TOKEN"] = DATABRICKS_TOKEN
 
 # COMMAND ----------
 
@@ -31,23 +44,57 @@ w = WorkspaceClient()
 # COMMAND ----------
 
 # Log the model to MLflow
-# TODO: remove example_no_conversion once this papercut is fixed
 with mlflow.start_run(run_name=POC_CHAIN_RUN_NAME):
+
     # Tag to differentiate from the data pipeline runs
     mlflow.set_tag("type", "chain")
 
-    logged_chain_info = mlflow.langchain.log_model(
-        lc_model=os.path.join(
-            os.getcwd(), CHAIN_CODE_FILE
-        ),  # Chain code file e.g., /path/to/the/chain.py
-        model_config=rag_chain_config,  # Chain configuration set in 00_config
-        artifact_path="chain",  # Required by MLflow
-        input_example=rag_chain_config[
-            "input_example"
-        ],  # Save the chain's input schema.  MLflow will execute the chain before logging & capture it's output schema.
-        example_no_conversion=True,  # Required by MLflow to use the input_example as the chain's schema
-        extra_pip_requirements=["databricks-agents"] # TODO: Remove this
-    )
+    # For pyfunc models
+    if CHAIN_CODE_FILE.startswith("pyfunc"):
+
+        # Define Databricks resources used by the chain
+        resources = [DatabricksServingEndpoint(endpoint_name=rag_chain_config.get("llm_endpoint")),
+                     DatabricksVectorSearchIndex(index_name=rag_chain_config["retriever_config"]["vector_search_index"])]
+        
+        # Log pyfunc model
+        model_info = mlflow.pyfunc.log_model(
+            python_model=os.path.join(
+                    os.getcwd(), CHAIN_CODE_FILE
+                ),  # Chain code file e.g., /path/to/the/chain.py,
+            model_config=os.path.join(
+                    os.getcwd(), "rag_chain_config.yaml"
+                ),         
+            artifact_path="chain", # Required by MLflow
+            input_example=rag_chain_config[
+                "input_example"
+            ],  # Save the chain's input schema.  MLflow will execute the chain before logging & capture it's output schema.            
+            resources=resources,
+            example_no_conversion=True, # Required by MLflow to use the input_example as the chain's schema
+            pip_requirements = [
+                "mlflow>=2.14.3",
+                "databricks-agents>=0.1.0",
+                "databricks-vectorsearch>=0.38",
+                "openai>=1.35.3",
+                "langchain==0.2.11",
+                "setuptools==68.0.0",
+            ],
+        )
+
+    # For Langchain Models
+    else:
+        # TODO: remove example_no_conversion once this papercut is fixed
+        model_info = mlflow.langchain.log_model(
+            lc_model=os.path.join(
+                os.getcwd(), CHAIN_CODE_FILE
+            ),  # Chain code file e.g., /path/to/the/chain.py
+            model_config=rag_chain_config,  # Chain configuration set in 00_config
+            artifact_path="chain",  # Required by MLflow
+            input_example=rag_chain_config[
+                "input_example"
+            ],  # Save the chain's input schema.  MLflow will execute the chain before logging & capture it's output schema.
+            example_no_conversion=True,  # Required by MLflow to use the input_example as the chain's schema
+            extra_pip_requirements=["databricks-agents"] # TODO: Remove this
+        )
 
     # Attach the data pipeline's configuration as parameters
     mlflow.log_params(_flatten_nested_params({"data_pipeline": data_pipeline_config}))
@@ -63,7 +110,7 @@ with mlflow.start_run(run_name=POC_CHAIN_RUN_NAME):
 
 # COMMAND ----------
 
-chain_input = {
+input_example = {
     "messages": [
         {
             "role": "user",
@@ -71,8 +118,14 @@ chain_input = {
         }
     ]
 }
-chain = mlflow.langchain.load_model(logged_chain_info.model_uri)
-chain.invoke(chain_input)
+
+# For pyfunc models
+if CHAIN_CODE_FILE.startswith("pyfunc"):
+    chain = mlflow.pyfunc.load_model(model_info.model_uri)
+    chain.predict(input_example)    
+else:    
+    chain = mlflow.langchain.load_model(model_info.model_uri)
+    chain.invoke(input_example)
 
 # COMMAND ----------
 
@@ -110,7 +163,7 @@ print(instructions_to_reviewer)
 mlflow.set_registry_uri('databricks-uc')
 
 # Register the chain to UC
-uc_registered_model_info = mlflow.register_model(model_uri=logged_chain_info.model_uri, name=UC_MODEL_NAME)
+uc_registered_model_info = mlflow.register_model(model_uri=model_info.model_uri, name=UC_MODEL_NAME)
 
 # Deploy to enable the Review APP and create an API endpoint
 deployment_info = agents.deploy(model_name=UC_MODEL_NAME, model_version=uc_registered_model_info.version)
@@ -140,7 +193,7 @@ print(f"\n\nReview App: {deployment_info.review_app_url}")
 
 # COMMAND ----------
 
-user_list = ["eric.peter@databricks.com"]
+user_list = ["niall.turbitt@databricks.com"]
 
 # Set the permissions.  If successful, there will be no return value.
 agents.set_permissions(model_name=UC_MODEL_NAME, users=user_list, permission_level=agents.PermissionLevel.CAN_QUERY)
@@ -162,3 +215,9 @@ active_deployments = agents.list_deployments()
 active_deployment = next((item for item in active_deployments if item.model_name == UC_MODEL_NAME), None)
 
 print(f"Review App URL: {active_deployment.review_app_url}")
+
+# COMMAND ----------
+
+# MAGIC %environment
+# MAGIC "client": "1"
+# MAGIC "base_environment": ""

@@ -9,9 +9,10 @@ dbutils.library.restartPython()
 
 import json
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import mlflow
+import pandas as pd
 import yaml
 from mlflow.pyfunc import ChatModel
 from mlflow.types.llm import ChatMessage, ChatResponse, ChatChoice, TokenUsageStats
@@ -20,34 +21,26 @@ from databricks.vector_search.client import VectorSearchClient
 
 # COMMAND ----------
 
-# NOTE: this must be commented out when deploying the agent
+# # NOTE: this must be commented out when deploying the agent
+# # Uncomment when you want to test this notebook locally
 
-# Get the API endpoint and token for the current notebook context
-DATABRICKS_HOST = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get() 
-DATABRICKS_TOKEN = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+# # Get the API endpoint and token for the current notebook context
+# DATABRICKS_HOST = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get() 
+# DATABRICKS_TOKEN = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
 
-# Set these as environment variables
-os.environ["DATABRICKS_HOST"] = DATABRICKS_HOST
-os.environ["DATABRICKS_TOKEN"] = DATABRICKS_TOKEN
-
-# COMMAND ----------
-
-# Load the chain config
-model_config = mlflow.models.ModelConfig(development_config="rag_chain_config.yaml")
-
-databricks_resources = model_config.get("databricks_resources")
-retriever_config = model_config.get("retriever_config")
-llm_config = model_config.get("llm_config")
+# # Set these as environment variables
+# os.environ["DATABRICKS_HOST"] = DATABRICKS_HOST
+# os.environ["DATABRICKS_TOKEN"] = DATABRICKS_TOKEN
 
 # COMMAND ----------
 
 class VectorSearchRetriever:
-    def __init__(self, config):
+    def __init__(self, config: mlflow.models.ModelConfig):
         self.config = config
         self.vs_client = VectorSearchClient(disable_notice=True)
         self.vs_index = self.vs_client.get_index(
-            endpoint_name=self.config["databricks_resources"]["vector_search_endpoint_name"],
-            index_name=self.config["retriever_config"]["vector_search_index"],
+            endpoint_name=self.config.get("databricks_resources")["vector_search_endpoint_name"],
+            index_name=self.config.get("retriever_config")["vector_search_index"],
         )
 
     @mlflow.trace(span_type="RETRIEVER")
@@ -55,66 +48,54 @@ class VectorSearchRetriever:
         results = self.vs_index.similarity_search(
             query_text=query,
             columns=[
-                self.config["retriever_config"]["schema"]["primary_key"],
-                self.config["retriever_config"]["schema"]["chunk_text"],
-                self.config["retriever_config"]["schema"]["document_uri"],
+                self.config.get("retriever_config")["schema"]["primary_key"],
+                self.config.get("retriever_config")["schema"]["chunk_text"],
+                self.config.get("retriever_config")["schema"]["document_uri"],
             ],
-            num_results=self.config["retriever_config"]["parameters"]["k"],
+            num_results=self.config.get("retriever_config")["parameters"]["k"],
         )
         
         documents = [
             {
                 "page_content": result[1],
                 "metadata": {
-                    self.config["retriever_config"]["schema"]["document_uri"]: result[2],
-                    self.config["retriever_config"]["schema"]["primary_key"]: result[0],
+                    self.config.get("retriever_config")["schema"]["document_uri"]: result[2],
+                    self.config.get("retriever_config")["schema"]["primary_key"]: result[0],
                 }
             }
             for result in results["result"]["data_array"]
         ]
         
-        return documents
+        return documents 
 
 # COMMAND ----------
 
 class RagChain(ChatModel):
     def __init__(self):
-        self.config = None
+        self.config = mlflow.models.ModelConfig(development_config="rag_chain_config.yaml")
+        # Set retriever schema for MLflow
+        mlflow.models.set_retriever_schema(
+            primary_key=self.config.get("retriever_config")["schema"]["primary_key"],
+            text_column=self.config.get("retriever_config")["schema"]["chunk_text"],
+            doc_uri=self.config.get("retriever_config")["schema"]["document_uri"],
+        )
         self.vector_search_retriever = None
 
     def load_context(self, context: mlflow.pyfunc.model.PythonModelContext) -> None:
-        if context is not None and context.artifacts is not None:
-            config_path = mlflow.artifacts.download_artifacts(context.artifacts["config_path"])
-            with open(config_path, 'r') as f:
-                self.config = yaml.safe_load(f)
-        else:
-            self.config = {
-                "databricks_resources": databricks_resources,
-                "retriever_config": retriever_config,
-                "llm_config": llm_config,
-            }
-        
-        if not self.config:
-            raise ValueError("No configuration provided")
-
         self.vector_search_retriever = VectorSearchRetriever(self.config)
-
-        # Set retriever schema for MLflow
-        mlflow.models.set_retriever_schema(
-            primary_key=self.config["retriever_config"]["schema"]["primary_key"],
-            text_column=self.config["retriever_config"]["schema"]["chunk_text"],
-            doc_uri=self.config["retriever_config"]["schema"]["document_uri"],
-        )
 
     @property
     def openai_client(self):
-        # create the OpenAI client on-demand - necessary for pickling
+        # create the OpenAI client on-demand - necessary for pickling when logging as MLflow model
         return OpenAI(
             api_key=os.environ.get("DATABRICKS_TOKEN"),
             base_url=os.environ.get("DATABRICKS_HOST") + "/serving-endpoints",
         )
 
-    def predict(self, context: mlflow.pyfunc.model.PythonModelContext, messages: List[Dict[str, str]]) -> ChatResponse:
+    def predict(self, 
+                context: mlflow.pyfunc.model.PythonModelContext, 
+                messages: List[Dict[str, str]],
+                params: Optional[Dict[str, Any]] = None) -> ChatResponse:
         return self.run_chain(messages)
 
     @mlflow.trace(name="rag_chain", span_type="CHAIN")
@@ -132,12 +113,27 @@ class RagChain(ChatModel):
         return self.convert_chat_response(response)
 
     @mlflow.trace(span_type="PARSER")
-    def extract_user_query_string(self, chat_messages_array):
-        return chat_messages_array[-1]["content"]
-
+    def extract_user_query_string(self, chat_messages_array: List[Union[Dict[str, str], ChatMessage]]) -> str:
+        last_message = chat_messages_array[-1]
+        if isinstance(last_message, dict):
+            return last_message["content"]
+        elif isinstance(last_message, ChatMessage):
+            return last_message.content
+        else:
+            raise ValueError(f"Unexpected message type: {type(last_message)}")
+        
     @mlflow.trace(span_type="PARSER")
-    def extract_chat_history(self, chat_messages_array):
-        return chat_messages_array[:-1]
+    def extract_chat_history(self, chat_messages_array: List[Union[Dict[str, str], ChatMessage]]) -> List[Dict[str, str]]:
+        history = chat_messages_array[:-1]
+        formatted_history = []
+        for message in history:
+            if isinstance(message, dict):
+                formatted_history.append(message)
+            elif isinstance(message, ChatMessage):
+                formatted_history.append({"role": message.role, "content": message.content})
+            else:
+                raise ValueError(f"Unexpected message type: {type(message)}")
+        return formatted_history
 
     @mlflow.trace(span_type="LLM")
     def rewrite_query(self, query: str, chat_history: List[Dict[str, str]]) -> str:
@@ -151,22 +147,22 @@ class RagChain(ChatModel):
         Question: {question}"""
 
         response = self.openai_client.chat.completions.create(
-            model=self.config["databricks_resources"]["llm_endpoint_name"],
+            model=self.config.get("databricks_resources")["llm_endpoint_name"],
             messages=[
                 {"role": "system", "content": query_rewrite_template},
                 {"role": "user", "content": f"Chat history: {json.dumps(chat_history)}\n\nQuestion: {query}"},
             ],
-            **self.config["llm_config"]["llm_parameters"],
+            **self.config.get("llm_config")["llm_parameters"],
         )
         return response.choices[0].message.content.strip()
 
     @mlflow.trace(span_type="PARSER")
     def format_context(self, retrieved_docs: List[Dict[str, Any]]) -> str:
-        chunk_template = self.config["retriever_config"]["chunk_template"]
+        chunk_template = self.config.get("retriever_config")["chunk_template"]
         formatted_chunks = [
             chunk_template.format(
                 chunk_text=doc["page_content"],
-                document_uri=doc["metadata"][self.config["retriever_config"]["schema"]["document_uri"]],
+                document_uri=doc["metadata"][self.config.get("retriever_config")["schema"]["document_uri"]],
             )
             for doc in retrieved_docs
         ]
@@ -188,19 +184,18 @@ class RagChain(ChatModel):
     def generate_answer(self, query: str, context: str, formatted_chat_history: List[Dict[str, str]]) -> Any:
         messages = [
             {"role": "system", 
-             "content": self.config["llm_config"]["llm_system_prompt_template"].format(context=context)},
+             "content": self.config.get("llm_config")["llm_system_prompt_template"].format(context=context)},
         ]
         messages.extend(formatted_chat_history)
         messages.append({"role": "user", "content": query})
 
         response = self.openai_client.chat.completions.create(
-            model=self.config["databricks_resources"]["llm_endpoint_name"],
+            model=self.config.get("databricks_resources")["llm_endpoint_name"],
             messages=messages,
-            **self.config["llm_config"]["llm_parameters"],
+            **self.config.get("llm_config")["llm_parameters"],
         )
         return response
 
-    @mlflow.trace(span_type="PARSER")
     def convert_chat_response(self, response: Any) -> ChatResponse:
         return ChatResponse(
             id=response.id,
@@ -219,7 +214,7 @@ class RagChain(ChatModel):
             ),
         )
 
-## Tell MLflow logging where to find your chain.
+# Tell MLflow logging where to find your chain.
 # `mlflow.models.set_model(model=...)` function specifies the chain to use for evaluation and deployment.  
 # This is required to log this chain to MLflow with `mlflow.pyfunc.log_model(...)`.
 mlflow.models.set_model(model=RagChain())        
