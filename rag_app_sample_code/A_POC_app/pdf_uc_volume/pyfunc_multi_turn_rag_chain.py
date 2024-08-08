@@ -21,16 +21,14 @@ from databricks.vector_search.client import VectorSearchClient
 
 # COMMAND ----------
 
-# # NOTE: this must be commented out when deploying the agent
-# # Uncomment when you want to test this notebook locally
+from dbruntime.databricks_repl_context import get_context
 
-# # Get the API endpoint and token for the current notebook context
-# DATABRICKS_HOST = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get() 
-# DATABRICKS_TOKEN = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+DATABRICKS_HOST = get_context().__dict__['workspaceUrl']
+DATABRICKS_TOKEN = get_context().__dict__['apiToken']
 
-# # Set these as environment variables
-# os.environ["DATABRICKS_HOST"] = DATABRICKS_HOST
-# os.environ["DATABRICKS_TOKEN"] = DATABRICKS_TOKEN
+# Set these as environment variables
+os.environ["DATABRICKS_HOST"] = "https://" + DATABRICKS_HOST
+os.environ["DATABRICKS_TOKEN"] = DATABRICKS_TOKEN
 
 # COMMAND ----------
 

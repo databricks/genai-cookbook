@@ -19,12 +19,13 @@ w = WorkspaceClient()
 
 # COMMAND ----------
 
-# Get the API endpoint and token for the current notebook context
-DATABRICKS_HOST = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get() 
-DATABRICKS_TOKEN = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+from dbruntime.databricks_repl_context import get_context
+
+DATABRICKS_HOST = get_context().__dict__['workspaceUrl']
+DATABRICKS_TOKEN = get_context().__dict__['apiToken']
 
 # Set these as environment variables
-os.environ["DATABRICKS_HOST"] = DATABRICKS_HOST
+os.environ["DATABRICKS_HOST"] = "https://" + DATABRICKS_HOST
 os.environ["DATABRICKS_TOKEN"] = DATABRICKS_TOKEN
 
 # COMMAND ----------
@@ -163,10 +164,14 @@ print(instructions_to_reviewer)
 mlflow.set_registry_uri('databricks-uc')
 
 # Register the chain to UC
-uc_registered_model_info = mlflow.register_model(model_uri=model_info.model_uri, name=UC_MODEL_NAME)
+uc_registered_model_info = mlflow.register_model(model_uri=model_info.model_uri, 
+                                                 name=UC_MODEL_NAME)
 
 # Deploy to enable the Review APP and create an API endpoint
-deployment_info = agents.deploy(model_name=UC_MODEL_NAME, model_version=uc_registered_model_info.version)
+deployment_info = agents.deploy(model_name=UC_MODEL_NAME, 
+                                model_version=uc_registered_model_info.version,
+                                environment_vars={"DATABRICKS_HOST": DATABRICKS_HOST,
+                                                  "DATABRICKS_TOKEN": DATABRICKS_TOKEN})
 
 browser_url = mlflow.utils.databricks_utils.get_browser_hostname()
 print(f"\n\nView deployment status: https://{browser_url}/ml/endpoints/{deployment_info.endpoint_name}")
@@ -196,7 +201,7 @@ print(f"\n\nReview App: {deployment_info.review_app_url}")
 user_list = ["niall.turbitt@databricks.com"]
 
 # Set the permissions.  If successful, there will be no return value.
-agents.set_permissions(model_name=UC_MODEL_NAME, users=user_list, permission_level=agents.PermissionLevel.CAN_QUERY)
+agents.set_permissions(model_name=UC_MODEL_NAME, users=user_list, permission_level=agents.PermissionLevel.CAN_MANAGE)
 
 # COMMAND ----------
 
@@ -215,6 +220,10 @@ active_deployments = agents.list_deployments()
 active_deployment = next((item for item in active_deployments if item.model_name == UC_MODEL_NAME), None)
 
 print(f"Review App URL: {active_deployment.review_app_url}")
+
+# COMMAND ----------
+
+agents.delete_deployment("niall_dev.genai_cookbook.my_agent_app")
 
 # COMMAND ----------
 
