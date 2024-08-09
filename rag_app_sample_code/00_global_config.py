@@ -52,7 +52,7 @@ SOURCE_PATH = f"/Volumes/{UC_CATALOG}/{UC_SCHEMA}/source_docs"
 ##### We suggest accepting these defaults unless you need to change them. ######
 ############################
 
-EVALUATION_SET_FQN = f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}_evaluation_set"
+EVALUATION_SET_FQN = f"`{UC_CATALOG}`.`{UC_SCHEMA}`.{RAG_APP_NAME}_evaluation_set"
 
 # MLflow experiment name
 # Using the same MLflow experiment for a single app allows you to compare runs across Notebooks

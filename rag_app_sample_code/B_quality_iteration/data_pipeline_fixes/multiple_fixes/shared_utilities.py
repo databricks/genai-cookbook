@@ -21,11 +21,11 @@ def get_strategy_packed_json_string(baseline_strategy, strategy_to_try):
     # Names of the output Delta Tables tables & Vector Search index
     merged_strategy["destination_tables_config"] = {
         # Staging table with the raw files & metadata
-        "raw_files_table_name": f"{UC_CATALOG}.{UC_SCHEMA}.{strategy_name}_raw_files_bronze",
+        "raw_files_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{strategy_name}_raw_files_bronze`",
         # Parsed documents
-        "parsed_docs_table_name": f"{UC_CATALOG}.{UC_SCHEMA}.{strategy_name}_parsed_docs_silver",
+        "parsed_docs_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{strategy_name}_parsed_docs_silver`",
         # Chunked documents that are loaded into the Vector Index
-        "chunked_docs_table_name": f"{UC_CATALOG}.{UC_SCHEMA}.{strategy_name}_chunked_docs_gold",
+        "chunked_docs_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{strategy_name}_chunked_docs_gold`",
         # Destination Vector Index
         "vectorsearch_index_name": f"{UC_CATALOG}.{UC_SCHEMA}.{strategy_name}_chunked_docs_gold_index",
         # Streaming checkpoints, used to only process each file once

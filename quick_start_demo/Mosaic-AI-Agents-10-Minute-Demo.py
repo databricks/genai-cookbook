@@ -28,7 +28,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install -U -qqqq databricks-agents mlflow mlflow-skinny databricks-vectorsearch databricks-sdk langchain==0.2.1 langchain_core==0.2.5 langchain_community==0.2.4 
+# MAGIC %pip install -U -qqqq databricks-agents mlflow mlflow-skinny databricks-vectorsearch databricks-sdk langchain==0.2.11 langchain_core==0.2.23 langchain_community==0.2.10 
 # MAGIC dbutils.library.restartPython()
 
 # COMMAND ----------
@@ -115,8 +115,8 @@ validate_vector_search_endpoint_exists(VECTOR_SEARCH_ENDPOINT)
 # COMMAND ----------
 
 # UC locations to store the chunked documents & index
-CHUNKS_DELTA_TABLE = f"{UC_CATALOG}.{UC_SCHEMA}.databricks_docs_chunked2"
-CHUNKS_VECTOR_INDEX = f"{UC_CATALOG}.{UC_SCHEMA}.databricks_docs_chunked_index2"
+CHUNKS_DELTA_TABLE = f"`{UC_CATALOG}`.`{UC_SCHEMA}`.databricks_docs_chunked2"
+CHUNKS_VECTOR_INDEX = f"`{UC_CATALOG}`.`{UC_SCHEMA}`.databricks_docs_chunked_index2"
 
 # COMMAND ----------
 

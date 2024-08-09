@@ -17,7 +17,7 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install -qqqq -U databricks-vectorsearch transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.0 mlflow mlflow-skinny
+# MAGIC %pip install -qqqq -U databricks-vectorsearch transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.2 mlflow mlflow-skinny
 # MAGIC dbutils.library.restartPython()
 
 # COMMAND ----------
@@ -457,7 +457,7 @@ force_delete = False
 
 def find_index(endpoint_name, index_name):
     all_indexes = vsc.list_indexes(name=VECTOR_SEARCH_ENDPOINT).get("vector_indexes", [])
-    return destination_tables_config["vectorsearch_index_name"] in map(lambda i: i.get("name"), all_indexes)
+    return index_name in map(lambda i: i.get("name"), all_indexes)
 
 if find_index(endpoint_name=VECTOR_SEARCH_ENDPOINT, index_name=destination_tables_config["vectorsearch_index_name"]):
     if force_delete:
@@ -476,13 +476,13 @@ if create_index:
         endpoint_name=VECTOR_SEARCH_ENDPOINT,
         index_name=destination_tables_config["vectorsearch_index_name"],
         primary_key="chunk_id",
-        source_table_name=destination_tables_config["chunked_docs_table_name"],
+        source_table_name=destination_tables_config["chunked_docs_table_name"].replace("`", ""),
         pipeline_type=vectorsearch_config['pipeline_type'],
         embedding_source_column="chunked_text",
         embedding_model_endpoint_name=embedding_config['embedding_endpoint_name']
     )
 
-tag_delta_table(destination_tables_config["vectorsearch_index_name"], data_pipeline_config)
+tag_delta_table(destination_tables_config["vectorsearch_index_table_name"], data_pipeline_config)
 
 # COMMAND ----------
 
