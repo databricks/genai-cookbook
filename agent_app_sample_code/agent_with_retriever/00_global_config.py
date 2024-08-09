@@ -129,10 +129,6 @@ print(f"POC_CHAIN_RUN_NAME {POC_CHAIN_RUN_NAME}")
 
 # COMMAND ----------
 
-# Nikhil added everything here and below
-
-# COMMAND ----------
-
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.vectorsearch import EndpointStatusState, EndpointType
 from mlflow.utils import databricks_utils as du

@@ -46,11 +46,6 @@ dbutils.library.restartPython()
 
 # COMMAND ----------
 
-# System packages required for DOCX parsing
-# install_apt_get_packages(['pandoc'])
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC ## Import the global configuration
 
