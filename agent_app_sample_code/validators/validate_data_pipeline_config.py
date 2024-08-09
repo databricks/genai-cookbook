@@ -169,7 +169,7 @@ def validate_embedding_endpoint(endpoint_name, task_type):
     raise ValueError(f"Model Serving endpoint: {endpoint_name} not ready.")
 
 # Embedding
-# validate_embedding_endpoint(EMBEDDING_MODEL_ENDPOINT, "llm/v1/embeddings")
+validate_embedding_endpoint(EMBEDDING_MODEL_ENDPOINT, "llm/v1/embeddings")
 
 # COMMAND ----------
 

@@ -40,9 +40,9 @@ AGENT_NAME = "my_agent_app"
 # UC Catalog & Schema where outputs tables/indexs are saved
 # If this catalog/schema does not exist, you need create catalog/schema permissions.
 UC_CATALOG = f"{user_name}_catalog"
-UC_CATALOG = "mosaic_catalog"
+UC_CATALOG = "ml"
 
-UC_SCHEMA = f"agents"
+UC_SCHEMA = f"cookbook"
 
 ## UC Model name where the Agent's model is logged
 UC_MODEL_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{AGENT_NAME}"
