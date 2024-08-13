@@ -1,5 +1,5 @@
 # Databricks notebook source
-# MAGIC %pip install -U -qqqq databricks-agents mlflow mlflow-skinny databricks-sdk
+# MAGIC %pip install -qqqq -U databricks-agents databricks-vectorsearch databricks-sdk mlflow mlflow-skinny 
 # MAGIC dbutils.library.restartPython()
 
 # COMMAND ----------
@@ -69,24 +69,9 @@ eval_data = [
 runs = mlflow.search_runs(experiment_names=[MLFLOW_EXPERIMENT_NAME], filter_string=f"run_name = '{POC_CHAIN_RUN_NAME}'", output_format="list")
 
 if len(runs) != 1:
-    raise ValueError(f"Found {len(runs)} run with name {POC_CHAIN_RUN_NAME}.  Ensure the run name is accurate and try again.")
+    print(f"Found {len(runs)} run with name {POC_CHAIN_RUN_NAME}. Selecting the most recent.")
 
 poc_run = runs[0]
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## Load the correct Python environment for the POC's app
-# MAGIC
-# MAGIC TODO: replace this with env_manager=virtualenv once that works
-
-# COMMAND ----------
-
-pip_requirements = mlflow.pyfunc.get_model_dependencies(f"runs:/{poc_run.info.run_id}/chain")
-
-# COMMAND ----------
-
-# MAGIC %pip install -r $pip_requirements
 
 # COMMAND ----------
 
@@ -99,7 +84,7 @@ with mlflow.start_run(run_id=poc_run.info.run_id):
     # Evaluate
     eval_results = mlflow.evaluate(
         data=eval_df,
-        model=f"runs:/{poc_run.info.run_id}/chain",  # replace `chain` with artifact_path that you used when calling log_model.  By default, this is `chain`.
+        model=f"runs:/{poc_run.info.run_id}/agent",  # replace `agent` with artifact_path that you used when calling log_model.  By default, this is `agent`.
         model_type="databricks-agent",
     )
 
@@ -119,7 +104,6 @@ eval_results.metrics
 
 # Evaluation results including LLM judge scores/rationales for each row in your evaluation set
 per_question_results_df = eval_results.tables['eval_results']
-
 # You can click on a row in the `trace` column to view the detailed MLflow trace
 display(per_question_results_df)
 
