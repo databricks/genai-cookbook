@@ -3,7 +3,7 @@
 
 # COMMAND ----------
 
-dbutils.library.restartPython()
+# dbutils.library.restartPython()
 
 # COMMAND ----------
 
@@ -182,7 +182,7 @@ chain = (
     }
     | prompt
     | model
-    | StrOutputParser()
+    | mlflow.langchain.output_parsers.ChatCompletionsOutputParser()
 )
 
 ## Tell MLflow logging where to find your chain.

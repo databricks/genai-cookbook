@@ -33,43 +33,8 @@
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC ## Setup: Load the necessary data and code from the Databricks Cookbook repo
-# MAGIC
-# MAGIC The following cell clones the Generative AI cookbook repo from `https://github.com/databricks/genai-cookbook` into a folder `genai-cookbook` in the same folder as this notebook using a [Git Folder](https://docs.databricks.com/en/repos/index.html).  
-# MAGIC
-# MAGIC Alternatively, you can manually clone the Git repo `https://github.com/databricks/genai-cookbook` to a folder `genai-cookbook`.
-
-# COMMAND ----------
-
 import os
-from databricks.sdk.core import DatabricksError
-from databricks.sdk import WorkspaceClient
-
 CURRENT_FOLDER = os.getcwd()
-QUICK_START_REPO_URL = "https://github.com/epec254/staging-cookbook.git"
-QUICK_START_REPO_URL = "https://github.com/databricks/genai-cookbook.git"
-QUICK_START_REPO_SAVE_FOLDER = "genai-cookbook"
-
-if os.path.isdir(QUICK_START_REPO_SAVE_FOLDER):
-    raise Exception(
-        f"{QUICK_START_REPO_SAVE_FOLDER} folder already exists, please change the variable QUICK_START_REPO_SAVE_FOLDER to be a non-existant path."
-    )
-
-# Clone the repo
-w = WorkspaceClient()
-try:
-    w.repos.create(
-        url=QUICK_START_REPO_URL, provider="github", path=f"{CURRENT_FOLDER}/{QUICK_START_REPO_SAVE_FOLDER}"
-    )
-    print(f"Cloned sample code repo to: {QUICK_START_REPO_SAVE_FOLDER}")
-except DatabricksError as e:
-    if e.error_code == "RESOURCE_ALREADY_EXISTS":
-        print("Repo already exists. Skipping creation")
-    else:
-        raise Exception(
-            f"Failed to clone the quick start code.  You can manually import this by creating a Git folder from the contents of {QUICK_START_REPO_URL} in the {QUICK_START_REPO_SAVE_FOLDER} folder in your workspace and then re-running this Notebook."
-        )
 
 # COMMAND ----------
 
@@ -91,9 +56,7 @@ user_name = w.current_user.me().user_name.split("@")[0].replace(".", "")
 # UC Catalog & Schema where outputs tables/indexs are saved
 # If this catalog/schema does not exist, you need create catalog/schema permissions.
 UC_CATALOG = f'{user_name}_catalog'
-UC_CATALOG = "rag_m1_release"
 UC_SCHEMA = f'rag_{user_name}'
-UC_SCHEMA = "10_mins"
 
 # UC Model name where the POC chain is logged
 UC_MODEL_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{user_name}_agent_quick_start"
@@ -108,13 +71,7 @@ VECTOR_SEARCH_ENDPOINT = f'{user_name}_vector_search'
 
 # COMMAND ----------
 
-from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.vectorsearch import EndpointStatusState, EndpointType
-from databricks.sdk.service.serving import EndpointCoreConfigInput, EndpointStateReady
-from databricks.sdk.errors import ResourceDoesNotExist
-import os
-
-w = WorkspaceClient()
+# MAGIC %run ./utils
 
 # COMMAND ----------
 
@@ -123,34 +80,7 @@ w = WorkspaceClient()
 
 # COMMAND ----------
 
-from databricks.sdk import WorkspaceClient
-from databricks.sdk.errors import NotFound, PermissionDenied
-w = WorkspaceClient()
-
-# Create UC Catalog if it does not exist, otherwise, raise an exception
-try:
-    _ = w.catalogs.get(UC_CATALOG)
-    print(f"PASS: UC catalog `{UC_CATALOG}` exists")
-except NotFound as e:
-    print(f"`{UC_CATALOG}` does not exist, trying to create...")
-    try:
-        _ = w.catalogs.create(name=UC_CATALOG)
-    except PermissionDenied as e:
-        print(f"FAIL: `{UC_CATALOG}` does not exist, and no permissions to create.  Please provide an existing UC Catalog.")
-        raise ValueError(f"Unity Catalog `{UC_CATALOG}` does not exist.")
-        
-# Create UC Schema if it does not exist, otherwise, raise an exception
-try:
-    _ = w.schemas.get(full_name=f"{UC_CATALOG}.{UC_SCHEMA}")
-    print(f"PASS: UC schema `{UC_CATALOG}.{UC_SCHEMA}` exists")
-except NotFound as e:
-    print(f"`{UC_CATALOG}.{UC_SCHEMA}` does not exist, trying to create...")
-    try:
-        _ = w.schemas.create(name=UC_SCHEMA, catalog_name=UC_CATALOG)
-        print(f"PASS: UC schema `{UC_CATALOG}.{UC_SCHEMA}` created")
-    except PermissionDenied as e:
-        print(f"FAIL: `{UC_CATALOG}.{UC_SCHEMA}` does not exist, and no permissions to create.  Please provide an existing UC Schema.")
-        raise ValueError("Unity Catalog Schema `{UC_CATALOG}.{UC_SCHEMA}` does not exist.")
+validate_catalog_and_schema_exist(UC_CATALOG, UC_SCHEMA)
 
 # COMMAND ----------
 
@@ -160,19 +90,7 @@ except NotFound as e:
 # COMMAND ----------
 
 # Create the Vector Search endpoint if it does not exist
-from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.vectorsearch import EndpointType
-w = WorkspaceClient()
-vector_search_endpoints = w.vector_search_endpoints.list_endpoints()
-if sum([VECTOR_SEARCH_ENDPOINT == ve.name for ve in vector_search_endpoints]) == 0:
-    print(f"Please wait, creating Vector Search endpoint `{VECTOR_SEARCH_ENDPOINT}`.  This can take up to 20 minutes...")
-    w.vector_search_endpoints.create_endpoint_and_wait(VECTOR_SEARCH_ENDPOINT, endpoint_type=EndpointType.STANDARD)
-
-# Make sure vector search endpoint is online and ready.
-w.vector_search_endpoints.wait_get_endpoint_vector_search_endpoint_online(VECTOR_SEARCH_ENDPOINT)
-
-print(f"PASS: Vector Search endpoint `{VECTOR_SEARCH_ENDPOINT}` exists")
-
+validate_vector_search_endpoint_exists(VECTOR_SEARCH_ENDPOINT)
 
 # COMMAND ----------
 
@@ -215,7 +133,7 @@ vsc = VectorSearchClient(disable_notice=True)
 
 # Load the chunked data to Delta Table & enable change-data capture to allow the table to sync to Vector Search
 chunked_docs_df = spark.read.parquet(
-    f"file:{QUICK_START_REPO_SAVE_FOLDER}/quick_start_demo/chunked_databricks_docs.snappy.parquet"
+    f"file:{CURRENT_FOLDER}/chunked_databricks_docs.snappy.parquet"
 )
 chunked_docs_df.write.format("delta").saveAsTable(CHUNKS_DELTA_TABLE)
 spark.sql(
@@ -263,7 +181,7 @@ index = vsc.create_delta_sync_index_and_wait(
 chain_config = {
     "llm_model_serving_endpoint_name": "databricks-dbrx-instruct",  # the foundation model we want to use
     "vector_search_endpoint_name": VECTOR_SEARCH_ENDPOINT,  # Endoint for vector search
-    "vector_search_index": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.{CHUNKS_VECTOR_INDEX}",
+    "vector_search_index": f"{CHUNKS_VECTOR_INDEX}",
     "llm_prompt_template": """You are an assistant that answers questions. Use the following pieces of retrieved context to answer the question. Some pieces of context may be irrelevant, in which case you should not use them to form the answer.\n\nContext: {context}""", # LLM Prompt template
 }
 
@@ -291,7 +209,7 @@ with mlflow.start_run(run_name="databricks-docs-bot"):
     logged_chain_info = mlflow.langchain.log_model(
         lc_model=os.path.join(
             os.getcwd(),
-            f"{QUICK_START_REPO_SAVE_FOLDER}/quick_start_demo/sample_rag_chain",
+            "sample_rag_chain",
         ),  # Chain code file from the quick start repo
         model_config=chain_config,  # Chain configuration set above
         artifact_path="chain",  # Required by MLflow
@@ -332,10 +250,7 @@ uc_registered_model_info = mlflow.register_model(model_uri=logged_chain_info.mod
 deployment_info = agents.deploy(model_name=UC_MODEL_NAME, model_version=uc_registered_model_info.version)
 
 # Wait for the Review App to be ready
-print("\nWaiting for endpoint to deploy.  This can take 15 - 20 minutes.", end="")
-while w.serving_endpoints.get(deployment_info.endpoint_name).state.ready == EndpointStateReady.NOT_READY or w.serving_endpoints.get(deployment_info.endpoint_name).state.config_update == EndpointStateConfigUpdate.IN_PROGRESS:
-    print(".", end="")
-    time.sleep(30)
+print("\nWaiting for endpoint to deploy.  This can take 15 - 20 minutes.")
 
 # COMMAND ----------
 
