@@ -1,0 +1,40 @@
+input_example:
+  messages:
+  - content: What is RAG?
+    role: user
+llm_config:
+  llm_endpoint_name: avesh-gpt-4o
+  llm_parameters:
+    max_tokens: 1500
+    temperature: 0.01
+  llm_system_prompt_template: You are a helpful assistant that answers questions by
+    calling tools.  Provide responses ONLY based on the information from tools that
+    are explictly specified to you.  If you do not have a relevant tool for a question,
+    respond with 'Sorry, I'm not trained to answer that question'.
+retriever_tool:
+  chunk_template: 'Passage text: {chunk_text}
+
+    Passage metadata: {metadata}
+
+
+    '
+  parameters:
+    num_results: 5
+    query_type: ann
+  prompt_template: 'Use the following pieces of retrieved context to answer the question.
+
+    Only use the passages from context that are relevant to the query to answer the
+    question, ignore the irrelevant passages.  When responding, cite your source,
+    referring to the passage by the columns in the passage''s metadata.
+
+
+    Context: {context}'
+  tool_description_prompt: Search for documents that are relevant to a user's query
+    about the [REPLACE WITH DESCRIPTION OF YOUR DOCS].
+  vector_search_index: ml.cookbook.my_agent_app_chunked_docs_index
+  vector_search_schema:
+    additional_metadata_columns: []
+    chunk_text: content_chunked
+    document_uri: doc_uri
+    primary_key: chunk_id
+  vector_search_threshold: 0.1

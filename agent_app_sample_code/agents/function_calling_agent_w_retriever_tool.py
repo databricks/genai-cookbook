@@ -20,7 +20,8 @@ from dataclasses import asdict, dataclass
 import pandas as pd
 from mlflow.models import set_model, ModelConfig
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
-from openai import OpenAI
+# from openai import OpenAI
+from mlflow.deployments import get_deploy_client
 
 import os
 
@@ -224,32 +225,11 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
     """
     Class representing an Agent that includes a Retriever tool
     """
-    def __init__(self, agent_config: dict = None):
-        self.__agent_config = agent_config
-        if self.__agent_config is None:
-            self.__agent_config = globals().get("__mlflow_model_config__")
-
-        print(globals().get("__mlflow_model_config__"))
-
-    def load_context(self, context):
-        # TODO: This is an ugly hack to support the CUJ of iterating on config in a notebook
-        print(globals().get("__mlflow_model_config__"))
-        if self.__agent_config is None:
-            try:
-                self.config = mlflow.models.ModelConfig(development_config="agents/generated_configs/agent.yaml")
-            except Exception as e:
-                self.config = mlflow.models.ModelConfig()
-        else:
-            self.config = mlflow.models.ModelConfig(development_config=self.__agent_config)
+    def __init__(self):
+        self.config = mlflow.models.ModelConfig(development_config="agents/generated_configs/agent.yaml")
         
         # Load the LLM
-        # OpenAI client used to query Databricks Model Serving
-        self.model_serving_client = OpenAI(
-            api_key=os.environ.get("DATABRICKS_TOKEN"),
-            base_url=str(os.environ.get("DATABRICKS_HOST")) + "/serving-endpoints",
-        )
-
-        # print(self.config)
+        self.model_serving_client = get_deploy_client("databricks")
 
         # Init the Retriever tool
         self.retriever_tool = VectorSearchRetriever(
@@ -273,6 +253,7 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
 
         # Internal representation of the chat history.  As the Agent iteratively selects/executes tools, the history will be stored here.  Since the Agent is stateless, this variable must be populated on each invocation of `predict(...)`.
         self.chat_history = None
+
 
     @mlflow.trace(name="chain", span_type="CHAIN")
     def predict(
@@ -315,13 +296,13 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
         ) = self.recursively_call_and_run_tools(messages=messages)
 
         # If your front end keeps of converastion history and automatically appends the bot's response to the messages history, remove this line.
-        messages_log_with_tool_calls.append(model_response.choices[0].message.to_dict())
+        messages_log_with_tool_calls.append(model_response.choices[0]["message"])
 
         # remove the system prompt - this should not be exposed to the Agent caller
         messages_log_with_tool_calls = messages_log_with_tool_calls[1:]
 
         return {
-            "content": model_response.choices[0].message.content,
+            "content": model_response.choices[0]["message"]["content"],
             # TODO: this should be returned back to the Review App (or any other front end app) and stored there so it can be passed back to this stateless agent with the next turns of converastion.
             "messages": messages_log_with_tool_calls,
         }
@@ -385,28 +366,27 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
         while i < max_iter:
             response = self.chat_completion(messages=messages, tools=True)
             # response = client.chat.completions.create(tools=tools, messages=messages, **kwargs)
-            assistant_message = response.choices[0].message
-            tool_calls = assistant_message.tool_calls
+            assistant_message = response.choices[0]["message"]
+            tool_calls = assistant_message.get("tool_calls")
             if tool_calls is None:
                 # the tool execution finished, and we have a generation
                 # print(response)
                 return (response, messages)
             tool_messages = []
             for tool_call in tool_calls:  # TODO: should run in parallel
-                function = tool_call.function
+                function = tool_call["function"]
                 # uc_func_name = decode_function_name(function.name)
-                args = json.loads(function.arguments)
+                args = json.loads(function["arguments"])
                 # result = exec_uc_func(uc_func_name, **args)
-                result = self.execute_function(function.name, args)
+                result = self.execute_function(function["name"], args)
                 tool_message = {
                     "role": "tool",
-                    "tool_call_id": tool_call.id,
+                    "tool_call_id": tool_call["id"],
                     "content": result,
                 }
                 tool_messages.append(tool_message)
-            assistant_message_dict = assistant_message.dict()
+            assistant_message_dict = assistant_message.copy()
             del assistant_message_dict["content"]
-            del assistant_message_dict["function_call"]
             messages = (
                 messages
                 + [
@@ -425,32 +405,38 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
         result = the_function(**args)
         return result
 
-    # @mlflow.trace(span_type="CHAT_MODEL", name="chat_completions_wrapper")
+
     def chat_completion(self, messages: List[Dict[str, str]], tools: bool = False):
         endpoint_name = self.config.get("llm_config").get("llm_endpoint_name")
         llm_options = self.config.get("llm_config").get("llm_parameters")
 
         # Trace the call to Model Serving
         traced_create = mlflow.trace(
-            self.model_serving_client.chat.completions.create,
+            self.model_serving_client.predict,
             name="chat_completions_api",
             span_type="CHAT_MODEL",
         )
 
         if tools:
             # Get all tools
-            # TODO: Generalize this to work with tools other than a hard-coded Retriever tool
             tools = [self.retriever_tool.get_tool_definition()]
 
-            return traced_create(
-                model=endpoint_name,
-                messages=messages,
-                tools=tools,
+            inputs = {
+                "messages": messages,
+                "tools": tools,
                 **llm_options,
-            )
+            }
         else:
-            # Call LLM without any tools
-            return traced_create(model=endpoint_name, messages=messages, **llm_options)
+            inputs = {
+                "messages": messages,
+                **llm_options,
+            }
+
+        # Use the traced_create to make the prediction
+        return traced_create(
+            endpoint=endpoint_name,
+            inputs=inputs,
+        )
 
     @mlflow.trace(span_type="PARSER")
     def get_messages_array(

@@ -89,7 +89,7 @@ def _build_index(
           sync_result = vsc.get_index(index_name=vectorsearch_index_name).sync()
 
   else:
-      print(f'Creating non-existent vector search index for endpoint "{vector_search_endpoint}" and index "{vectorsearch_index_name}")
+      print(f'Creating non-existent vector search index for endpoint "{vector_search_endpoint}" and index "{vectorsearch_index_name}"')
       create_index = True
 
   if create_index:
