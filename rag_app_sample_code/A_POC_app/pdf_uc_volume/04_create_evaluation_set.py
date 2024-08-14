@@ -108,9 +108,10 @@ display(requests_with_feedback_df.select(
     F.col("is_correct"),
 ))
 
+# COMMAND ----------
 # MAGIC %md
 # MAGIC ## Ingest chats into the Review App to be reviewed 
-
+#
 # COMMAND ----------
 
 from databricks.agents import enable_trace_reviews
