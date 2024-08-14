@@ -109,6 +109,17 @@ display(requests_with_feedback_df.select(
 ))
 
 # COMMAND ----------
+# MAGIC %md
+# MAGIC ## Ingest chats into the Review App to be reviewed 
+from databricks.agents import enable_trace_reviews
+
+request_id_list = requests_with_feedback_df.select(F.col("request_id")).rdd.flatMap(lambda x: x).collect()
+enable_trace_reviews(
+  model_name=UC_MODEL_NAME,
+  request_ids=request_id_list
+)
+
+# COMMAND ----------
 
 # MAGIC %md
 # MAGIC # Save the resulting evaluation set to a Delta Table

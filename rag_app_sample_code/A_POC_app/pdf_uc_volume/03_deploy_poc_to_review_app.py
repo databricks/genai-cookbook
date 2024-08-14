@@ -136,7 +136,11 @@ print(f"\n\nReview App: {deployment_info.review_app_url}")
 # MAGIC
 # MAGIC Now, grant your stakeholders permissions to use the Review App.  Your stakeholders do not Databricks accounts as long as you have [insert docs].
 # MAGIC
-# MAGIC `#TODO: add docs link`
+# MAGIC 
+# Now, grant your stakeholders permissions to use the Review App.  Your stakeholders do not need to have Databricks accounts. From the documentation: 
+# > If reviewers don’t have access already, account admins can use account-level SCIM provisioning to sync users and groups automatically from your identity provider to your Databricks account. You can also manually register these users and groups as you set up identities in Databricks. This allows them to be included as eligible reviewers.
+# MAGIC
+#[Refer to documentation here](https://docs.databricks.com/en/generative-ai/agent-evaluation/human-evaluation.html#set-up-permissions-to-the-review-app-workspace).
 
 # COMMAND ----------
 
@@ -151,7 +155,7 @@ agents.set_permissions(model_name=UC_MODEL_NAME, users=user_list, permission_lev
 # MAGIC
 # MAGIC If you lose this notebook's state and need to find the URL to your Review App, run this cell.
 # MAGIC
-# MAGIC Alternatively, you can construct the Review App URL as follows:
+# MAGIC Alternatively, you can cnstruct the Review App URL as follows:
 # MAGIC
 # MAGIC `https://<your-workspace-url>/ml/reviews/{UC_CATALOG}.{UC_SCHEMA}.{UC_MODEL_NAME}/{UC_MODEL_VERSION_NUMBER}/instructions`
 
