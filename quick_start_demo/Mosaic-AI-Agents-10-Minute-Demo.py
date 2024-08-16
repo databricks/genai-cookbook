@@ -50,6 +50,7 @@ CURRENT_FOLDER = os.getcwd()
 # COMMAND ----------
 
 # Use the current user name to create any necesary resources
+from databricks.sdk import WorkspaceClient
 w = WorkspaceClient()
 user_name = w.current_user.me().user_name.split("@")[0].replace(".", "")
 
