@@ -182,7 +182,7 @@ chain = (
     }
     | prompt
     | model
-    | mlflow.langchain.output_parsers.ChatCompletionsOutputParser()
+    | StrOutputParser()
 )
 
 ## Tell MLflow logging where to find your chain.
