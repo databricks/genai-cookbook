@@ -25,31 +25,31 @@ display(eval_df)
 
 # COMMAND ----------
 
-# If you did not collect feedback from your stakeholders, and want to evaluate using a manually curated set of questions, you can use the structure below.
+# # If you did not collect feedback from your stakeholders, and want to evaluate using a manually curated set of questions, you can use the structure below.
 
-eval_data = [
-    {
-        ### REQUIRED
-        # Question that is asked by the user
-        "request": "What is the difference between reduceByKey and groupByKey in Spark?",
+# eval_data = [
+#     {
+#         ### REQUIRED
+#         # Question that is asked by the user
+#         "request": "What is the difference between reduceByKey and groupByKey in Spark?",
 
-        ### OPTIONAL
-        # Optional, user specified to identify each row
-        "request_id": "your-request-id",
-        # Optional: correct response to the question
-        # If provided, Agent Evaluation can compute additional metrics.
-        "expected_response": "There's no significant difference.",
-        # Optional: Which documents should be retrieved.
-        # If provided, Agent Evaluation can compute additional metrics.
-        "expected_retrieved_context": [
-            {
-                # URI of the relevant document to answer the request
-                # Must match the contents of `document_uri` in your chain config / Vec
-                "doc_uri": "doc_uri_2_1",
-            },
-        ],
-    }
-]
+#         ### OPTIONAL
+#         # Optional, user specified to identify each row
+#         "request_id": "your-request-id",
+#         # Optional: correct response to the question
+#         # If provided, Agent Evaluation can compute additional metrics.
+#         "expected_response": "There's no significant difference.",
+#         # Optional: Which documents should be retrieved.
+#         # If provided, Agent Evaluation can compute additional metrics.
+#         "expected_retrieved_context": [
+#             {
+#                 # URI of the relevant document to answer the request
+#                 # Must match the contents of `document_uri` in your chain config / Vec
+#                 "doc_uri": "doc_uri_2_1",
+#             },
+#         ],
+#     }
+# ]
 
 # Uncomment this row to use the above data instead of your evaluation set
 # eval_df = pd.DataFrame(eval_data)
@@ -68,8 +68,8 @@ eval_data = [
 
 runs = mlflow.search_runs(experiment_names=[MLFLOW_EXPERIMENT_NAME], filter_string=f"run_name = '{POC_CHAIN_RUN_NAME}'", output_format="list")
 
-if len(runs) != 1:
-    raise ValueError(f"Found {len(runs)} run with name {POC_CHAIN_RUN_NAME}.  Ensure the run name is accurate and try again.")
+# if len(runs) != 1:
+#     raise ValueError(f"Found {len(runs)} run with name {POC_CHAIN_RUN_NAME}.  Ensure the run name is accurate and try again.")
 
 poc_run = runs[0]
 

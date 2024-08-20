@@ -29,20 +29,25 @@ user_name = user_email.split("@")[0].replace(".", "").lower()[:35]
 
 # COMMAND ----------
 
+dbutils.widgets.text(name="RAG_APP_NAME", defaultValue="united_airlines_rag_app")
+dbutils.widgets.text(name="UC_CATALOG", defaultValue="main")
+dbutils.widgets.text(name="UC_SCHEMA", defaultValue="rag_united_airlines")
+dbutils.widgets.text(name="VECTOR_SEARCH_ENDPOINT", defaultValue="one-env-shared-endpoint-0")
+
 # The name of the RAG application.  This is used to name the chain's UC model and prepended to the output Delta Tables + Vector Indexes
-RAG_APP_NAME = 'my_agent_app'
+RAG_APP_NAME = dbutils.widgets.get("RAG_APP_NAME")
 
 # UC Catalog & Schema where outputs tables/indexs are saved
 # If this catalog/schema does not exist, you need create catalog/schema permissions.
-UC_CATALOG = f'{user_name}_catalog'
-UC_SCHEMA = f'rag_{user_name}'
+UC_CATALOG = dbutils.widgets.get("UC_CATALOG")
+UC_SCHEMA = dbutils.widgets.get("UC_SCHEMA")
 
 ## UC Model name where the POC chain is logged
 UC_MODEL_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}"
 
 # Vector Search endpoint where index is loaded
 # If this does not exist, it will be created
-VECTOR_SEARCH_ENDPOINT = f'{user_name}_vector_search'
+VECTOR_SEARCH_ENDPOINT = dbutils.widgets.get("VECTOR_SEARCH_ENDPOINT")
 
 # Source location for documents
 # You need to create this location and add files

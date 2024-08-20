@@ -456,7 +456,7 @@ print(f"Gold Delta Table w/ chunked files: {get_table_url(destination_tables_con
 # COMMAND ----------
 
 # DBTITLE 1,Testing the Index
-index.similarity_search(columns=["chunked_text", "chunk_id", "path"], query_text="your query text")
+index.similarity_search(columns=["chunked_text", "chunk_id", "path"], query_text="What is the baggage claim ETA model?")
 
 # COMMAND ----------
 

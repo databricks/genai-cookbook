@@ -1,0 +1,30 @@
+databricks_resources:
+  llm_endpoint_name: databricks-meta-llama-3-1-70b-instruct
+  vector_search_endpoint_name: one-env-shared-endpoint-0
+input_example:
+  messages:
+  - content: What is Baggage Claim ETA?
+    role: user
+llm_config:
+  llm_parameters:
+    max_tokens: 1500
+    temperature: 0.01
+  llm_system_prompt_template: 'You are an assistant that answers questions. Use the
+    following pieces of retrieved context to answer the question. Some pieces of context
+    may be irrelevant, in which case you should not use them to form the answer.
+
+
+    Context: {context}'
+retriever_config:
+  chunk_template: 'Passage: {chunk_text}
+
+    '
+  data_pipeline_tag: poc
+  parameters:
+    k: 5
+    query_type: ann
+  schema:
+    chunk_text: chunked_text
+    document_uri: path
+    primary_key: chunk_id
+  vector_search_index: main.rag_united_airlines.united_airlines_rag_app_poc_chunked_docs_gold_index

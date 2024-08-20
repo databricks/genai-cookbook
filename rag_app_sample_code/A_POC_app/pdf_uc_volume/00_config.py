@@ -37,6 +37,20 @@ print(f"POC app using the UC catalog/schema {UC_CATALOG}.{UC_SCHEMA} with source
 
 # COMMAND ----------
 
+dbutils.widgets.dropdown("embedding_endpoint_name", "databricks-gte-large-en", choices=["databricks-gte-large-en", "databricks-bge-large-en"])
+
+embedding_endpoint_name = dbutils.widgets.get("embedding_endpoint_name")
+
+if "gte-large-en" in embedding_endpoint_name:
+  tokenizer_model_name = "Alibaba-NLP/gte-large-en-v1.5"
+elif "bge-large-en" in embedding_endpoint_name:
+  tokenizer_model_name = "BAAI/bge-large-en-v1.5"
+
+print(f"Embedding endpoint name: {embedding_endpoint_name}")
+print(f"Tokenizer model name: {tokenizer_model_name}")
+
+# COMMAND ----------
+
 data_pipeline_config = {
     # Vector Search index configuration
     "vectorsearch_config": {
@@ -49,10 +63,10 @@ data_pipeline_config = {
     # Tested configurations are available in the `supported_configs/embedding_models` Notebook
     "embedding_config": {
         # Model Serving endpoint name
-        "embedding_endpoint_name": "databricks-gte-large-en",
+        "embedding_endpoint_name": embedding_endpoint_name,
         "embedding_tokenizer": {
             # Name of the embedding model that the tokenizer recognizes
-            "tokenizer_model_name": "Alibaba-NLP/gte-large-en-v1.5",
+            "tokenizer_model_name": tokenizer_model_name,
             # Name of the tokenizer, either `hugging_face` or `tiktoken`
             "tokenizer_source": "hugging_face",
         },
@@ -97,6 +111,7 @@ destination_tables_config = {
     "vectorsearch_index_table_name": f"`{UC_CATALOG}`.`{UC_SCHEMA}`.`{RAG_APP_NAME}_poc_chunked_docs_gold_index`",
 }
 destination_tables_config["vectorsearch_index_name"] = destination_tables_config["vectorsearch_index_table_name"].replace("`", "")
+
 # COMMAND ----------
 
 # MAGIC %md
@@ -153,6 +168,13 @@ CHAIN_CODE_FILE = "multi_turn_rag_chain"
 
 # COMMAND ----------
 
+dbutils.widgets.dropdown("llm_endpoint_name", "databricks-meta-llama-3-1-70b-instruct", 
+                         choices=["databricks-meta-llama-3-1-70b-instruct", "databricks-dbrx-instruct"])
+
+llm_endpoint_name = dbutils.widgets.get("llm_endpoint_name")
+
+# COMMAND ----------
+
 # Chain configuration
 # We suggest using these default settings
 rag_chain_config = {
@@ -161,7 +183,7 @@ rag_chain_config = {
         "vector_search_endpoint_name": VECTOR_SEARCH_ENDPOINT,
         # Databricks Model Serving endpoint name
         # This is the generator LLM where your LLM queries are sent.
-        "llm_endpoint_name": "databricks-dbrx-instruct",
+        "llm_endpoint_name": llm_endpoint_name,
     },
     "retriever_config": {
         # Vector Search index that is created by the data pipeline
@@ -201,7 +223,7 @@ Context: {context}""".strip(),
         "messages": [
             {
                 "role": "user",
-                "content": "What is RAG?",
+                "content": "What is Baggage Claim ETA?",
             },
         ]
     },
