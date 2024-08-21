@@ -153,7 +153,7 @@ agents.set_permissions(model_name=UC_MODEL_NAME, users=user_list, permission_lev
 # MAGIC
 # MAGIC If you lose this notebook's state and need to find the URL to your Review App, run this cell.
 # MAGIC
-# MAGIC Alternatively, you can cnstruct the Review App URL as follows:
+# MAGIC Alternatively, you can construct the Review App URL as follows:
 # MAGIC
 # MAGIC `https://<your-workspace-url>/ml/reviews/{UC_CATALOG}.{UC_SCHEMA}.{UC_MODEL_NAME}/{UC_MODEL_VERSION_NUMBER}/instructions`
 
