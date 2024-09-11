@@ -78,7 +78,6 @@ poc_run = runs[0]
 # MAGIC %md
 # MAGIC ## Load the correct Python environment for the POC's app
 # MAGIC
-# MAGIC TODO: replace this with env_manager=virtualenv once that works
 
 # COMMAND ----------
 
