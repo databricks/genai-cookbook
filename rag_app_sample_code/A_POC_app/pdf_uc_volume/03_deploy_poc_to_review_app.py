@@ -26,12 +26,11 @@ w = WorkspaceClient()
 # MAGIC
 # MAGIC **MLflow Tracing** allows you to inspect what happens inside the chain.  This same tracing data will be logged from your deployed chain along with feedback that your stakeholders provide to a Delta Table.
 # MAGIC
-# MAGIC `# TODO: link docs for code-based logging`
+# MAGIC [Document for code-based logging](https://docs.databricks.com/en/generative-ai/create-log-agent.html#code-based-logging-workflow)
 
 # COMMAND ----------
 
 # Log the model to MLflow
-# TODO: remove example_no_conversion once this papercut is fixed
 with mlflow.start_run(run_name=POC_CHAIN_RUN_NAME):
     # Tag to differentiate from the data pipeline runs
     mlflow.set_tag("type", "chain")
