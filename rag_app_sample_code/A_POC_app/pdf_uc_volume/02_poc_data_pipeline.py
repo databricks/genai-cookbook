@@ -84,7 +84,6 @@ mlflow.log_dict(data_pipeline_config, "data_pipeline_config.json")
 # MAGIC
 # MAGIC **NOTE:** You will have to upload some PDF files to this volume. See the `sample_pdfs` folder of this repo for some example PDFs to upload to the UC Volume.
 # MAGIC
-# MAGIC TODO: Another notebook to load sample PDFs if the customer does't have them
 
 # COMMAND ----------
 
