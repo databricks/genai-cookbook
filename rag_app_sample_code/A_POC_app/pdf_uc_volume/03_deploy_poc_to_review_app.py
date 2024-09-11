@@ -135,7 +135,6 @@ print(f"\n\nReview App: {deployment_info.review_app_url}")
 # MAGIC
 # MAGIC Now, grant your stakeholders permissions to use the Review App.  Your stakeholders do not Databricks accounts as long as you have [insert docs].
 # MAGIC
-# MAGIC `#TODO: add docs link`
 
 # COMMAND ----------
 
