@@ -140,10 +140,10 @@ print(f"\n\nReview App: {deployment_info.review_app_url}")
 
 # COMMAND ----------
 
-user_list = ["eric.peter@databricks.com"]
+# user_list = ["eric.peter@databricks.com"]
 
 # Set the permissions.  If successful, there will be no return value.
-agents.set_permissions(model_name=UC_MODEL_NAME, users=user_list, permission_level=agents.PermissionLevel.CAN_QUERY)
+# agents.set_permissions(model_name=UC_MODEL_NAME, users=user_list, permission_level=agents.PermissionLevel.CAN_QUERY)
 
 # COMMAND ----------
 
