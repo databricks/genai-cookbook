@@ -66,8 +66,11 @@ inference_table_catalog = endpoint_config.catalog_name
 inference_table_schema = endpoint_config.schema_name
 
 # Cleanly formatted tables
-assessment_log_table_name = f"{inference_table_catalog}.{inference_table_schema}.`{inference_table_name}_assessment_logs`"
-request_log_table_name = f"{inference_table_catalog}.{inference_table_schema}.`{inference_table_name}_request_logs`"
+# assessment_log_table_name = f"{inference_table_catalog}.{inference_table_schema}.`{inference_table_name}_assessment_logs`"
+# request_log_table_name = f"{inference_table_catalog}.{inference_table_schema}.`{inference_table_name}_request_logs`"
+# Hardcoded tables in the interest of time during the lab. Please remove the 2 lines below and uncomment the 2 lines above during an actual POC.
+assessment_log_table_name = f"genai_workshop.rag_adminuser3487541.my_agent_app_payload_assessment_logs"
+request_log_table_name = f"genai_workshop.rag_adminuser3487541.my_agent_app_payload_request_logs"
 
 print(f"Assessment logs: {assessment_log_table_name}")
 print(f"Request logs: {request_log_table_name}")
