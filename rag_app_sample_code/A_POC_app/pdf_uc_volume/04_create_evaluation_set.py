@@ -116,7 +116,7 @@ display(requests_with_feedback_df.select(
 
 from databricks.agents import enable_trace_reviews
 
-request_id_list = requests_with_feedback_df.toPandas()["request_id"].tolist()
+request_id_list = request_log_df.toPandas()["databricks_request_id"].tolist()
 
 enable_trace_reviews(
   model_name=UC_MODEL_NAME,
