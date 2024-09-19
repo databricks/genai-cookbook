@@ -56,8 +56,7 @@ retriever_config = RetrieverToolConfig(
 
 llm_config = LLMConfig(
     # https://docs.databricks.com/en/machine-learning/foundation-models/index.html
-    # llm_endpoint_name="databricks-meta-llama-3-70b-instruct",
-    llm_endpoint_name="avesh-gpt-4o",
+    llm_endpoint_name="databricks-meta-llama-3-1-70b-instruct",
     # Define a template for the LLM prompt.  This is how the RAG chain combines the user's question and the retrieved context.
     llm_system_prompt_template=(
         """You are a helpful assistant that answers questions by calling tools.  Provide responses ONLY based on the information from tools that are explictly specified to you.  If you do not have a relevant tool for a question, respond with 'Sorry, I'm not trained to answer that question'."""

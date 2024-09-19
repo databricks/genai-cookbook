@@ -293,14 +293,11 @@ load_uc_volume_to_delta_table(
   spark_dataframe_schema=typed_dicts_to_spark_schema(ParserReturnValue)
 )
 
-print()
 print(DOCS_DELTA_TABLE)
 display(spark.table(DOCS_DELTA_TABLE))
 
 # Log the resulting table to MLflow
 mlflow.log_input(mlflow.data.load_delta(table_name=DOCS_DELTA_TABLE, name=DOCS_DELTA_TABLE.replace("`", "")))
-
-# TODO: Log the parsing function code
 
 # COMMAND ----------
 
@@ -383,7 +380,6 @@ retriever_index_result = build_retriever_index(
 print(retriever_index_result)
 
 print()
-print()
 print('Vector search index created! This will be used in the next notebook.')
 print(f'Vector search endpoint: {retriever_index_result.vector_search_endpoint}')
 print(f'Vector search index: {retriever_index_result.vector_search_index_name}')
@@ -398,3 +394,7 @@ print(f'Chunked docs table: {retriever_index_result.chunked_docs_table}')
 # COMMAND ----------
 
 mlflow.end_run()
+
+# COMMAND ----------
+
+
