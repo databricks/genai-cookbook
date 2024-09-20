@@ -3,7 +3,7 @@ input_example:
   - content: What is RAG?
     role: user
 llm_config:
-  llm_endpoint_name: avesh-gpt-4o
+  llm_endpoint_name: databricks-meta-llama-3-1-70b-instruct
   llm_parameters:
     max_tokens: 1500
     temperature: 0.01
@@ -31,7 +31,7 @@ retriever_tool:
     Context: {context}'
   tool_description_prompt: Search for documents that are relevant to a user's query
     about the [REPLACE WITH DESCRIPTION OF YOUR DOCS].
-  vector_search_index: ml.cookbook.my_agent_app_chunked_docs_index
+  vector_search_index: prithvikannan_catalog.cookbook.my_agent_app_chunked_docs_index
   vector_search_schema:
     additional_metadata_columns: []
     chunk_text: content_chunked

@@ -7,7 +7,7 @@
 # COMMAND ----------
 
 # If running this notebook by itself, uncomment these.
-# %pip install --upgrade -qqqq databricks-agents openai databricks-vectorsearch
+# %pip install --upgrade -qqqq databricks-agents databricks-vectorsearch
 # dbutils.library.restartPython()
 
 # COMMAND ----------
@@ -20,7 +20,6 @@ from dataclasses import asdict, dataclass
 import pandas as pd
 from mlflow.models import set_model, ModelConfig
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
-# from openai import OpenAI
 from mlflow.deployments import get_deploy_client
 
 import os
@@ -316,7 +315,7 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
         # else:
         #     vs_query = query
 
-        print(doc_name_filter)
+        # print(doc_name_filter)
         results = self.customer_notes_retriever.similarity_search(vs_query)
 
         context = ""
