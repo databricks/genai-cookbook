@@ -41,20 +41,15 @@ import mlflow
 
 # MAGIC %md ## Get the request and assessment log tables
 # MAGIC
-# MAGIC These tables are updated every ~hour with data from the raw Inference Table.
-# MAGIC
-# MAGIC TODO: Add docs link to the schemas
+# MAGIC These tables are updated every ~hour with data from the raw Inference Table. See [docs](https://docs.databricks.com/en/generative-ai/deploy-agent.html#agent-enhanced-inference-tables) for the schema.
 
 # COMMAND ----------
 
 w = WorkspaceClient()
 
-active_deployments = agents.list_deployments()
-active_deployment = next(
-    (item for item in active_deployments if item.model_name == UC_MODEL_NAME), None
-)
+deployment = agents.get_deployments(UC_MODEL_NAME)
+endpoint = w.serving_endpoints.get(deployment[0].endpoint_name)
 
-endpoint = w.serving_endpoints.get(active_deployment.endpoint_name)
 
 try:
     endpoint_config = endpoint.config.auto_capture_config
@@ -118,7 +113,3 @@ display(requests_with_feedback_df.select(
 eval_set = requests_with_feedback_df[["request", "request_id", "expected_response", "expected_retrieved_context", "source_user", "source_tag"]]
 
 eval_set.write.format("delta").mode("overwrite").saveAsTable(EVALUATION_SET_FQN)
-
-# COMMAND ----------
-
-

@@ -24,22 +24,6 @@ def get_table_url(table_fqdn):
 
 # COMMAND ----------
 
-# from databricks.sdk import WorkspaceClient
-
-# def create_or_get_vector_search_endpoint(vector_search_endpoint: str):
-#   w = WorkspaceClient()
-#   vector_search_endpoints = w.vector_search_endpoints.list_endpoints()
-#   if sum([vector_search_endpoint == ve.name for ve in vector_search_endpoints]) == 0:
-#       print(f"Please wait, creating Vector Search endpoint `{vector_search_endpoint}`.  This can take up to 20 minutes...")
-#       w.vector_search_endpoints.create_endpoint_and_wait(vector_search_endpoint, endpoint_type=EndpointType.STANDARD)
-
-#   # Make sure vector search endpoint is online and ready.
-#   w.vector_search_endpoints.wait_get_endpoint_vector_search_endpoint_online(vector_search_endpoint)
-
-#   print(f"PASS: Vector Search endpoint `{vector_search_endpoint}` exists")
-
-# COMMAND ----------
-
 
 from typing import TypedDict, Dict
 import io 
@@ -66,11 +50,6 @@ def _build_index(
 
   # Get the vector search index
   vsc = VectorSearchClient(disable_notice=True)
-
-  # Use optimizations if available
-#   dbr_majorversion = int(spark.conf.get("spark.databricks.clusterUsageTags.sparkVersion").split(".")[0])
-#   if dbr_majorversion >= 14:
-#     spark.conf.set("spark.sql.execution.pythonUDF.arrow.enabled", True)
 
   def find_index(endpoint_name, index_name):
       all_indexes = vsc.list_indexes(name=vector_search_endpoint).get("vector_indexes", [])

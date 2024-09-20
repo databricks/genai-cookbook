@@ -87,6 +87,7 @@ with mlflow.start_run(run_id=poc_run.info.run_id):
         model=f"runs:/{poc_run.info.run_id}/agent",  # replace `agent` with artifact_path that you used when calling log_model.  By default, this is `agent`.
         model_type="databricks-agent",
     )
+    per_question_results_df = eval_results.tables['eval_results']
 
 # COMMAND ----------
 
@@ -103,7 +104,6 @@ eval_results.metrics
 # COMMAND ----------
 
 # Evaluation results including LLM judge scores/rationales for each row in your evaluation set
-per_question_results_df = eval_results.tables['eval_results']
 # You can click on a row in the `trace` column to view the detailed MLflow trace
 display(per_question_results_df)
 
