@@ -12,6 +12,8 @@
 # COMMAND ----------
 
 from typing import List
+
+
 def install_apt_get_packages(package_list: List[str]):
     """
     Installs apt-get packages required by the parser.
@@ -42,5 +44,3 @@ def install_apt_get_packages(package_list: List[str]):
     except Exception as e:
         print(f"Couldn't install {package_list} on all nodes: {e}")
         raise e
-
-

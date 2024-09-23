@@ -23,15 +23,15 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from transformers import AutoTokenizer
 import tiktoken
-from typing import Callable
+from typing import Callable, Tuple, Optional
 import os
+import re
 from databricks.sdk import WorkspaceClient
 
-
-# This is necessary because spark sometimes will give a warning about the cache in `/.cache` being read-only.
+# Constants
 HF_CACHE_DIR = "/tmp/hf_cache/"
 
-
+# Embedding Models Configuration
 EMBEDDING_MODELS = {
     "gte-large-en-v1.5": {
         "tokenizer": lambda: AutoTokenizer.from_pretrained(
@@ -40,14 +40,14 @@ EMBEDDING_MODELS = {
         "context_window": 8192,
         "type": "SENTENCE_TRANSFORMER",
     },
-    "bge-large-en-v1.5": { # FMAPI Per-Token name
+    "bge-large-en-v1.5": {
         "tokenizer": lambda: AutoTokenizer.from_pretrained(
             "BAAI/bge-large-en-v1.5", cache_dir=HF_CACHE_DIR
         ),
         "context_window": 512,
         "type": "SENTENCE_TRANSFORMER",
     },
-    "bge_large_en_v1_5": { # FMAPI PT name
+    "bge_large_en_v1_5": {
         "tokenizer": lambda: AutoTokenizer.from_pretrained(
             "BAAI/bge-large-en-v1.5", cache_dir=HF_CACHE_DIR
         ),
@@ -72,43 +72,79 @@ EMBEDDING_MODELS = {
 }
 
 
-def detect_fmapi_embedding_model_type(model_serving_endpoint):
-    """
-    Try to detect the endpoint type and get the embedding config
-    returns (None, None) if not found
-    returns (endpoint_type, embedding_config)
-    """
-    w = WorkspaceClient()
+def get_workspace_client() -> WorkspaceClient:
+    """Returns a WorkspaceClient instance."""
+    return WorkspaceClient()
 
-    endpoint_type = None
+
+def get_embedding_model_config(endpoint_type: str) -> Optional[dict]:
+    """
+    Retrieve embedding model configuration by endpoint type.
+    """
+    return EMBEDDING_MODELS.get(endpoint_type)
+
+
+def extract_endpoint_type(llm_endpoint) -> Optional[str]:
+    """
+    Extract the endpoint type from the given llm_endpoint object.
+    """
     try:
-        llm_endpoint = w.serving_endpoints.get(name=model_serving_endpoint)
-        # external model name
-        endpoint_type = llm_endpoint.config.served_entities[0].external_model.name
-    except Exception as e:
+        return llm_endpoint.config.served_entities[0].external_model.name
+    except AttributeError:
         try:
-            # FMAPI pay per token
-            endpoint_type = llm_endpoint.config.served_entities[0].foundation_model.name
-        except Exception as e:
-            try: 
-                # FMAPI provisioned throughput
-                endpoint_type = llm_endpoint.config.served_entities[0].name
-                if endpoint_type[-2:][0] == '-':
-                    # remove the version number if present e.g., `bge_large_en_v1_5-2` --> `bge_large_en_v1_5`
-                    endpoint_type = endpoint_type[:-2]
-            except Exception as e:
-                pass
-                
+            return llm_endpoint.config.served_entities[0].foundation_model.name
+        except AttributeError:
+            try:
+                endpoint_name = llm_endpoint.config.served_entities[0].name
+                return (
+                    re.sub(r"-\d+$", "", endpoint_name)
+                    if re.search(r"-\d+$", endpoint_name)
+                    else endpoint_name
+                )
+            except AttributeError:
+                return None
 
-    if endpoint_type is not None:
-        # will return None if not found
-        embedding_config = EMBEDDING_MODELS.get(endpoint_type)
-        if embedding_config is not None:
-            return (endpoint_type, embedding_config)
-        else:
-            return None, None
-    else:
-        return None, None
+
+def detect_fmapi_embedding_model_type(
+    model_serving_endpoint: str,
+) -> Tuple[Optional[str], Optional[dict]]:
+    """
+    Detects the embedding model type and configuration for the given endpoint.
+    Returns a tuple of (endpoint_type, embedding_config) or (None, None) if not found.
+    """
+    client = get_workspace_client()
+
+    try:
+        llm_endpoint = client.serving_endpoints.get(name=model_serving_endpoint)
+        endpoint_type = extract_endpoint_type(llm_endpoint)
+    except Exception as e:
+        endpoint_type = None
+
+    embedding_config = (
+        get_embedding_model_config(endpoint_type) if endpoint_type else None
+    )
+    return (endpoint_type, embedding_config)
+
+
+def validate_chunk_size(chunk_spec: dict):
+    """
+    Validate the chunk size and overlap settings in chunk_spec.
+    Raises ValueError if any condition is violated.
+    """
+    if (
+        chunk_spec["chunk_overlap_tokens"] + chunk_spec["chunk_size_tokens"]
+    ) > chunk_spec["context_window"]:
+        raise ValueError(
+            f'Proposed chunk_size of {chunk_spec["chunk_size_tokens"]} + overlap of {chunk_spec["chunk_overlap_tokens"]} '
+            f'is {chunk_spec["chunk_overlap_tokens"] + chunk_spec["chunk_size_tokens"]} which is greater than context '
+            f'window of {chunk_spec["context_window"]} tokens.'
+        )
+
+    if chunk_spec["chunk_overlap_tokens"] > chunk_spec["chunk_size_tokens"]:
+        raise ValueError(
+            f'Proposed `chunk_overlap_tokens` of {chunk_spec["chunk_overlap_tokens"]} is greater than the '
+            f'`chunk_size_tokens` of {chunk_spec["chunk_size_tokens"]}. Reduce the size of `chunk_size_tokens`.'
+        )
 
 
 def get_recursive_character_text_splitter(
@@ -118,43 +154,40 @@ def get_recursive_character_text_splitter(
     chunk_overlap_tokens: int = 0,
 ) -> Callable[[str], list[str]]:
     try:
-        (embedding_model_name, chunk_spec) = detect_fmapi_embedding_model_type(
+        # Detect the embedding model and its configuration
+        embedding_model_name, chunk_spec = detect_fmapi_embedding_model_type(
             model_serving_endpoint
         )
-        if chunk_spec is not None and embedding_model_name is not None:
-            print(
-                f"Detected endpoint `{model_serving_endpoint}` as embedding model `{embedding_model_name}`"
-            )
-        else:
-            # try to look it up based on the based type
-            chunk_spec = EMBEDDING_MODELS[embedding_model_name]
 
-        if chunk_size_tokens is not None:
-            chunk_spec["chunk_size_tokens"] = chunk_size_tokens
-        else:
-            chunk_spec["chunk_size_tokens"] = chunk_spec["context_window"]
+        if chunk_spec is None or embedding_model_name is None:
+            # Fall back to using provided embedding_model_name
+            chunk_spec = EMBEDDING_MODELS.get(embedding_model_name)
+            if chunk_spec is None:
+                raise KeyError
 
+        # Update chunk specification based on provided parameters
+        chunk_spec["chunk_size_tokens"] = (
+            chunk_size_tokens or chunk_spec["context_window"]
+        )
         chunk_spec["chunk_overlap_tokens"] = chunk_overlap_tokens
 
-        if (
-            chunk_spec["chunk_overlap_tokens"] + chunk_spec["chunk_size_tokens"]
-        ) > chunk_spec["context_window"]:
-            raise ValueError(
-                f'Proposed chunk_size of {chunk_spec["chunk_size_tokens"]} + overlap of {chunk_spec["chunk_overlap_tokens"]} is {chunk_spec["chunk_overlap_tokens"] + chunk_spec["chunk_size_tokens"]} which is greater than context window of {chunk_spec["context_window"]} tokens'
-            )
-
-        if chunk_spec["chunk_overlap_tokens"] > chunk_spec["chunk_size_tokens"]:
-            raise ValueError(
-                f'Proposed `chunk_overlap_tokens` of {chunk_spec["chunk_overlap_tokens"]} is greater than the `chunk_size_tokens` of {chunk_spec["chunk_size_tokens"]}.  Reduce the size of `chunk_size_tokens`'
-            )
+        # Validate chunk size and overlap
+        validate_chunk_size(chunk_spec)
 
         print(f'Chunk size in tokens: {chunk_spec["chunk_size_tokens"]}')
         print(f'Chunk overlap in tokens: {chunk_spec["chunk_overlap_tokens"]}')
-      
-        print(
-            f'Using {round((chunk_spec["chunk_size_tokens"] + chunk_spec["chunk_overlap_tokens"])/chunk_spec["context_window"], 2)*100}% of the {chunk_spec["context_window"]} token context window.'
+        context_usage = (
+            round(
+                (chunk_spec["chunk_size_tokens"] + chunk_spec["chunk_overlap_tokens"])
+                / chunk_spec["context_window"],
+                2,
+            )
+            * 100
         )
-        # print(chunk_spec)
+        print(
+            f'Using {context_usage}% of the {chunk_spec["context_window"]} token context window.'
+        )
+
     except KeyError:
         raise ValueError(
             f"Embedding model `{embedding_model_name}` not found. Available models: {EMBEDDING_MODELS.keys()}"
@@ -168,13 +201,14 @@ def get_recursive_character_text_splitter(
                 chunk_size=chunk_spec["chunk_size_tokens"],
                 chunk_overlap=chunk_spec["chunk_overlap_tokens"],
             )
-            return splitter.split_text(text)
         elif chunk_spec["type"] == "OPENAI":
             splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
                 tokenizer.name,
                 chunk_size=chunk_spec["chunk_size_tokens"],
                 chunk_overlap=chunk_spec["chunk_overlap_tokens"],
             )
-            return splitter.split_text(text)
+        else:
+            raise ValueError(f"Unsupported model type: {chunk_spec['type']}")
+        return splitter.split_text(text)
 
     return _recursive_character_text_splitter

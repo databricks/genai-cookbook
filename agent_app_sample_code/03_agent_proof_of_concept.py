@@ -12,7 +12,7 @@
 # COMMAND ----------
 
 # Versions of Databricks code are not locked since Databricks ensures changes are backwards compatible.
-%pip install -qqqq -U databricks-agents databricks-vectorsearch databricks-sdk mlflow mlflow-skinny 
+%pip install -qqqq -U databricks-agents databricks-vectorsearch databricks-sdk mlflow mlflow-skinny
 # Restart to load the packages into the Python environment
 dbutils.library.restartPython()
 
@@ -51,7 +51,7 @@ retriever_config = RetrieverToolConfig(
     tool_description_prompt="Search for documents that are relevant to a user's query about the [REPLACE WITH DESCRIPTION OF YOUR DOCS].",
 )
 
-# `llm_endpoint_name`: Model Serving endpoint with the LLM for your Agent. 
+# `llm_endpoint_name`: Model Serving endpoint with the LLM for your Agent.
 #     - Either an [Foundational Models](https://docs.databricks.com/en/machine-learning/foundation-models/index.html) Provisioned Throughput / Pay-Per-Token or [External Model](https://docs.databricks.com/en/generative-ai/external-models/index.html) of type `/llm/v1/chat` with support for [function calling](https://docs.databricks.com/en/machine-learning/model-serving/function-calling.html).  Supported models: `databricks-meta-llama-3-70b-instruct` or any of the Azure OpenAI / OpenAI models.
 
 llm_config = LLMConfig(
@@ -99,6 +99,7 @@ validate_llm_config(llm_config)
 # COMMAND ----------
 
 import mlflow
+
 mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
 # COMMAND ----------
@@ -148,7 +149,10 @@ print(response["content"])
 
 # COMMAND ----------
 
-from mlflow.models.resources import DatabricksVectorSearchIndex, DatabricksServingEndpoint
+from mlflow.models.resources import (
+    DatabricksVectorSearchIndex,
+    DatabricksServingEndpoint,
+)
 from mlflow.models.signature import ModelSignature
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest
 import yaml
@@ -157,17 +161,17 @@ from databricks import vector_search
 
 databricks_resources = [
     DatabricksServingEndpoint(endpoint_name=llm_config.llm_endpoint_name),
-    DatabricksVectorSearchIndex(index_name=retriever_config.vector_search_index)
+    DatabricksVectorSearchIndex(index_name=retriever_config.vector_search_index),
 ]
 
-# Specify the full path to the Agent notebook 
+# Specify the full path to the Agent notebook
 model_file = "agents/function_calling_agent_w_retriever_tool"
 model_path = os.path.join(os.getcwd(), model_file)
 
 with mlflow.start_run(run_name=POC_CHAIN_RUN_NAME):
     model_info = mlflow.pyfunc.log_model(
         python_model=model_path,
-        model_config=agent_config.dict(), 
+        model_config=agent_config.dict(),
         artifact_path="agent",
         input_example=agent_config.input_example,
         resources=databricks_resources,
@@ -186,10 +190,12 @@ model.predict(agent_config.input_example)
 # COMMAND ----------
 
 # Use Unity Catalog as the model registry
-mlflow.set_registry_uri('databricks-uc')
+mlflow.set_registry_uri("databricks-uc")
 
 # Register the model to the Unity Catalog
-uc_registered_model_info = mlflow.register_model(model_uri=model_info.model_uri, name=UC_MODEL_NAME)
+uc_registered_model_info = mlflow.register_model(
+    model_uri=model_info.model_uri, name=UC_MODEL_NAME
+)
 
 # COMMAND ----------
 

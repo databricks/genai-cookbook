@@ -80,7 +80,9 @@ request_log_df = spark.table(request_log_table_name)
 
 # COMMAND ----------
 
-requests_with_feedback_df = create_potential_evaluation_set(request_log_df, assessment_log_df)
+requests_with_feedback_df = create_potential_evaluation_set(
+    request_log_df, assessment_log_df
+)
 
 requests_with_feedback_df.columns
 
@@ -93,15 +95,17 @@ requests_with_feedback_df.columns
 
 # COMMAND ----------
 
-display(requests_with_feedback_df.select(
-    F.col("request_id"),
-    F.col("request"),
-    F.col("response"),
-    F.col("trace"),
-    F.col("expected_response"),
-    F.col("expected_retrieved_context"),
-    F.col("is_correct"),
-))
+display(
+    requests_with_feedback_df.select(
+        F.col("request_id"),
+        F.col("request"),
+        F.col("response"),
+        F.col("trace"),
+        F.col("expected_response"),
+        F.col("expected_retrieved_context"),
+        F.col("is_correct"),
+    )
+)
 
 # COMMAND ----------
 
@@ -110,6 +114,15 @@ display(requests_with_feedback_df.select(
 
 # COMMAND ----------
 
-eval_set = requests_with_feedback_df[["request", "request_id", "expected_response", "expected_retrieved_context", "source_user", "source_tag"]]
+eval_set = requests_with_feedback_df[
+    [
+        "request",
+        "request_id",
+        "expected_response",
+        "expected_retrieved_context",
+        "source_user",
+        "source_tag",
+    ]
+]
 
 eval_set.write.format("delta").mode("overwrite").saveAsTable(EVALUATION_SET_FQN)

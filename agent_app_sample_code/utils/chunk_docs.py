@@ -58,39 +58,45 @@ from transformers import AutoTokenizer
 import tiktoken
 from pyspark.sql.types import StructType, StringType, StructField, MapType, ArrayType
 
+
 def compute_chunks(
-  docs_table: str,
-  doc_column: str,
-  chunk_fn: Callable[[str], list[str]],
-  propagate_columns: list[str],
-  chunked_docs_table: str
+    docs_table: str,
+    doc_column: str,
+    chunk_fn: Callable[[str], list[str]],
+    propagate_columns: list[str],
+    chunked_docs_table: str,
 ) -> str:
-  chunked_docs_table = chunked_docs_table or f'{docs_table}_chunked'
+    chunked_docs_table = chunked_docs_table or f"{docs_table}_chunked"
 
-  print(f'Computing chunks for `{docs_table}`...')
+    print(f"Computing chunks for `{docs_table}`...")
 
-  raw_docs = spark.read.table(docs_table)
+    raw_docs = spark.read.table(docs_table)
 
-  parser_udf = func.udf(
-      chunk_fn,
-      returnType=ArrayType(StringType()),
-  )
-  chunked_array_docs = raw_docs.withColumn("content_chunked", parser_udf(doc_column)).drop(doc_column)
-  chunked_docs = chunked_array_docs.select(*propagate_columns, explode("content_chunked").alias("content_chunked"))
+    parser_udf = func.udf(
+        chunk_fn,
+        returnType=ArrayType(StringType()),
+    )
+    chunked_array_docs = raw_docs.withColumn(
+        "content_chunked", parser_udf(doc_column)
+    ).drop(doc_column)
+    chunked_docs = chunked_array_docs.select(
+        *propagate_columns, explode("content_chunked").alias("content_chunked")
+    )
 
-  # Add a primary key: "chunk_id".
-  chunks_with_ids = chunked_docs.withColumn(
-      "chunk_id",
-      func.md5(func.col("content_chunked"))
-  )
-  # Reorder for better display.
-  chunks_with_ids = chunks_with_ids.select("chunk_id", "content_chunked", *propagate_columns)
+    # Add a primary key: "chunk_id".
+    chunks_with_ids = chunked_docs.withColumn(
+        "chunk_id", func.md5(func.col("content_chunked"))
+    )
+    # Reorder for better display.
+    chunks_with_ids = chunks_with_ids.select(
+        "chunk_id", "content_chunked", *propagate_columns
+    )
 
-  print(f'Created {chunks_with_ids.count()} chunks!')
+    print(f"Created {chunks_with_ids.count()} chunks!")
 
-  # Write to Delta Table
-  chunks_with_ids.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable(
-      chunked_docs_table
-  )
+    # Write to Delta Table
+    chunks_with_ids.write.mode("overwrite").option(
+        "overwriteSchema", "true"
+    ).saveAsTable(chunked_docs_table)
 
-  return chunked_docs_table
+    return chunked_docs_table

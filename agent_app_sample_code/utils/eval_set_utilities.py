@@ -13,7 +13,6 @@ from databricks import agents
 from databricks.sdk import WorkspaceClient
 from databricks.rag_eval.evaluation import traces
 
-
 # COMMAND ----------
 
 # Deduplicate the assessment log
@@ -123,8 +122,15 @@ def attach_ground_truth(request_log_df, deduped_assessment_log_df):
         .withColumn(
             "suggested_output",
             F.when(suggested_output_col == "", None).otherwise(suggested_output_col),
-        ).withColumn("source_user", F.col("source.id"))
-        .select("request_id", "is_correct", "suggested_output", "source_user", _RETRIEVAL_ASSESSMENT)
+        )
+        .withColumn("source_user", F.col("source.id"))
+        .select(
+            "request_id",
+            "is_correct",
+            "suggested_output",
+            "source_user",
+            _RETRIEVAL_ASSESSMENT,
+        )
     )
     # Join the request log with the ratings from above
     raw_requests_with_feedback_df = request_log_df.join(
@@ -136,81 +142,108 @@ def attach_ground_truth(request_log_df, deduped_assessment_log_df):
     raw_requests_with_feedback_df = raw_requests_with_feedback_df.drop("request_id")
     return raw_requests_with_feedback_df
 
-
-
 # COMMAND ----------
 
-_EXPECTED_RETRIEVAL_CONTEXT_SCHEMA = T.ArrayType(T.StructType([T.StructField("doc_uri", T.StringType()), T.StructField("content", T.StringType())]))
+_EXPECTED_RETRIEVAL_CONTEXT_SCHEMA = T.ArrayType(
+    T.StructType(
+        [
+            T.StructField("doc_uri", T.StringType()),
+            T.StructField("content", T.StringType()),
+        ]
+    )
+)
+
 
 def extract_retrieved_chunks_from_trace(trace_str: str) -> List[Mapping[str, str]]:
-  """Helper to extract the retrieved chunks from a trace string"""
-  trace = mlflow_entities.Trace.from_json(trace_str)
-  chunks = traces.extract_retrieval_context_from_trace(trace)
-  return [{"doc_uri": chunk.doc_uri, "content": chunk.content} for chunk in chunks]
+    """Helper to extract the retrieved chunks from a trace string"""
+    trace = mlflow_entities.Trace.from_json(trace_str)
+    chunks = traces.extract_retrieval_context_from_trace(trace)
+    return [{"doc_uri": chunk.doc_uri, "content": chunk.content} for chunk in chunks]
+
 
 @F.udf(_EXPECTED_RETRIEVAL_CONTEXT_SCHEMA)
-def construct_expected_retrieval_context(trace_str: Optional[str], chunk_at_i_relevance: Optional[List[str]]) -> Optional[List[Mapping[str, str]]]:
-  """Helper to construct the expected retrieval context. Any retrieved chunks that are not relevant are dropped."""
-  if chunk_at_i_relevance is None or trace_str is None: 
-    return None
-  retrieved_chunks = extract_retrieved_chunks_from_trace(trace_str)
-  expected_retrieval_context = [chunk for chunk, rating in zip(retrieved_chunks, chunk_at_i_relevance) if rating == "true"]
-  return expected_retrieval_context if len(expected_retrieval_context) else None
+def construct_expected_retrieval_context(
+    trace_str: Optional[str], chunk_at_i_relevance: Optional[List[str]]
+) -> Optional[List[Mapping[str, str]]]:
+    """Helper to construct the expected retrieval context. Any retrieved chunks that are not relevant are dropped."""
+    if chunk_at_i_relevance is None or trace_str is None:
+        return None
+    retrieved_chunks = extract_retrieved_chunks_from_trace(trace_str)
+    expected_retrieval_context = [
+        chunk
+        for chunk, rating in zip(retrieved_chunks, chunk_at_i_relevance)
+        if rating == "true"
+    ]
+    return expected_retrieval_context if len(expected_retrieval_context) else None
+
+
 # =================================
 
 
 def identify_potential_eval_set_records(raw_requests_with_feedback_df):
-  # For thumbs up, use either the suggested output or the response, in that order
-  positive_feedback_df = (
-    raw_requests_with_feedback_df
-      .where(F.col("is_correct") == F.lit("positive"))
-      .withColumn(
-        "expected_response",
-        F.when(
-          F.col("suggested_output") != None, F.col("suggested_output")
-        ).otherwise(F.col("response"))
-      )
-      .withColumn("source_tag", F.lit("thumbs_up"))
-  )
+    # For thumbs up, use either the suggested output or the response, in that order
+    positive_feedback_df = (
+        raw_requests_with_feedback_df.where(F.col("is_correct") == F.lit("positive"))
+        .withColumn(
+            "expected_response",
+            F.when(
+                F.col("suggested_output") != None, F.col("suggested_output")
+            ).otherwise(F.col("response")),
+        )
+        .withColumn("source_tag", F.lit("thumbs_up"))
+    )
 
-  # For thumbs down, use the suggested output if there is one
-  negative_feedback_df = (
-    raw_requests_with_feedback_df
-      .where(F.col("is_correct") == F.lit("negative"))
-      .withColumn("expected_response", F.col("suggested_output"))
-      .withColumn("source_tag", F.lit("thumbs_down_edited"))
-  )
+    # For thumbs down, use the suggested output if there is one
+    negative_feedback_df = (
+        raw_requests_with_feedback_df.where(F.col("is_correct") == F.lit("negative"))
+        .withColumn("expected_response", F.col("suggested_output"))
+        .withColumn("source_tag", F.lit("thumbs_down_edited"))
+    )
 
-  # For no feedback or IDK, there is no expected response.
-  no_or_unknown_feedback_df = (
-    raw_requests_with_feedback_df
-      .where((F.col("is_correct").isNull()) | ((F.col("is_correct") != F.lit("negative")) & (F.col("is_correct") != F.lit("positive"))))
-      .withColumn("expected_response", F.lit(None))
-      .withColumn("source_tag", F.lit("no_feedback_provided"))
-  )
-  # Join the above feedback tables and select the relevant columns for the eval harness
-  requests_with_feedback_df = positive_feedback_df.unionByName(negative_feedback_df).unionByName(no_or_unknown_feedback_df)
-  # Get the thumbs up/down for each retrieved chunk
-  requests_with_feedback_df = requests_with_feedback_df.withColumn(
-      "chunk_at_i_relevance",
-      F.transform(
-          F.col(_RETRIEVAL_ASSESSMENT),
-          lambda x: x.ratings.answer_correct.value
-      )
-  ).drop(_RETRIEVAL_ASSESSMENT)
+    # For no feedback or IDK, there is no expected response.
+    no_or_unknown_feedback_df = (
+        raw_requests_with_feedback_df.where(
+            (F.col("is_correct").isNull())
+            | (
+                (F.col("is_correct") != F.lit("negative"))
+                & (F.col("is_correct") != F.lit("positive"))
+            )
+        )
+        .withColumn("expected_response", F.lit(None))
+        .withColumn("source_tag", F.lit("no_feedback_provided"))
+    )
+    # Join the above feedback tables and select the relevant columns for the eval harness
+    requests_with_feedback_df = positive_feedback_df.unionByName(
+        negative_feedback_df
+    ).unionByName(no_or_unknown_feedback_df)
+    # Get the thumbs up/down for each retrieved chunk
+    requests_with_feedback_df = requests_with_feedback_df.withColumn(
+        "chunk_at_i_relevance",
+        F.transform(
+            F.col(_RETRIEVAL_ASSESSMENT), lambda x: x.ratings.answer_correct.value
+        ),
+    ).drop(_RETRIEVAL_ASSESSMENT)
 
-  requests_with_feedback_df = requests_with_feedback_df.withColumnRenamed("databricks_request_id", "request_id")
-  
-  # Add the expected retrieved context column
-  requests_with_feedback_df = requests_with_feedback_df.withColumn(
-    "expected_retrieved_context", construct_expected_retrieval_context(F.col("trace"), F.col("chunk_at_i_relevance"))
-  )
-  return requests_with_feedback_df
-  
+    requests_with_feedback_df = requests_with_feedback_df.withColumnRenamed(
+        "databricks_request_id", "request_id"
+    )
+
+    # Add the expected retrieved context column
+    requests_with_feedback_df = requests_with_feedback_df.withColumn(
+        "expected_retrieved_context",
+        construct_expected_retrieval_context(
+            F.col("trace"), F.col("chunk_at_i_relevance")
+        ),
+    )
+    return requests_with_feedback_df
 
 # COMMAND ----------
 
 def create_potential_evaluation_set(request_log_df, assessment_log_df):
-    raw_requests_with_feedback_df = attach_ground_truth(request_log_df, assessment_log_df)
-    requests_with_feedback_df = identify_potential_eval_set_records(raw_requests_with_feedback_df)
+    raw_requests_with_feedback_df = attach_ground_truth(
+        request_log_df, assessment_log_df
+    )
+    requests_with_feedback_df = identify_potential_eval_set_records(
+        raw_requests_with_feedback_df
+    )
     return requests_with_feedback_df

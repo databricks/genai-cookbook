@@ -76,7 +76,7 @@ POC_CHAIN_RUN_NAME = "agent_poc"
 
 # COMMAND ----------
 
-print('--user info--')
+print("--user info--")
 print(f"user_name {user_name}")
 
 print("--agent--")
@@ -94,41 +94,9 @@ print(f"POC_CHAIN_RUN_NAME {POC_CHAIN_RUN_NAME}")
 
 # COMMAND ----------
 
-# # Write the parts of the configuration that are needed by the Agent model to a YAML file
-# # This is used to securely provision these credentials to the deployed Agent
-
-# agent_resources = {
-#   "api_version": "1",
-#   "databricks": {
-#     "vector_search_index": [
-#       {
-#         "name": VECTOR_INDEX_NAME
-#       }
-#     ],
-#     "serving_endpoint": [
-#       {
-#         "name": LLM_ENDPOINT
-#       },
-#       {
-#         "name": EMBEDDING_MODEL_ENDPOINT
-#       }
-#     ]
-#   }
-# }
-
-# import yaml
-
-# # Specify the file path for the YAML file
-# file_path = 'agent_resources.yaml'
-
-# # Write the dictionary to a YAML file
-# with open(file_path, 'w') as file:
-#     yaml.dump(agent_resources, file)
-
-# COMMAND ----------
-
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import NotFound, PermissionDenied
+
 w = WorkspaceClient()
 
 # Create UC Catalog if it does not exist, otherwise, raise an exception
@@ -140,9 +108,11 @@ except NotFound as e:
     try:
         _ = w.catalogs.create(name=UC_CATALOG)
     except PermissionDenied as e:
-        print(f"FAIL: `{UC_CATALOG}` does not exist, and no permissions to create.  Please provide an existing UC Catalog.")
+        print(
+            f"FAIL: `{UC_CATALOG}` does not exist, and no permissions to create.  Please provide an existing UC Catalog."
+        )
         raise ValueError(f"Unity Catalog `{UC_CATALOG}` does not exist.")
-        
+
 # Create UC Schema if it does not exist, otherwise, raise an exception
 try:
     _ = w.schemas.get(full_name=f"{UC_CATALOG}.{UC_SCHEMA}")
@@ -153,5 +123,9 @@ except NotFound as e:
         _ = w.schemas.create(name=UC_SCHEMA, catalog_name=UC_CATALOG)
         print(f"PASS: UC schema `{UC_CATALOG}.{UC_SCHEMA}` created")
     except PermissionDenied as e:
-        print(f"FAIL: `{UC_CATALOG}.{UC_SCHEMA}` does not exist, and no permissions to create.  Please provide an existing UC Schema.")
-        raise ValueError("Unity Catalog Schema `{UC_CATALOG}.{UC_SCHEMA}` does not exist.")
+        print(
+            f"FAIL: `{UC_CATALOG}.{UC_SCHEMA}` does not exist, and no permissions to create.  Please provide an existing UC Schema."
+        )
+        raise ValueError(
+            "Unity Catalog Schema `{UC_CATALOG}.{UC_SCHEMA}` does not exist."
+        )

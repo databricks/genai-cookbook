@@ -39,11 +39,18 @@ debug = False
 
 # COMMAND ----------
 
-
 if debug:
     # Use OpenAI client with Model Serving
-    API_TOKEN = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
-    API_ROOT = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get()
+    API_TOKEN = (
+        dbutils.notebook.entry_point.getDbutils()
+        .notebook()
+        .getContext()
+        .apiToken()
+        .get()
+    )
+    API_ROOT = (
+        dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get()
+    )
     os.environ["DATABRICKS_TOKEN"] = API_TOKEN
     os.environ["DATABRICKS_HOST"] = f"{API_ROOT}"
 
@@ -54,6 +61,7 @@ if debug:
 # COMMAND ----------
 
 from databricks.vector_search.client import VectorSearchClient
+
 
 @dataclass
 class Document:
@@ -68,7 +76,7 @@ class VectorSearchRetriever:
     """
 
     def __init__(self, config: Dict[str, Any]):
-        # TODO: Validate config 
+        # TODO: Validate config
         self.config = config
         self.vector_search_client = VectorSearchClient(disable_notice=True)
         self.vector_search_index = self.vector_search_client.get_index(
@@ -78,7 +86,7 @@ class VectorSearchRetriever:
 
     def get_config(self) -> Dict[str, Any]:
         return self.config
-    
+
     def get_tool_definition(self) -> Dict[str, Any]:
         # description = "Search for documents that are relevant to a user's query."
         # if self.config.get("description_prompt"):
@@ -112,22 +120,19 @@ class VectorSearchRetriever:
 
     @mlflow.trace(span_type="TOOL", name="VectorSearchRetriever")
     def __call__(self, query: str) -> str:
-        # TODO: Rewrite the query e.g., "what is it?" to "what is [topic from previous question]".  Test the chain with and without this - some function calling models automatically handle the query rewriting e.g., when they call the tool, they rewrite the query
-
-        # print(doc_name_filter)
         results = self.similarity_search(query)
 
         context = ""
         for result in results:
-            formatted_chunk = self.config.get("chunk_template").format(chunk_text=result.get("page_content"), metadata=json.dumps(result.get("metadata")))
-            context += formatted_chunk 
+            formatted_chunk = self.config.get("chunk_template").format(
+                chunk_text=result.get("page_content"),
+                metadata=json.dumps(result.get("metadata")),
+            )
+            context += formatted_chunk
 
-        resulting_prompt = (
-            self.config.get("prompt_template")
-            .format(context=context)
-        )
+        resulting_prompt = self.config.get("prompt_template").format(context=context)
 
-        return resulting_prompt  # json.dumps(results, default=str)
+        return resulting_prompt
 
     @mlflow.trace(span_type="RETRIEVER")
     def similarity_search(
@@ -153,7 +158,7 @@ class VectorSearchRetriever:
         columns = [
             self.config.get("vector_search_schema").get("primary_key"),
             self.config.get("vector_search_schema").get("chunk_text"),
-            self.config.get("vector_search_schema").get("document_uri")
+            self.config.get("vector_search_schema").get("document_uri"),
         ] + self.config.get("vector_search_schema").get("additional_metadata_columns")
 
         if filters is None:
@@ -192,10 +197,8 @@ class VectorSearchRetriever:
                 score = item[-1]
                 if score >= vector_search_threshold:
                     metadata["similarity_score"] = score
-                    # print(score)
                     i = 0
                     for field in item[0:-1]:
-                        # print(field + "--")
                         metadata[column_names[i]["name"]] = field
                         i = i + 1
                     # put contents of the chunk into page_content
@@ -224,21 +227,21 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
     """
     Class representing an Agent that includes a Retriever tool
     """
+
     def __init__(self):
-        self.config = mlflow.models.ModelConfig(development_config="agents/generated_configs/agent.yaml")
-        
+        self.config = mlflow.models.ModelConfig(
+            development_config="agents/generated_configs/agent.yaml"
+        )
+
         # Load the LLM
         self.model_serving_client = get_deploy_client("databricks")
 
         # Init the Retriever tool
-        self.retriever_tool = VectorSearchRetriever(
-            self.config.get("retriever_tool")
-        )
+        self.retriever_tool = VectorSearchRetriever(self.config.get("retriever_tool"))
 
         # Configure the Review App to use the Retriever's schema
-        vector_search_schema = (
-            self.config.get("retriever_tool")
-            .get("vector_search_schema")
+        vector_search_schema = self.config.get("retriever_tool").get(
+            "vector_search_schema"
         )
         mlflow.models.set_retriever_schema(
             primary_key=vector_search_schema.get("primary_key"),
@@ -252,7 +255,6 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
 
         # Internal representation of the chat history.  As the Agent iteratively selects/executes tools, the history will be stored here.  Since the Agent is stateless, this variable must be populated on each invocation of `predict(...)`.
         self.chat_history = None
-
 
     @mlflow.trace(name="chain", span_type="CHAIN")
     def predict(
@@ -310,10 +312,10 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
     def retrieve_documents(self, query, doc_name_filter) -> Dict:
         # Rewrite the query e.g., "what is it?" to "what is [topic from previous question]".  Test the chain with and without this - some function calling models automatically handle the query rewriting e.g., when they call the tool, they rewrite the query
         vs_query = query
-        # if len(self.chat_history) > 0:
-        #     vs_query = self.query_rewrite(query, self.chat_history)
-        # else:
-        #     vs_query = query
+        if len(self.chat_history) > 0:
+            vs_query = self.query_rewrite(query, self.chat_history)
+        else:
+            vs_query = query
 
         # print(doc_name_filter)
         results = self.customer_notes_retriever.similarity_search(vs_query)
@@ -358,25 +360,20 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
 
     @mlflow.trace(span_type="AGENT")
     def recursively_call_and_run_tools(self, max_iter=10, **kwargs):
-        # tools = self.config.get("tools")
         messages = kwargs["messages"]
         del kwargs["messages"]
         i = 0
         while i < max_iter:
             response = self.chat_completion(messages=messages, tools=True)
-            # response = client.chat.completions.create(tools=tools, messages=messages, **kwargs)
             assistant_message = response.choices[0]["message"]
             tool_calls = assistant_message.get("tool_calls")
             if tool_calls is None:
                 # the tool execution finished, and we have a generation
-                # print(response)
                 return (response, messages)
             tool_messages = []
-            for tool_call in tool_calls:  # TODO: should run in parallel
+            for tool_call in tool_calls:
                 function = tool_call["function"]
-                # uc_func_name = decode_function_name(function.name)
                 args = json.loads(function["arguments"])
-                # result = exec_uc_func(uc_func_name, **args)
                 result = self.execute_function(function["name"], args)
                 tool_message = {
                     "role": "tool",
@@ -393,17 +390,13 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
                 ]
                 + tool_messages
             )
-            # print("---current state of messages---")
-            # print(messages)
         raise "ERROR: max iter reached"
 
     @mlflow.trace(span_type="FUNCTION")
     def execute_function(self, function_name, args):
         the_function = self.tool_functions.get(function_name)
-        # print(the_function)
         result = the_function(**args)
         return result
-
 
     def chat_completion(self, messages: List[Dict[str, str]], tools: bool = False):
         endpoint_name = self.config.get("llm_config").get("llm_endpoint_name")
@@ -441,15 +434,10 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
     def get_messages_array(
         self, model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame]
     ) -> List[Dict[str, str]]:
-        # TODO: This is required to handle both Dict + ChatCompletionRequest wrapped inputs.  If ChatCompletionRequest  supported .get(), this code wouldn't be required.
-
         if type(model_input) == ChatCompletionRequest:
             return model_input.messages
         elif type(model_input) == dict:
             return model_input.get("messages")
-        ## required to test with the following code after logging
-        ## model = mlflow.pyfunc.load_model(model_info.model_uri)
-        ## model.predict(agent_config['input_example'])
         elif type(model_input) == pd.DataFrame:
             return model_input.iloc[0].to_dict().get("messages")
 
@@ -504,7 +492,9 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
                 new_array.append(asdict(message))
             return new_array
         else:
-            raise ValueError("chat_messages_array is not an Array of Dictionary, Pandas DataFrame, or array of MLflow Message.")
+            raise ValueError(
+                "chat_messages_array is not an Array of Dictionary, Pandas DataFrame, or array of MLflow Message."
+            )
 
     @mlflow.trace(span_type="PARSER")
     def format_chat_history(self, chat_history: List[Dict[str, str]]) -> str:
@@ -544,7 +534,7 @@ if debug:
             {"role": "user", "content": f"what is lakehouse monitoring?"},
         ]
     }
-    
+
     response = agent.predict(model_input=first_turn_input)
     print(response["content"])
 
@@ -555,7 +545,6 @@ if debug:
     # 2nd turn of converastion
     new_messages = response["messages"]
     new_messages.append({"role": "user", "content": f"how do i use it?"})
-    # print(type(new_messages))
     second_turn_input = {"messages": new_messages}
     response = agent.predict(model_input=second_turn_input)
     print(response["content"])
