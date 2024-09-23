@@ -33,9 +33,10 @@ else:
 
     w = WorkspaceClient()
 
-    volume_name = SOURCE_UC_VOLUME[9:].split("/")[2]
-    uc_catalog = SOURCE_UC_VOLUME[9:].split("/")[0]
-    uc_schema = SOURCE_UC_VOLUME[9:].split("/")[1]
+    # extract the catalog, schema, and volume name from the path
+    # example path: /Volumes/prithvikannan_catalog/cookbook/source_docs
+    _, _, uc_catalog, uc_schema, volume_name = SOURCE_UC_VOLUME.split("/")
+
     try:
         created_volume = w.volumes.create(
             catalog_name=uc_catalog,

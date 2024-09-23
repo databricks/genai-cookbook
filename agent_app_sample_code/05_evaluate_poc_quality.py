@@ -1,5 +1,5 @@
 # Databricks notebook source
-# MAGIC %pip install -qqqq -U databricks-agents databricks-vectorsearch databricks-sdk mlflow mlflow-skinny 
+# MAGIC %pip install -qqqq -U databricks-agents databricks-vectorsearch databricks-sdk mlflow mlflow-skinny
 # MAGIC dbutils.library.restartPython()
 
 # COMMAND ----------
@@ -32,7 +32,6 @@ eval_data = [
         ### REQUIRED
         # Question that is asked by the user
         "request": "What is the difference between reduceByKey and groupByKey in Spark?",
-
         ### OPTIONAL
         # Optional, user specified to identify each row
         "request_id": "your-request-id",
@@ -67,12 +66,19 @@ eval_data = [
 # COMMAND ----------
 
 import mlflow
+
 mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
-runs = mlflow.search_runs(experiment_names=[MLFLOW_EXPERIMENT_NAME], filter_string=f"run_name = '{POC_CHAIN_RUN_NAME}'", output_format="list")
+runs = mlflow.search_runs(
+    experiment_names=[MLFLOW_EXPERIMENT_NAME],
+    filter_string=f"run_name = '{POC_CHAIN_RUN_NAME}'",
+    output_format="list",
+)
 
 if len(runs) != 1:
-    print(f"Found {len(runs)} run with name {POC_CHAIN_RUN_NAME}. Selecting the most recent.")
+    print(
+        f"Found {len(runs)} run with name {POC_CHAIN_RUN_NAME}. Selecting the most recent."
+    )
 
 poc_run = runs[0]
 
@@ -106,7 +112,7 @@ eval_results.metrics
 # COMMAND ----------
 
 # Evaluation results including LLM judge scores/rationales for each row in your evaluation set
-eval_results_df = eval_results.tables['eval_results']
+eval_results_df = eval_results.tables["eval_results"]
 # You can click on a row in the `trace` column to view the detailed MLflow trace
 display(eval_results_df)
 
@@ -123,58 +129,57 @@ display(eval_results_df)
 
 # COMMAND ----------
 
-
 # # Define the conditions and corresponding root cause and overall rating
 # conditions = [
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "no") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") & 
-#     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
-    
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "no") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") & 
-#     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
-    
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "no") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "yes"),
-    
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") & 
-#     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
-    
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") & 
-#     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
-    
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "yes") ,
-    
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "no") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "no"),
-    
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "no") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "yes"),
-    
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") & 
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "no") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") &
 #     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
 
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") & 
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "no") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") &
 #     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
-    
-#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) & 
-#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") & 
-#     (eval_results_df["response/llm_judged/correctness/rating"] == "yes") & 
+
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "no") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "yes"),
+
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") &
+#     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
+
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") &
+#     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
+
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "yes") ,
+
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "no") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "no"),
+
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "no") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "yes"),
+
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") &
+#     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
+
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "no") &
+#     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
+
+#     (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) &
+#     (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") &
+#     (eval_results_df["response/llm_judged/correctness/rating"] == "yes") &
 #     (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes")
 # ]
 
@@ -242,38 +247,30 @@ display(eval_results_df)
 
 # Define the conditions and corresponding root cause and overall rating
 conditions = [
-    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) & 
-    (eval_results_df["response/llm_judged/groundedness/rating"] == "no") & 
-    (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
-    
-    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) & 
-    (eval_results_df["response/llm_judged/groundedness/rating"] == "no") & 
-    (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
-    
-    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) & 
-    (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") & 
-    (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
-    
-    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]<.5) & 
-    (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") & 
-    (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
-
-    
-    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) & 
-    (eval_results_df["response/llm_judged/groundedness/rating"] == "no") & 
-    (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
-    
-    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) & 
-    (eval_results_df["response/llm_judged/groundedness/rating"] == "no") & 
-    (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
-
-    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) & 
-    (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") & 
-    (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
-
-    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"]>=.5) & 
-    (eval_results_df["response/llm_judged/groundedness/rating"] == "yes") & 
-    (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
+    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"] < 0.5)
+    & (eval_results_df["response/llm_judged/groundedness/rating"] == "no")
+    & (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
+    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"] < 0.5)
+    & (eval_results_df["response/llm_judged/groundedness/rating"] == "no")
+    & (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
+    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"] < 0.5)
+    & (eval_results_df["response/llm_judged/groundedness/rating"] == "yes")
+    & (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
+    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"] < 0.5)
+    & (eval_results_df["response/llm_judged/groundedness/rating"] == "yes")
+    & (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
+    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"] >= 0.5)
+    & (eval_results_df["response/llm_judged/groundedness/rating"] == "no")
+    & (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
+    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"] >= 0.5)
+    & (eval_results_df["response/llm_judged/groundedness/rating"] == "no")
+    & (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
+    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"] >= 0.5)
+    & (eval_results_df["response/llm_judged/groundedness/rating"] == "yes")
+    & (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "no"),
+    (eval_results_df["retrieval/llm_judged/chunk_relevance/precision"] >= 0.5)
+    & (eval_results_df["response/llm_judged/groundedness/rating"] == "yes")
+    & (eval_results_df["response/llm_judged/relevance_to_query/rating"] == "yes"),
 ]
 
 root_causes = [
@@ -287,16 +284,7 @@ root_causes = [
     "No root cause, record passed",
 ]
 
-overall_ratings = [
-    "fail",
-    "fail",
-    "fail",
-    "pass",
-    "fail",
-    "fail",
-    "fail",
-    "pass"
-]
+overall_ratings = ["fail", "fail", "fail", "pass", "fail", "fail", "fail", "pass"]
 
 root_cause_rationales = [
     "Retrieval quality is poor.",
@@ -311,14 +299,22 @@ root_cause_rationales = [
 
 
 # Create new columns in the dataframe based on the conditions
-eval_results_df["overall/root_cause/rating"] = pd.Series(pd.NA, index=eval_results_df.index)
+eval_results_df["overall/root_cause/rating"] = pd.Series(
+    pd.NA, index=eval_results_df.index
+)
 eval_results_df["overall/assessment"] = pd.Series(pd.NA, index=eval_results_df.index)
-eval_results_df["overall/root_cause/rationale"] = pd.Series(pd.NA, index=eval_results_df.index)
+eval_results_df["overall/root_cause/rationale"] = pd.Series(
+    pd.NA, index=eval_results_df.index
+)
 
-for condition, root_cause, overall_rating,root_cause_rationale  in zip(conditions, root_causes, overall_ratings, root_cause_rationales):
+for condition, root_cause, overall_rating, root_cause_rationale in zip(
+    conditions, root_causes, overall_ratings, root_cause_rationales
+):
     eval_results_df.loc[condition, "overall/root_cause/rating"] = root_cause
     eval_results_df.loc[condition, "overall/assessment"] = overall_rating
-    eval_results_df.loc[condition, "overall/root_cause/rationale"] = root_cause_rationale
+    eval_results_df.loc[
+        condition, "overall/root_cause/rationale"
+    ] = root_cause_rationale
 
 # COMMAND ----------
 
@@ -327,8 +323,12 @@ for condition, root_cause, overall_rating,root_cause_rationale  in zip(condition
 
 # COMMAND ----------
 
-root_cause_frequencies = eval_results_df["overall/root_cause/rating"].value_counts(normalize=True) * 100
-root_cause_rationale_frequencies = eval_results_df["overall/root_cause/rationale"].value_counts(normalize=True) * 100
+root_cause_frequencies = (
+    eval_results_df["overall/root_cause/rating"].value_counts(normalize=True) * 100
+)
+root_cause_rationale_frequencies = (
+    eval_results_df["overall/root_cause/rationale"].value_counts(normalize=True) * 100
+)
 
 print("Root cause frequencies: \n")
 print(root_cause_frequencies)
@@ -369,7 +369,9 @@ columns_to_display = [
 
 # COMMAND ----------
 
-filtered_df = eval_results_df[eval_results_df["overall/root_cause/rating"] == "Improve Retrieval"][columns_to_display]
+filtered_df = eval_results_df[
+    eval_results_df["overall/root_cause/rating"] == "Improve Retrieval"
+][columns_to_display]
 if filtered_df.empty:
     print("No data matches the filter criteria.")
 else:
@@ -382,7 +384,9 @@ else:
 
 # COMMAND ----------
 
-filtered_df = eval_results_df[eval_results_df["overall/root_cause/rating"] == "Improve Generation"][columns_to_display]
+filtered_df = eval_results_df[
+    eval_results_df["overall/root_cause/rating"] == "Improve Generation"
+][columns_to_display]
 if filtered_df.empty:
     print("No data matches the filter criteria.")
 else:

@@ -14,7 +14,6 @@
 
 # COMMAND ----------
 
-# By default, will use the current user name to create a unique UC catalog/schema & vector search endpoint
 user_email = spark.sql("SELECT current_user() as username").collect()[0].username
 user_name = user_email.split("@")[0].replace(".", "").lower()[:35]
 
@@ -37,7 +36,8 @@ user_name = user_email.split("@")[0].replace(".", "").lower()[:35]
 # The name of the Agent.  This is used to name the agent's UC model and prepended to the output Delta Tables + Vector Indexes
 AGENT_NAME = "my_agent_app"
 
-# UC Catalog & Schema where outputs tables/indexs are saved
+# UC Catalog & Schema where outputs tables/indexes are saved
+# By default, will use the current user name to create a unique UC catalog/schema & vector search endpoint
 # If this catalog/schema does not exist, you need create catalog/schema permissions.
 UC_CATALOG = f"{user_name}_catalog"
 UC_SCHEMA = f"cookbook"

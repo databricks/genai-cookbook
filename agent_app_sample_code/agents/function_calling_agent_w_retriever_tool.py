@@ -26,36 +26,6 @@ import os
 
 # COMMAND ----------
 
-# Use this if running the notebook by itself.  By default, it is set to False to allow this Agent to be logged by MLflow.
-
-# Why?  MLflow code logging takes a copy of this entire notebook and loads it to the model serving environment.  Putting your debug / vibe check code behind the `debug` flag ensure this code does not run in the model serving environment.
-
-debug = False
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC Use the Notebook's PAT token for development.  When this Agent is deployed, Agent Framework will securely provision credentials for the Agent to use.
-
-# COMMAND ----------
-
-if debug:
-    # Use OpenAI client with Model Serving
-    API_TOKEN = (
-        dbutils.notebook.entry_point.getDbutils()
-        .notebook()
-        .getContext()
-        .apiToken()
-        .get()
-    )
-    API_ROOT = (
-        dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get()
-    )
-    os.environ["DATABRICKS_TOKEN"] = API_TOKEN
-    os.environ["DATABRICKS_HOST"] = f"{API_ROOT}"
-
-# COMMAND ----------
-
 # MAGIC %md ##### Retriever tool
 
 # COMMAND ----------
@@ -524,27 +494,3 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
 
 set_model(AgentWithRetriever())
 
-
-if debug:
-    agent = AgentWithRetriever(agent_config=agent_config.dict())
-    agent.load_context(None)
-    # 1st turn of converastion
-    first_turn_input = {
-        "messages": [
-            {"role": "user", "content": f"what is lakehouse monitoring?"},
-        ]
-    }
-
-    response = agent.predict(model_input=first_turn_input)
-    print(response["content"])
-
-    print()
-    print("------")
-    print()
-
-    # 2nd turn of converastion
-    new_messages = response["messages"]
-    new_messages.append({"role": "user", "content": f"how do i use it?"})
-    second_turn_input = {"messages": new_messages}
-    response = agent.predict(model_input=second_turn_input)
-    print(response["content"])

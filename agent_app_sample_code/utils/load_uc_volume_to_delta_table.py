@@ -29,7 +29,6 @@ def parse_and_extract(
     modification_time: datetime,
     doc_bytes_length: int,
     doc_path: str,
-    # extract_metadata_udf: Callable[[[dict, Any]], str],
     parse_file_udf: Callable[[[dict, Any]], str],
 ) -> Dict[str, Any]:
     """Parses raw bytes & extract metadata."""
@@ -87,11 +86,8 @@ def get_parser_udf(
 def load_uc_volume_to_delta_table(
     source_path: str,
     dest_table_name: str,
-    # extract_metadata_udf: Callable[[[dict, Any]], str],
     parse_file_udf: Callable[[[dict, Any]], str],
     spark_dataframe_schema: StructType
-    # propagate_columns: list[str] = [],
-    # file_extension: str = "json"
 ) -> str:
     if not os.path.exists(source_path):
         raise ValueError(
@@ -101,7 +97,6 @@ def load_uc_volume_to_delta_table(
     # Load the raw riles
     raw_files_df = (
         spark.read.format("binaryFile").option("recursiveFileLookup", "true")
-        # .option("pathGlobFilter", f"*.{file_extension}")
         .load(source_path)
     )
 
@@ -172,12 +167,7 @@ def load_uc_volume_to_delta_table(
         *[func.col(f"parsing.{field}").alias(field) for field in resulting_fields]
     )
 
-    # For pretty-printing the order.
-    # parsed_files_df = parsed_files_df.select("doc_content", "doc_uri", "path", "modificationTime", "length")
-
     # Write to a aDelta Table and overwrite it.
-    # display(parsed_files_df)
-    # print(type(parsed_files_df))
     parsed_files_df.write.mode("overwrite").option(
         "overwriteSchema", "true"
     ).saveAsTable(dest_table_name)
@@ -189,6 +179,4 @@ def load_uc_volume_to_delta_table(
     print(f"Parsed {parsed_files_df.count()} documents.")
     # display(parsed_files_df)
 
-    # tag_delta_table(destination_tables_config["parsed_docs_table_name"], data_pipeline_config)
-    # mlflow.log_input(mlflow.data.load_delta(table_name=destination_tables_config.get("parsed_docs_table_name")), context="parsed_docs")
     return dest_table_name

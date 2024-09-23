@@ -59,7 +59,6 @@ def _build_index(
             create_index = True
         else:
             create_index = False
-            # sync the index
             print(
                 f"Syncing index {vectorsearch_index_name}, this can take 15 minutes or much longer if you have a larger number of documents..."
             )
@@ -80,10 +79,10 @@ def _build_index(
         vsc.create_delta_sync_index_and_wait(
             endpoint_name=vector_search_endpoint,
             index_name=vectorsearch_index_name,
-            primary_key=primary_key,  # "chunk_id",
+            primary_key=primary_key,
             source_table_name=chunked_docs_table_name,
             pipeline_type="TRIGGERED",
-            embedding_source_column=embedding_source_column,  # "chunked_text",
+            embedding_source_column=embedding_source_column,
             embedding_model_endpoint_name=embedding_endpoint_name,
         )
 
@@ -110,8 +109,6 @@ def build_retriever_index(
 ) -> RetrieverIndexResult:
 
     retriever_index_result = RetrieverIndexResult(
-        # TODO(nsthorat): Is this right? Should we make a new vector search index for each chunked docs table?
-        # TODO(e): No it will be many indexes per endpoint
         vector_search_endpoint=vector_search_endpoint,
         vector_search_index_name=vector_search_index_name,
         embedding_endpoint_name=embedding_endpoint_name,
