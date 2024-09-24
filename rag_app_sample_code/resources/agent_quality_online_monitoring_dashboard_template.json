@@ -542,7 +542,7 @@
                 {
                     "widget": {
                         "name": "f3cd0aff",
-                        "textbox_spec": "\n## Top-level metrics\nThe following charts give a quick overview of incoming traffic, the pass/fail rate of output quality, the average execution time for the agent, and topic distribution. **Click on a bar to filter all charts in the dashboard.**"
+                        "textbox_spec": "\n## Top-level metrics\nThe following charts give a quick overview of incoming traffic, the pass/fail rate of output quality, the average execution time for the agent, and topic distribution. **Clicking on any data point inside a chart will filter all other charts to the requests covered by the selected data point.**"
                     },
                     "position": {
                         "x": 0,
