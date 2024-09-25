@@ -3,7 +3,7 @@
 To start working on this book:
 - clone the repo; `cd cookbook`
 - use your preferred approach to starting a new python environment
-- in that environment, `pip install jupyter-book`
+- in that environment, `pip install -r dev/dev_requirements.txt`
 - build and preview the site with `jupyter-book build --all genai_cookbook`
 
 The homepage is at `genai_cookbook/index.md`

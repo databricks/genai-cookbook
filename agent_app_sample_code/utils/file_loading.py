@@ -1,8 +1,8 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC ##### `load_uc_volume_to_delta_table`
+# MAGIC ##### `load_files_to_df`
 # MAGIC
-# MAGIC `load_uc_volume_to_delta_table` loads files from a specified source path into a Delta Table after parsing and extracting metadata.
+# MAGIC `load_files_to_df` loads files from a specified source path into a Spark DataFrame after parsing and extracting metadata.
 # MAGIC
 # MAGIC Arguments:
 # MAGIC   - source_path: The path to the folder of files. This should be a valid directory path where the files are stored.
@@ -22,9 +22,10 @@ from IPython.display import display_markdown
 import warnings
 import pyspark.sql.functions as func
 from pyspark.sql.types import StructType
+from pyspark.sql import DataFrame, SparkSession
 
 
-def parse_and_extract(
+def _parse_and_extract(
     raw_doc_contents_bytes: bytes,
     modification_time: datetime,
     doc_bytes_length: int,
@@ -57,7 +58,7 @@ def parse_and_extract(
         }
 
 
-def get_parser_udf(
+def _get_parser_udf(
     # extract_metadata_udf: Callable[[[dict, Any]], str],
     parse_file_udf: Callable[[[dict, Any]], str],
     spark_dataframe_schema: StructType,
@@ -71,7 +72,7 @@ def get_parser_udf(
     """
     # This UDF will load each file, parse the doc, and extract metadata.
     parser_udf = func.udf(
-        lambda raw_doc_contents_bytes, modification_time, doc_bytes_length, doc_path: parse_and_extract(
+        lambda raw_doc_contents_bytes, modification_time, doc_bytes_length, doc_path: _parse_and_extract(
             raw_doc_contents_bytes,
             modification_time,
             doc_bytes_length,
@@ -83,15 +84,28 @@ def get_parser_udf(
     return parser_udf
 
 
-def load_uc_volume_to_delta_table(
+def load_files_to_df(
+    spark: SparkSession,
     source_path: str,
     dest_table_name: str,
     parse_file_udf: Callable[[[dict, Any]], str],
     spark_dataframe_schema: StructType
-) -> str:
+) -> DataFrame:
+    """
+    Loads files from a specified source path into a DataFrame after parsing and extracting metadata.
+
+    Args:
+        source_path (str): The path to the folder of files. This should be a valid directory path where the files are stored.
+        dest_table_name (str): The name of the destination Delta Table.
+        parse_file_udf (function): A user-defined function that takes the bytes of the file, parses it, and returns the parsed content and metadata.
+            Example:
+                def parse_file(raw_doc_contents_bytes, doc_path):
+                    return {'doc_content': content, 'metadata': metadata}
+        spark_dataframe_schema (StructType): The schema of the resulting Spark DataFrame after parsing and metadata extraction.
+    """
     if not os.path.exists(source_path):
         raise ValueError(
-            f"{source_path} passed to `load_uc_volume_to_delta_table` does not exist."
+            f"{source_path} passed to `load_uc_volume_files` does not exist."
         )
 
     # Load the raw riles
@@ -107,10 +121,9 @@ def load_uc_volume_to_delta_table(
     print(f"Found {raw_files_df.count()} files in {source_path}.")
     display(raw_files_df)
 
-    print()
     print("Running parsing & metadata extraction UDF in spark...")
 
-    parser_udf = get_parser_udf(parse_file_udf, spark_dataframe_schema)
+    parser_udf = _get_parser_udf(parse_file_udf, spark_dataframe_schema)
 
     # Run the parsing
     parsed_files_staging_df = raw_files_df.withColumn(
@@ -157,16 +170,4 @@ def load_uc_volume_to_delta_table(
         *[func.col(f"parsing.{field}").alias(field) for field in resulting_fields]
     )
 
-    # Write to a aDelta Table and overwrite it.
-    parsed_files_df.write.mode("overwrite").option(
-        "overwriteSchema", "true"
-    ).saveAsTable(dest_table_name)
-
-    # Reload to get correct lineage in UC.
-    parsed_files_df = spark.table(dest_table_name)
-
-    # Display for debugging
-    print(f"Parsed {parsed_files_df.count()} documents.")
-    # display(parsed_files_df)
-
-    return dest_table_name
+    return parsed_files_df

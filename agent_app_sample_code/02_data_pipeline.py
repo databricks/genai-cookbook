@@ -291,11 +291,12 @@ def file_parser(
 
 # COMMAND ----------
 
-# MAGIC %run ./utils/load_uc_volume_to_delta_table
+from utils.file_loading import load_files_to_df
 
 # COMMAND ----------
 
-load_uc_volume_to_delta_table(
+loaded_files = load_files_to_df(
+    spark=spark,
     source_path=SOURCE_UC_VOLUME,
     dest_table_name=DOCS_DELTA_TABLE,
     # Modify this function to change the parser, extract additional metadata, etc
@@ -304,8 +305,14 @@ load_uc_volume_to_delta_table(
     spark_dataframe_schema=typed_dicts_to_spark_schema(ParserReturnValue),
 )
 
-print(DOCS_DELTA_TABLE)
-display(spark.table(DOCS_DELTA_TABLE))
+# Write to a Delta Table
+loaded_files.write.mode("overwrite").option(
+    "overwriteSchema", "true"
+).saveAsTable(DOCS_DELTA_TABLE)
+
+# Display for debugging
+print(f"Parsed {loaded_files.count()} documents.")
+loaded_files.display()
 
 # Log the resulting table to MLflow
 mlflow.log_input(
