@@ -94,15 +94,7 @@ def extract_endpoint_type(llm_endpoint) -> Optional[str]:
         try:
             return llm_endpoint.config.served_entities[0].foundation_model.name
         except AttributeError:
-            try:
-                endpoint_name = llm_endpoint.config.served_entities[0].name
-                return (
-                    re.sub(r"-\d+$", "", endpoint_name)
-                    if re.search(r"-\d+$", endpoint_name)
-                    else endpoint_name
-                )
-            except AttributeError:
-                return None
+            return None
 
 
 def detect_fmapi_embedding_model_type(

@@ -102,9 +102,6 @@ def load_uc_volume_to_delta_table(
 
     # Check that files were present and loaded
     if raw_files_df.count() == 0:
-        display(
-            f"`{source_path}` does not contain any files.  Open the volume and upload at least file."
-        )
         raise Exception(f"`{source_path}` does not contain any files.")
 
     num_source_files = raw_files_df.count()

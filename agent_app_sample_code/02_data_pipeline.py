@@ -163,6 +163,8 @@ from datetime import datetime
 import warnings
 import io
 import traceback
+import os
+from urllib.parse import urlparse
 
 # PDF libraries
 from pypdf import PdfReader
@@ -207,7 +209,7 @@ def file_parser(
 
     Parameters:
     - raw_doc_contents_bytes (bytes): The raw bytes of the document to be parsed (set by Spark when loading the file)
-    - doc_path (str): The path of the document, used to verify the file extension (set by Spark when loading the file)
+    - doc_path (str): The DBFS path of the document, used to verify the file extension (set by Spark when loading the file)
     - modification_time (timestamp): The last modification time of the document (set by Spark when loading the file)
     - doc_bytes_length (long): The size of the document in bytes (set by Spark when loading the file)
 
@@ -217,10 +219,10 @@ def file_parser(
       whether the parsing was successful or if an error occurred.
     """
     try:
-        file_extension = doc_path.split(".")[-1]
+        filename, file_extension = os.path.splitext(doc_path)
         parsed_document = {}
 
-        if file_extension == "pdf":
+        if file_extension == ".pdf":
             pdf = io.BytesIO(raw_doc_contents_bytes)
             reader = PdfReader(pdf)
 
@@ -232,7 +234,7 @@ def file_parser(
                 "doc_content": "\n".join(parsed_content),
                 "parser_status": "SUCCESS",
             }
-        elif file_extension == "html":
+        elif file_extension == ".html":
             from markdownify import markdownify as md
 
             html_content = raw_doc_contents_bytes.decode("utf-8")
@@ -246,7 +248,7 @@ def file_parser(
                 "doc_content": markdown_stripped,
                 "parser_status": "SUCCESS",
             }
-        elif file_extension == "docx":
+        elif file_extension == ".docx":
             with tempfile.NamedTemporaryFile(delete=True) as temp_file:
                 temp_file.write(raw_doc_contents_bytes)
                 temp_file_path = temp_file.name
@@ -261,7 +263,7 @@ def file_parser(
 
         # Extract the required doc_uri
         # convert from `dbfs:/Volumes/catalog/schema/pdf_docs/filename.pdf` to `Volumes/catalog/schema/pdf_docs/filename.pdf`
-        modified_path = doc_path[5:]
+        modified_path = urlparse(doc_path).path.lstrip('/')
         parsed_document["doc_uri"] = modified_path
 
         # Sample metadata extraction logic
@@ -335,8 +337,8 @@ mlflow.log_input(
 # Configure the chunker
 chunk_fn = get_recursive_character_text_splitter(
     model_serving_endpoint=EMBEDDING_MODEL_ENDPOINT,
-    chunk_size_tokens=384,  # 1024,
-    chunk_overlap_tokens=128,  # 256
+    chunk_size_tokens=384,
+    chunk_overlap_tokens=128,
 )
 
 # Get the columns from the parser except for the doc_content
@@ -360,8 +362,6 @@ chunked_docs_table = compute_chunks(
     chunked_docs_table=CHUNKED_DOCS_DELTA_TABLE,
 )
 
-print(chunked_docs_table)
-chunked_docs_df = chunked_docs_table
 display(spark.read.table(chunked_docs_table))
 
 # Log to MLflow

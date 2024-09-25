@@ -46,7 +46,6 @@ class VectorSearchRetriever:
     """
 
     def __init__(self, config: Dict[str, Any]):
-        # TODO: Validate config
         self.config = config
         self.vector_search_client = VectorSearchClient(disable_notice=True)
         self.vector_search_index = self.vector_search_client.get_index(
@@ -58,10 +57,6 @@ class VectorSearchRetriever:
         return self.config
 
     def get_tool_definition(self) -> Dict[str, Any]:
-        # description = "Search for documents that are relevant to a user's query."
-        # if self.config.get("description_prompt"):
-        #       description = description + f"  This tool contains documents about {self.config.get('description_prompt')}"
-
         return {
             "type": "function",
             "function": {
@@ -74,14 +69,6 @@ class VectorSearchRetriever:
                             "type": "string",
                             "description": "The query to find documents about.",
                         },
-                        # "doc_name_filter": {
-                        #     "type": "string",
-                        #     "enum": [
-                        #         "/Volumes/ericpeter_catalog/agents/source_docs/2212.14024.pdf",
-                        #         "test_doc_2",
-                        #     ],
-                        #     "description": "A filter for the specific document name.",
-                        # },
                     },
                     "required": ["query"],
                 },
@@ -253,7 +240,6 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
         system_prompt = self.config.get("llm_config").get("llm_system_prompt_template")
 
         # Add the previous history
-        # TODO: Need a way to include the previous tool calls
         messages = (
             [{"role": "system", "content": system_prompt}]
             + self.chat_history  # append chat history for multi turn
@@ -274,7 +260,7 @@ class AgentWithRetriever(mlflow.pyfunc.PythonModel):
 
         return {
             "content": model_response.choices[0]["message"]["content"],
-            # TODO: this should be returned back to the Review App (or any other front end app) and stored there so it can be passed back to this stateless agent with the next turns of converastion.
+            # this should be returned back to the Review App (or any other front end app) and stored there so it can be passed back to this stateless agent with the next turns of converastion.
             "messages": messages_log_with_tool_calls,
         }
 
