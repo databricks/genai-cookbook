@@ -104,15 +104,8 @@ def load_uc_volume_to_delta_table(
     if raw_files_df.count() == 0:
         raise Exception(f"`{source_path}` does not contain any files.")
 
-    num_source_files = raw_files_df.count()
-    print(f"Found {num_source_files} files in {source_path}.")
-    count = 0
-    limit = 5
-    for file in raw_files_df.select("path").limit(limit).collect():
-        print(file.path)
-        count += 1
-    if count < num_source_files:
-        print(f"... and {num_source_files - limit} more.")
+    print(f"Found {raw_files_df.count()} files in {source_path}.")
+    display(raw_files_df)
 
     print()
     print("Running parsing & metadata extraction UDF in spark...")
