@@ -5,3 +5,5 @@ env
 .idea
 __pycache__
 
+# Exclude `databricks sync` CLI command snapshots
+.databricks

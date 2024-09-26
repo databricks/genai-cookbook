@@ -42,10 +42,6 @@ dbutils.library.restartPython()
 
 # COMMAND ----------
 
-# MAGIC %run ./utils/install_aptget_package
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC ## Import the global configuration
 
@@ -56,7 +52,7 @@ dbutils.library.restartPython()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Set the MLflow experiement name
+# MAGIC ## Set the MLflow experiment name
 # MAGIC
 # MAGIC Used to track information about this Data Pipeline that are used in the later notebooks.
 

@@ -1,19 +1,3 @@
-# Databricks notebook source
-# MAGIC %md
-# MAGIC ##### `load_files_to_df`
-# MAGIC
-# MAGIC `load_files_to_df` loads files from a specified source path into a Spark DataFrame after parsing and extracting metadata.
-# MAGIC
-# MAGIC Arguments:
-# MAGIC   - source_path: The path to the folder of files. This should be a valid directory path where the files are stored.
-# MAGIC   - dest_table_name: The name of the destination Delta Table.
-# MAGIC   - parse_file_udf: A user-defined function that takes the bytes of the file, parses it, and returns the parsed content and metadata.
-# MAGIC       For example: `def parse_file(raw_doc_contents_bytes, doc_path): return {'doc_content': content, 'metadata': metadata}`
-# MAGIC   - spark_dataframe_schema: The schema of the resulting Spark DataFrame after parsing and metadata extraction.
-
-# COMMAND ----------
-
-import json
 import traceback
 from datetime import datetime
 from typing import Any, Callable, TypedDict, Dict
@@ -86,6 +70,11 @@ def _get_parser_udf(
 def load_files_to_df(
     spark: SparkSession,
     source_path: str) -> DataFrame:
+    """
+    Load files from a directory into a Spark DataFrame.
+    Each row in the DataFrame will contain the path, length, and content of the file; for more
+    details, see https://spark.apache.org/docs/latest/sql-data-sources-binaryFile.html
+    """
 
     if not os.path.exists(source_path):
         raise ValueError(
@@ -94,7 +83,7 @@ def load_files_to_df(
 
     # Load the raw riles
     raw_files_df = (
-        spark.read.format("binaryFile").option("recursiveFileLookup", "true")
+        https://spark.apache.org/docs/latest/sql-data-sources-binaryFile.html.option("recursiveFileLookup", "true")
         .load(source_path)
     )
 
@@ -108,6 +97,11 @@ def load_files_to_df(
 
 
 def apply_parsing_udf(raw_files_df: DataFrame, parse_file_udf: Callable[[[dict, Any]], str], parsed_df_schema: StructType) -> DataFrame:
+    """
+    Apply a file-parsing UDF to a DataFrame whose rows correspond to file content/metadata loaded via
+    https://spark.apache.org/docs/latest/sql-data-sources-binaryFile.html
+    Returns a DataFrame with the parsed content and metadata.
+    """
     print("Running parsing & metadata extraction UDF in spark...")
 
     parser_udf = _get_parser_udf(parse_file_udf, parsed_df_schema)
