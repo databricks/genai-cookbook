@@ -216,7 +216,6 @@ def file_parser(
     """
     try:
         filename, file_extension = os.path.splitext(doc_path)
-        parsed_document = {}
 
         if file_extension == ".pdf":
             pdf = io.BytesIO(raw_doc_contents_bytes)
