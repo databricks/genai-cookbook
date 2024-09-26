@@ -2,7 +2,7 @@ import pytest
 import pyspark
 import pandas as pd
 
-from agent_app_sample_code.utils.file_loading import load_files_to_df, apply_parsing_udf
+from agent_app_sample_code.utils.file_loading import load_files_to_df
 
 @pytest.fixture(scope="module")
 def spark():
