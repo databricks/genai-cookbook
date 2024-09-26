@@ -73,7 +73,7 @@ def _build_index(
 
     if create_index:
         print(
-            f"Computing document embeddings and Vector Search Index {get_table_url}. This can take 15 minutes or much longer if you have a larger number of documents."
+            f"Computing document embeddings and Vector Search Index. This can take 15 minutes or much longer if you have a larger number of documents."
         )
 
         vsc.create_delta_sync_index_and_wait(

@@ -42,10 +42,6 @@ dbutils.library.restartPython()
 
 # COMMAND ----------
 
-# MAGIC %run ./utils/install_aptget_package
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC ## Import the global configuration
 
@@ -56,7 +52,7 @@ dbutils.library.restartPython()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Set the MLflow experiement name
+# MAGIC ## Set the MLflow experiment name
 # MAGIC
 # MAGIC Used to track information about this Data Pipeline that are used in the later notebooks.
 
@@ -291,21 +287,31 @@ def file_parser(
 
 # COMMAND ----------
 
-# MAGIC %run ./utils/load_uc_volume_to_delta_table
+from utils.file_loading import load_files_to_df, apply_parsing_udf
 
 # COMMAND ----------
 
-load_uc_volume_to_delta_table(
+raw_files_df = load_files_to_df(
+    spark=spark,
     source_path=SOURCE_UC_VOLUME,
-    dest_table_name=DOCS_DELTA_TABLE,
+)
+
+parsed_files_df = apply_parsing_udf(
+    raw_files_df=raw_files_df,
     # Modify this function to change the parser, extract additional metadata, etc
     parse_file_udf=file_parser,
     # The schema of the resulting Delta Table will follow the schema defined in ParserReturnValue
-    spark_dataframe_schema=typed_dicts_to_spark_schema(ParserReturnValue),
+    parsed_df_schema=typed_dicts_to_spark_schema(ParserReturnValue)
 )
 
-print(DOCS_DELTA_TABLE)
-display(spark.table(DOCS_DELTA_TABLE))
+# Write to a Delta Table
+parsed_files_df.write.mode("overwrite").option(
+    "overwriteSchema", "true"
+).saveAsTable(DOCS_DELTA_TABLE)
+
+# Display for debugging
+print(f"Parsed {parsed_files_df.count()} documents.")
+parsed_files_df.display()
 
 # Log the resulting table to MLflow
 mlflow.log_input(

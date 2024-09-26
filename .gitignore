@@ -2,3 +2,8 @@ genai_cookbook/_build
 env
 .env
 .DS_STORE
+.idea
+__pycache__
+
+# Exclude `databricks sync` CLI command snapshots
+.databricks

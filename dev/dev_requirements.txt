@@ -1,2 +1,8 @@
 jupyter-book
 livereload
+black
+pytest
+mlflow-skinny[databricks]
+databricks-vectorsearch
+pyspark
+pandas
