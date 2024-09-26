@@ -3,3 +3,5 @@ env
 .env
 .DS_STORE
 .idea
+__pycache__
+

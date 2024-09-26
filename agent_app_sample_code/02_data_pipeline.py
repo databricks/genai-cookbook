@@ -291,28 +291,31 @@ def file_parser(
 
 # COMMAND ----------
 
-from utils.file_loading import load_files_to_df
+from utils.file_loading import load_files_to_df, apply_parsing_udf
 
 # COMMAND ----------
 
-loaded_files = load_files_to_df(
+raw_files_df = load_files_to_df(
     spark=spark,
     source_path=SOURCE_UC_VOLUME,
-    dest_table_name=DOCS_DELTA_TABLE,
+)
+
+parsed_files_df = apply_parsing_udf(
+    raw_files_df=raw_files_df,
     # Modify this function to change the parser, extract additional metadata, etc
     parse_file_udf=file_parser,
     # The schema of the resulting Delta Table will follow the schema defined in ParserReturnValue
-    spark_dataframe_schema=typed_dicts_to_spark_schema(ParserReturnValue),
+    parsed_df_schema=typed_dicts_to_spark_schema(ParserReturnValue)
 )
 
 # Write to a Delta Table
-loaded_files.write.mode("overwrite").option(
+parsed_files_df.write.mode("overwrite").option(
     "overwriteSchema", "true"
 ).saveAsTable(DOCS_DELTA_TABLE)
 
 # Display for debugging
-print(f"Parsed {loaded_files.count()} documents.")
-loaded_files.display()
+print(f"Parsed {parsed_files_df.count()} documents.")
+parsed_files_df.display()
 
 # Log the resulting table to MLflow
 mlflow.log_input(

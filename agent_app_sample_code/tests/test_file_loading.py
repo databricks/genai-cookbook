@@ -1,36 +1,41 @@
 import pytest
+import pyspark
+import pandas as pd
 
-# TODO: dedup with data pipeline
-class ParserReturnValue(TypedDict):
-    # DO NOT CHANGE THESE NAMES - these are required by Evaluation & Framework
-    # Parsed content of the document
-    doc_content: str  # do not change this name
-    # The status of whether the parser succeeds or fails, used to exclude failed files downstream
-    parser_status: str  # do not change this name
-    # Unique ID of the document
-    doc_uri: str  # do not change this name
+from agent_app_sample_code.utils.file_loading import load_files_to_df, apply_parsing_udf
 
-    # OK TO CHANGE THESE NAMES
-    # Optionally, you can add additional metadata fields here
-    example_metadata: str
-    last_modified: datetime
+@pytest.fixture(scope="module")
+def spark():
+    return (
+        pyspark.sql.SparkSession.builder
+        .master("local[1]")
+        # Uncomment the following line for testing on Apple silicon locally
+        .config("spark.driver.bindAddress", "127.0.0.1")
+        .config("spark.task.maxFailures", "1")  # avoid retry failed spark tasks
+        .getOrCreate()
+            )
 
-def test_load_uc_volume_to_delta_table():
-    assert True
-    def dummy_file_parser(
-            raw_doc_contents_bytes: bytes,
-            doc_path: str,
-            modification_time: datetime,
-            doc_bytes_length: int,
-    ) -> ParserReturnValue:
-
-    #
-    load_uc_volume_to_delta_table(
-        spark=spark,
-        source_path=SOURCE_UC_VOLUME,
-        dest_table_name=DOCS_DELTA_TABLE,
-        # Modify this function to change the parser, extract additional metadata, etc
-        parse_file_udf=file_parser,
-        # The schema of the resulting Delta Table will follow the schema defined in ParserReturnValue
-        spark_dataframe_schema=typed_dicts_to_spark_schema(ParserReturnValue),
+def test_load_files_to_df(spark, tmpdir):
+    temp_dir = tmpdir.mkdir("files_subdir")
+    file_1 = temp_dir.join("file1.txt")
+    file_2 = temp_dir.join("file2.txt")
+    file_1.write("file1 content")
+    file_2.write("file2 content")
+    raw_files_df = load_files_to_df(spark, str(temp_dir)).drop("modificationTime").orderBy("path")
+    assert raw_files_df.count() == 2
+    raw_pandas_df = raw_files_df.toPandas()
+    # Decode the content from bytes to string
+    raw_pandas_df['content'] = raw_pandas_df['content'].apply(
+        lambda x: bytes(x).decode('utf-8')
     )
+    # Expected DataFrame
+    expected_df = pd.DataFrame([{
+        "path": f"file:{str(file_1)}",
+        "length": len("file1 content"),
+        "content": "file1 content",
+    }, {
+        "path": f"file:{str(file_2)}",
+        "length": len("file2 content"),
+        "content": "file2 content",
+    }])
+    pd.testing.assert_frame_equal(raw_pandas_df, expected_df)
