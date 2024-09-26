@@ -121,7 +121,7 @@ def apply_parsing_udf(raw_files_df: DataFrame, parse_file_udf: Callable[[[dict, 
         display_markdown(
             f"### {num_errors} documents had parse errors. Please review.", raw=True
         )
-        errors_df.display()
+        errors_df.show()
 
         if errors_df.count() == parsed_files_staging_df.count():
             raise ValueError(
@@ -133,7 +133,7 @@ def apply_parsing_udf(raw_files_df: DataFrame, parse_file_udf: Callable[[[dict, 
         display_markdown(
             f"### {num_errors} documents have no content. Please review.", raw=True
         )
-        errors_df.display()
+        errors_df.show()
 
         if num_empty_content == parsed_files_staging_df.count():
             raise ValueError("All documents are empty. Please review.")
@@ -146,7 +146,7 @@ def apply_parsing_udf(raw_files_df: DataFrame, parse_file_udf: Callable[[[dict, 
         parsed_files_staging_df.parsing.parser_status == "SUCCESS"
     )
 
-    parsed_files_df.display()
+    parsed_files_df.show()
     parsed_files_df = parsed_files_df.select(
         *[func.col(f"parsing.{field}").alias(field) for field in resulting_fields]
     )
