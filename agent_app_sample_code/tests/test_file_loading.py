@@ -13,11 +13,10 @@ def spark():
     return (
         pyspark.sql.SparkSession.builder
         .master("local[1]")
-        # Uncomment the following line for testing on Apple silicon locally
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.task.maxFailures", "1")  # avoid retry failed spark tasks
         .getOrCreate()
-            )
+    )
 
 @pytest.fixture()
 def example_files_dir(tmpdir):
