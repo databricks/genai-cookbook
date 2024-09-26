@@ -83,7 +83,7 @@ def load_files_to_df(
 
     # Load the raw riles
     raw_files_df = (
-        https://spark.apache.org/docs/latest/sql-data-sources-binaryFile.html.option("recursiveFileLookup", "true")
+        spark.read.format("binaryFile").option("recursiveFileLookup", "true")
         .load(source_path)
     )
 

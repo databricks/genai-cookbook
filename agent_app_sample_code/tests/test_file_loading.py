@@ -39,3 +39,8 @@ def test_load_files_to_df(spark, tmpdir):
         "content": "file2 content",
     }])
     pd.testing.assert_frame_equal(raw_pandas_df, expected_df)
+
+def test_load_files_to_df_throws_if_no_files(spark, tmpdir):
+    temp_dir = tmpdir.mkdir("files_subdir")
+    with pytest.raises(Exception, match="does not contain any files"):
+        load_files_to_df(spark, str(temp_dir))
