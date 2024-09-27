@@ -55,7 +55,6 @@ def test_load_files_to_df_throws_if_no_files(spark, tmpdir):
         load_files_to_df(spark, str(temp_dir))
 
 class ParserReturnValue(TypedDict):
-    # DO NOT CHANGE THESE NAMES - these are required by Evaluation & Framework
     # Parsed content of the document
     doc_content: str  # do not change this name
     # The status of whether the parser succeeds or fails, used to exclude failed files downstream
