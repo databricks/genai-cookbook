@@ -16,26 +16,37 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install -qqqq -U 'pydantic>=2.9.2' mlflow databricks-sdk
+# MAGIC %pip install -qqqq -U -r requirements.txt
 # MAGIC dbutils.library.restartPython()
 
 # COMMAND ----------
 
-# MAGIC %run ./utils/agent_storage_location_config
+from databricks.sdk import WorkspaceClient
+
+# Get current user's name for the default UC schema
+w = WorkspaceClient()
+user_name = w.current_user.me().user_name.split("@")[0].replace(".", "_")
+
+# Get the workspace default UC catalog
+default_catalog = spark.sql("select current_catalog() as cur_catalog").collect()[0]['cur_catalog']
 
 # COMMAND ----------
 
-# Get current user's name for the default UC catalog name
-user_name = spark.sql("SELECT current_user() as username").collect()[0].username.split("@")[0].replace(".", "").lower()[:35]
+# MAGIC %md
+# MAGIC ### Modify this cell to set your Agent's storage locations
 
 # COMMAND ----------
+
+from utils import AgentStorageLocationConfig
 
 # Agent's storage location configuration
 agent_storage_locations_config = AgentStorageLocationConfig(
-    uc_catalog=f"{user_name}_catalog", 
-    uc_schema="agents", 
-    uc_asset_prefix="agent_app_name", # Prefix to every created UC asset
+    uc_catalog=f"{default_catalog}", 
+    uc_schema=f"{user_name}_agents", 
+    uc_asset_prefix="agent_app_name", # Prefix to every created UC asset, typically the Agent's name
 )
+
+# COMMAND ----------
 
 # Save configuration
 agent_storage_locations_config.dump_to_yaml('./configs/agent_config.yaml')
@@ -50,4 +61,6 @@ agent_storage_locations_config.pretty_print()
 
 # COMMAND ----------
 
-# MAGIC %run ./validators/validate_agent_storage_locations
+from utils import validate_storage_config
+
+validate_storage_config(agent_storage_locations_config)

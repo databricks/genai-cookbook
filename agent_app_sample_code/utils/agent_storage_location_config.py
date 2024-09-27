@@ -1,25 +1,8 @@
-# Databricks notebook source
-# MAGIC %md
-# MAGIC #### `AgentStorageLocationConfig()`
-# MAGIC
-# MAGIC - `uc_catalog` (str): Unity Catalog where the Agent's resources are stored.
-# MAGIC - `uc_schema` (str): Unity Catalog schema where the Agent's resources are stored.
-# MAGIC - `uc_asset_prefix` (str): Prefix for the UC assets created by these notebooks. This is typically a short name to identify the Agent e.g., "my_agent_app". Example usage: '`{uc_catalog}`.`{uc_schema}`.`{uc_asset_prefix}`_example_table_name'.
-# MAGIC - `mlflow_experiment_directory` (str): The directory where the Agent's MLflow Experiment is stored. Defaults to `/Users/<current-user-name>/{uc_asset_prefix}_mlflow_experiment`.
-
-# COMMAND ----------
-
-# # Uncomment to install requirements if running this notebook directly
-# %pip install -U pydantic
-# dbutils.library.restartPython()
-
-# COMMAND ----------
-
 from pydantic import BaseModel, Field, root_validator, computed_field, field_validator, FieldValidationInfo
 import os
 import json
 
-# COMMAND ----------
+from databricks.sdk import WorkspaceClient
 
 class AgentStorageLocationConfig(BaseModel):
     """
@@ -39,10 +22,16 @@ class AgentStorageLocationConfig(BaseModel):
     def model_post_init(self, __context):
         if self.mlflow_experiment_directory is None:
             try:
-              user_email = spark.sql("SELECT current_user() as username").collect()[0].username 
-              self.mlflow_experiment_directory = f"/Users/{user_email}/{self.uc_asset_prefix}_mlflow_experiment"
+              w = WorkspaceClient()
+
+              user_email = w.current_user.me().user_name #spark.sql("SELECT current_user() as username").collect()[0].username 
+            #   print(user_email)
+              user_home_directory = f"/Users/{user_email}"
+              
+              self.mlflow_experiment_directory = f"{user_home_directory}/{self.uc_asset_prefix}_mlflow_experiment"
             except Exception as e:
-              raise ValueError(f"Failed to identify the current user name, which is used to initialize the default value for `mlflow_experiment_directory`.  Please explicitly specify `mlflow_experiment_directory` and retry.")
+            #   print(e)
+              raise ValueError(f"Failed to identify the current user's working directory, which is used to initialize the default value for `mlflow_experiment_directory`.  Please explicitly specify `mlflow_experiment_directory` and retry.")
 
     def get_uc_fqn(self, asset_name:str) -> str:
         uc_fqn = f"{self.uc_catalog}.{self.uc_schema}.{self.uc_asset_prefix}_{asset_name}"
@@ -85,4 +74,3 @@ class AgentStorageLocationConfig(BaseModel):
         config_dump = self.model_dump()
         print(json.dumps(config_dump, indent=4, sort_keys=True))
       
-

@@ -1,0 +1,5 @@
+pydantic>=2.9.2
+databricks-agents
+mlflow
+mlflow-skinny
+databricks-sdk
