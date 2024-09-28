@@ -3,3 +3,5 @@ databricks-agents
 mlflow
 mlflow-skinny
 databricks-sdk
+databricks-vectorsearch
+pyyaml

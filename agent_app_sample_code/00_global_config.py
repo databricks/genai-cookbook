@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC ## Global configuration
+# MAGIC ## Shared configuration
 # MAGIC
 # MAGIC This notebook initializes a `AgentStorageLocationConfig` Pydantic class to define the storage locations that are shared between the cookbook notebooks. Storage locations include: 
 # MAGIC - Unity Catalog schema to store the Agent's Delta Table, Vector Index, and Model resources.
@@ -37,6 +37,10 @@ default_catalog = spark.sql("select current_catalog() as cur_catalog").collect()
 
 # COMMAND ----------
 
+print(AgentStorageLocationConfig.__doc__)
+
+# COMMAND ----------
+
 from utils import AgentStorageLocationConfig
 
 # Agent's storage location configuration
@@ -57,10 +61,10 @@ agent_storage_locations_config.pretty_print()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Validate the configuration's locations
+# MAGIC ### Validate the storage locations exist, create if they don't exist
 
 # COMMAND ----------
 
-from utils import validate_storage_config
+from utils import validate_and_create_storage_locations
 
-validate_storage_config(agent_storage_locations_config)
+validate_and_create_storage_locations(agent_storage_locations_config)
