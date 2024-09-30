@@ -175,8 +175,7 @@ storage_config = UnstructuredDataPipelineStorageConfig(
     parsed_docs_table=f"{uc_asset_prefix}_docs",
     chunked_docs_table=f"{uc_asset_prefix}_docs_chunked",
     vector_index=f"{uc_asset_prefix}_docs_chunked_index",
-    # vector_search_endpoint=f"{uc_asset_prefix}_endpoint", # by default, a new endpoint is created for the Agent
-    vector_search_endpoint="ericpeter_vector_search",
+    vector_search_endpoint=f"{uc_asset_prefix}_endpoint", # by default, a new endpoint is created for the Agent
     tag="", # Optional, use to tag the tables/index with a postfix to differentiate between versions when iterating on chunking/parsing/embedding configs.  
 )
 
