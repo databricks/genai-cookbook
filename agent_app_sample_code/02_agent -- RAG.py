@@ -243,7 +243,7 @@ write_dict_to_yaml(agent_config.dict(exclude_none=True), "./configs/agent_model_
 ########################
 #### Print resulting config to the console
 ########################
-print(json.dumps(agent_config, indent=4))
+print(json.dumps(agent_config.model_dump(), indent=4))
 
 # COMMAND ----------
 
