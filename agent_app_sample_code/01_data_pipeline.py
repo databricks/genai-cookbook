@@ -468,8 +468,8 @@ from datapipeline_utils.recursive_character_text_splitter import get_recursive_c
 # Configure the chunker
 chunk_fn = get_recursive_character_text_splitter(
     model_serving_endpoint=chunking_config.embedding_model_endpoint,
-    chunk_size_tokens=384,
-    chunk_overlap_tokens=128,
+    chunk_size_tokens=chunking_config.chunk_size_tokens,
+    chunk_overlap_tokens=chunking_config.chunk_overlap_tokens,
 )
 
 # Get the columns from the parser except for the doc_content
