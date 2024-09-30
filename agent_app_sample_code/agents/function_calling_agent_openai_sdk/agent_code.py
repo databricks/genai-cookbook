@@ -59,25 +59,6 @@ class VectorSearchRetriever:
             doc_uri=vector_search_schema.get("document_uri"),
         )
 
-    def get_tool_definition(self) -> Dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": "retrieve_documents",
-                "description": self.config.get("tool_description_prompt"),
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "The query to find documents about.",
-                        },
-                    },
-                    "required": ["query"],
-                },
-            },
-        }
-
     @mlflow.trace(span_type="TOOL", name="VectorSearchRetriever")
     def __call__(self, query: str) -> str:
         results = self.similarity_search(query)
@@ -209,7 +190,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             self.config = None
         if self.config is None:
             try:
-                self.config = mlflow.models.ModelConfig(development_config="../configs/agent_model_config.yaml")
+                self.config = mlflow.models.ModelConfig(development_config="../../configs/agent_model_config.yaml")
             except Exception as e:
                 self.config = None
         if self.config is None:

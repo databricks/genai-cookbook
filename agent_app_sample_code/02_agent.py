@@ -137,7 +137,7 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # COMMAND ----------
 
 # Import Pydantic models
-from cookbook_utils.function_calling_agent_openai_sdk import (
+from agents.function_calling_agent_openai_sdk.config import (
     AgentConfig,
     FunctionCallingLLMConfig,
     LLMParametersConfig,
@@ -286,7 +286,7 @@ write_dict_to_yaml(agent_config.dict(exclude_none=True), "./configs/agent_model_
 
 # COMMAND ----------
 
-# MAGIC %run ./agents/function_calling_agent_w_retriever_tool
+# MAGIC %run ./agents/function_calling_agent_openai_sdk/agent_code
 
 # COMMAND ----------
 
@@ -361,7 +361,7 @@ def log_agent_to_mlflow(agent_config):
                 print("Could not identify the embedding model endpoint resource for {tool.vector_search_index}.  Please manually add the embedding model endpoint to `databricks_resources`.")
 
     # Specify the full path to the Agent notebook
-    model_file = "agents/function_calling_agent_w_retriever_tool"
+    model_file = "agents/function_calling_agent_openai_sdk/agent_code"
     model_path = os.path.join(os.getcwd(), model_file)
 
     # Log the agent as an MLflow model
