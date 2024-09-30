@@ -14,39 +14,51 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### 👉 START HERE: How to use this notebook
+# MAGIC ### 👉 START HERE: How to Use This Notebook
 # MAGIC
-# MAGIC We suggest the following approach to using this notebook to build and iterate on your data pipeline's quality.
-# MAGIC 1. **Build the first version of your index with our smart default settings**
-# MAGIC     - Install the Python libraries
-# MAGIC     - 1️⃣ 📂 Configure data source & destination tables 
-# MAGIC     - Press Run All to create the vector index
+# MAGIC Follow these steps to build and refine your data pipeline's quality:
 # MAGIC
-# MAGIC     *Note: For your initial data pipeline, this notebook is designed so you can **only** adjust the data source/destinaton configuration and then press run all.*
+# MAGIC 1. **Build a v0 index with default settings**
+# MAGIC     - Configure the data source and destination tables in the `1️⃣ 📂 Data source & destination configuration` cells
+# MAGIC     - Press `Run All` to create the vector index.
 # MAGIC
-# MAGIC 2. **Use the later notebooks to deploy the Agent and use Agent Evaluation to measure the quality of your Agent + Retriever.**
-# MAGIC 3. **If your evaluation results indicate a retrieval issue, try various strategies to improve the quality.  For a deep dive on these strategies, view [AI cookbook](https://ai-cookbook.io/nbs/5-hands-on-improve-quality-step-1-retrieval.html).**
-# MAGIC     - Verify that the necessary source documents are included
-# MAGIC     - Resolve conflicting source documents
-# MAGIC     - 2️⃣ ⚙️ Adjust the data pipeline config
-# MAGIC       - Change the chunk size or overlap
-# MAGIC       - Try different embedding models
-# MAGIC     - 3️⃣ ⌨️ Adjust the data pipeline code
-# MAGIC       - Write a custom parser or try different parsing libraries
-# MAGIC       - Write a custom chunker or try different chunking techniques
-# MAGIC       - Extract additional metadata about each document
-# MAGIC     - Adjust the Agent's code/config *(this is done the following notebooks)*
-# MAGIC       - Change the K e.g., number of docs retrieved
-# MAGIC       - Try a re-ranker
-# MAGIC       - Try hybrid search
-# MAGIC       - Use extracted metadata as filters
+# MAGIC     *Note: While you can adjust the other settings and modify the parsing/chunking code, we suggest doing so only after evaluating your Agent's quality so you can make improvements that specifically address root causes of quality issues.*
+# MAGIC
+# MAGIC 2. **Use later notebooks to intergate the retriever into an the agent and evaluate the agent/retriever's quality.**
+# MAGIC
+# MAGIC 3. **If the evaluation results show retrieval issues as a root cause, use this notebook to iterate on your data pipeline's code & config.** Below are some potential fixes you can try, see the AI Cookbook's [debugging retrieval issues](https://ai-cookbook.io/nbs/5-hands-on-improve-quality-step-1-retrieval.html) section for details.**
+# MAGIC     - Add missing, but relevant source documents into in the index.
+# MAGIC     - Resolve any conflicting information in source documents.
+# MAGIC     - Adjust the data pipeline configuration:
+# MAGIC       - Modify chunk size or overlap.
+# MAGIC       - Experiment with different embedding models.
+# MAGIC     - 3️Adjust the data pipeline code:
+# MAGIC       - Create a custom parser or use different parsing libraries.
+# MAGIC       - Develop a custom chunker or use different chunking techniques.
+# MAGIC       - Extract additional metadata for each document.
+# MAGIC     - Adjust the Agent's code/config in subsequent notebooks:
+# MAGIC       - Change the number of documents retrieved (K).
+# MAGIC       - Try a re-ranker.
+# MAGIC       - Use hybrid search.
+# MAGIC       - Apply extracted metadata as filters.
+# MAGIC
+# MAGIC
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC **Important note:** Throughout this notebook, we indicate which cells you:
+# MAGIC - ✅✏️ *should* customize - these cells contain code & config with business logic that you should edit to meet your requirements & tune quality
+# MAGIC - 🚫✏️ *typically will not* customize - these cells contain boilerplate code required to execute the pipeline
+# MAGIC
+# MAGIC *Cells that don't require customization still need to be run!  You CAN change these cells, but if this is the first time using this notebook, we suggest not doing so.*
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ### Install Python libraries
 # MAGIC
-# MAGIC You do not need to modify this cell unless you are adjusting the code for the document parsing or chunking logic.
+# MAGIC 🚫✏️ Only modify if you need additional packages in your code changes to the document parsing or chunking logic.
 
 # COMMAND ----------
 
@@ -57,7 +69,7 @@
   pymupdf4llm==0.0.5 pymupdf==1.24.5 `# PDF parsing` \
   markdownify==0.12.1  `# HTML parsing` \
   pypandoc_binary==1.13  `# DOCX parsing` \
-  transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.0. `# For get_recursive_character_text_splitter`
+  transformers==4.41.1 torch==2.3.0 tiktoken==0.7.0 langchain-text-splitters==0.2.0. `# For get_recursive_character_text_splitter()`
 
 # Restart to load the packages into the Python environment
 dbutils.library.restartPython()
@@ -71,41 +83,33 @@ dbutils.library.restartPython()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### 📂 (Optional) Change Agent's shared storage location configuration
+# MAGIC #### 🚫✏️ (Optional) Change Agent's shared storage location configuration
 # MAGIC
-# MAGIC **❗❗ If you configured `00_shared_config`, just run this cell as-is.**
+# MAGIC **If you configured `00_shared_config`, just run this cell as-is.**
 # MAGIC
 # MAGIC From the shared configuration, we use:
 # MAGIC * The UC catalog & schema as the default location for output tables/indexs
 # MAGIC * The MLflow experiment for tracking pipeline runs
 # MAGIC
-# MAGIC *These are set in `00_shared_config`, but can also be overriden here if you want to use this notebook independently.*
-# MAGIC
-# MAGIC
+# MAGIC *These values can be set here if you want to use this notebook independently.*
 
 # COMMAND ----------
 
-# %load_ext autoreload
-
-# %autoreload 2
-
-# COMMAND ----------
-
-from utils import AgentStorageLocationConfig
+from cookbook_utils.cookbook_config import AgentCookbookConfig
 import mlflow
 
 # Load the shared configuration
-agent_storage_location_config = AgentStorageLocationConfig.from_yaml_file('./configs/agent_config.yaml')
+cookbook_shared_config = AgentCookbookConfig.from_yaml_file('./configs/cookbook_config.yaml')
 
 # Print configuration 
-agent_storage_location_config.pretty_print()
+cookbook_shared_config.pretty_print()
 
 # Set the MLflow Experiment that is used to track metadata about each run of this Data Pipeline.
-experiment_info = mlflow.set_experiment(agent_storage_location_config.mlflow_experiment_directory)
+experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment_name)
 
 # COMMAND ----------
 
-# MAGIC %md #### 📂 Configure the data pipeline's source location.
+# MAGIC %md #### 📂 ✅✏️ Configure the data pipeline's source location.
 # MAGIC
 # MAGIC Choose a [Unity Catalog Volume](https://docs.databricks.com/en/volumes/index.html) containing PDF, HTML, etc documents to be parsed/chunked/embedded.
 # MAGIC
@@ -114,16 +118,17 @@ experiment_info = mlflow.set_experiment(agent_storage_location_config.mlflow_exp
 # MAGIC - `uc_volume_name`: Name of the Unity Catalog volume. 
 # MAGIC
 # MAGIC Running this cell with validate that the UC Volume exists, trying to create it if not.
+# MAGIC
 
 # COMMAND ----------
 
-from cookbook_utils import UnstructuredDataPipelineSourceConfig
+from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineSourceConfig
 
 # Default is a Volume called `{uc_asset_prefix}_source_docs` in the configured UC catalog/schema
 source_config = UnstructuredDataPipelineSourceConfig(
-    uc_catalog_name=agent_storage_location_config.uc_catalog,
-    uc_schema_name=agent_storage_location_config.uc_schema,
-    uc_volume_name=f"{agent_storage_location_config.uc_asset_prefix}_source_docs"
+    uc_catalog_name=cookbook_shared_config.uc_catalog_name,
+    uc_schema_name=cookbook_shared_config.uc_schema_name,
+    uc_volume_name=f"{cookbook_shared_config.uc_asset_prefix}_source_docs"
 )
 
 # Print source location to console
@@ -141,9 +146,11 @@ if not source_config.create_or_check_volume():
 # MAGIC %md
 # MAGIC #### 📂 Configure the data pipeline's output locations.
 # MAGIC
+# MAGIC ✅✏️ Most users will only modify `vector_search_endpoint` and `tag`
+# MAGIC
 # MAGIC Choose where the data pipeline outputs the parsed, chunked, and embedded documents.
 # MAGIC
-# MAGIC By default, the Delta Tables and Vector Index are created in the `agent_storage_location_config`'s Unity Catalog schema and given a logical name e.g., `catalog.schema.{uc_asset_prefix}_docs`.  Optionally, you can change the name of the tables/indexes.  
+# MAGIC By default, the Delta Tables and Vector Index are created in the `cookbook_shared_config`'s Unity Catalog schema and given a logical name e.g., `catalog.schema.{uc_asset_prefix}_docs`.  Optionally, you can change the name of the tables/indexes.  
 # MAGIC
 # MAGIC *Note: If you are comparing different chunking/parsing/embedding strategies, set the `tag` parameter, which is appended to the output tables/indexes so you can have multiple Vector Indexes running at once.*
 # MAGIC
@@ -156,21 +163,21 @@ if not source_config.create_or_check_volume():
 
 # COMMAND ----------
 
-from cookbook_utils import UnstructuredDataPipelineStorageConfig
+from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineStorageConfig
 from databricks.sdk import WorkspaceClient
 
-uc_asset_prefix = agent_storage_location_config.uc_asset_prefix
+uc_asset_prefix = cookbook_shared_config.uc_asset_prefix
 
 storage_config = UnstructuredDataPipelineStorageConfig(
-    uc_catalog_name=agent_storage_location_config.uc_catalog,
-    uc_schema_name=agent_storage_location_config.uc_schema,
+    uc_catalog_name=cookbook_shared_config.uc_catalog_name,
+    uc_schema_name=cookbook_shared_config.uc_schema_name,
     uc_asset_prefix=uc_asset_prefix,
     parsed_docs_table=f"{uc_asset_prefix}_docs",
     chunked_docs_table=f"{uc_asset_prefix}_docs_chunked",
     vector_index=f"{uc_asset_prefix}_docs_chunked_index",
     # vector_search_endpoint=f"{uc_asset_prefix}_endpoint", # by default, a new endpoint is created for the Agent
     vector_search_endpoint="ericpeter_vector_search",
-    tag="22", # Optional, use to tag the tables/index with a postfix to differentiate between versions when iterating on chunking/parsing/embedding configs.  
+    tag="", # Optional, use to tag the tables/index with a postfix to differentiate between versions when iterating on chunking/parsing/embedding configs.  
 )
 
 # Print output locations to console
@@ -195,7 +202,7 @@ if not storage_config.create_or_check_vector_search_endpoint():
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### ⚙️ Configure simple chunking parameters and the embedding model.
+# MAGIC #### ⚙️ ✅✏️ Configure chunk size and the embedding model.
 # MAGIC
 # MAGIC **Chunk size and overlap** control how a larger document is turned into smaller chunks that can be processed by an embedding model.  See the AI Cookbook [chunking deep dive](https://ai-cookbook.io/nbs/3-deep-dive-data-pipeline.html#chunking) for more details.
 # MAGIC
@@ -207,10 +214,10 @@ if not storage_config.create_or_check_vector_search_endpoint():
 
 # COMMAND ----------
 
-from cookbook_utils import ChunkingConfig
+from datapipeline_utils.data_pipeline_config import ChunkingConfig
 
 chunking_config = ChunkingConfig(
-    embedding_model_endpoint="databricks-gte-large-en", # A Model Serving endpoint
+    embedding_model_endpoint="databricks-gte-large-en", # A Model Serving endpoint supporting the /llm/v1/embeddings task
     chunk_size_tokens=2048,
     chunk_overlap_tokens=256
 )
@@ -233,15 +240,11 @@ if not chunking_config.validate_chunk_size_and_overlap():
 # MAGIC ## 3️⃣ ⌨️ Data pipeline code
 # MAGIC
 # MAGIC The code below executes the data pipeline.  You can modify the below code as indicated to implement different parsing or chunking strategies or to extract additional metadata fields
-# MAGIC
-# MAGIC Throughout this section, we indicate which cell's code you:
-# MAGIC - ✏️ should customize - these cells contain the "business logic" that parses/chunks the documents.
-# MAGIC - 🚫 should not customize - these cells contain boilerplate logic to execute the parsing/chunking/embedding inside Spark.
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### 🚫 Start MLflow run for tracking
+# MAGIC #### 🚫✏️ Start MLflow run for tracking
 
 # COMMAND ----------
 
@@ -265,7 +268,7 @@ mlflow.start_run(run_name=mlflow_run_tag)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ##### Customize the parsing function
+# MAGIC ##### ✅✏️ Customize the parsing function
 # MAGIC
 # MAGIC This default implementation parses PDF, HTML, and DOCX files using open source libraries.  Adjust `file_parser(...)` to add change the parsing logic, add support for more file types, or extract additional metadata about each document.
 
@@ -294,7 +297,8 @@ import pypandoc
 import tempfile
 
 # Schema of the dict returned by `file_parser(...)`
-# This is used to create the output Delta Table's schema - if you want to add columns, do so here.
+# This is used to create the output Delta Table's schema.
+# Adjust the class if you want to add additional columns from your parser, such as extracting custom metadata.
 class ParserReturnValue(TypedDict):
     # DO NOT CHANGE THESE NAMES - these are required by Agent Evaluation & Framework
     # Parsed content of the document
@@ -310,7 +314,7 @@ class ParserReturnValue(TypedDict):
     last_modified: datetime
 
 
-# Parser function.  Replace this function to provide custom parsing logic.
+# Parser function.  Adjust this function to modify the parsing logic.
 def file_parser(
     raw_doc_contents_bytes: bytes,
     doc_path: str,
@@ -406,12 +410,13 @@ def file_parser(
 
 # COMMAND ----------
 
-# MAGIC %md 🚫 The below cell is boilerplate code to apply the parsing function using Spark.  You should not need to modify this code.
+# MAGIC %md 🚫✏️ The below cell is boilerplate code to apply the parsing function using Spark.
 
 # COMMAND ----------
 
-from cookbook_utils.file_loading import load_files_to_df, apply_parsing_udf
-from cookbook_utils import typed_dicts_to_spark_schema
+from datapipeline_utils.file_loading import load_files_to_df, apply_parsing_udf
+from datapipeline_utils.typed_dicts_to_spark_schema import typed_dicts_to_spark_schema
+from IPython.display import display_markdown
 
 raw_files_df = load_files_to_df(
     spark=spark,
@@ -432,7 +437,7 @@ parsed_files_df.write.mode("overwrite").option(
 ).saveAsTable(storage_config.parsed_docs_table)
 
 # Display for debugging
-print(f"Parsed {parsed_files_df.count()} documents.")
+display_markdown(f"### Parsed {parsed_files_df.count()} documents: ", raw=True)
 parsed_files_df.display()
 
 # Log the resulting table to MLflow
@@ -453,11 +458,13 @@ mlflow.log_input(
 
 # MAGIC %md
 # MAGIC
-# MAGIC ✏️ Chunking logic.  We provide a default implementation of a recursive text splitter.  To create your own chunking logic, adapt the `get_recursive_character_text_splitter()` function inside `cookbook_utils.recursive_character_text_splitter.py`.
+# MAGIC ##### ✅✏️ Chunking logic.  
+# MAGIC
+# MAGIC We provide a default implementation of a recursive text splitter.  To create your own chunking logic, adapt the `get_recursive_character_text_splitter()` function inside `cookbook_utils.recursive_character_text_splitter.py`.
 
 # COMMAND ----------
 
-from cookbook_utils.recursive_character_text_splitter import get_recursive_character_text_splitter
+from datapipeline_utils.recursive_character_text_splitter import get_recursive_character_text_splitter
 
 # Configure the chunker
 chunk_fn = get_recursive_character_text_splitter(
@@ -483,11 +490,14 @@ propagate_columns = [
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC 🚫 Run the chunking function within Spark
+# MAGIC 🚫✏️ Run the chunking function within Spark
 
 # COMMAND ----------
 
-from cookbook_utils.chunk_docs import compute_chunks
+from datapipeline_utils.chunk_docs import compute_chunks
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from transformers import AutoTokenizer
+import tiktoken
 
 chunked_docs_table = compute_chunks(
     # The source documents table.
@@ -517,18 +527,13 @@ mlflow.log_input(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### Pipeline step 3: Create the vector index
+# MAGIC #### 🚫✏️ Pipeline step 3: Create the vector index
 # MAGIC
 # MAGIC In this step, we'll embed the documents to compute the vector index over the chunks and create our retriever index that will be used to query relevant documents to the user question.  The embedding pipeline is handled within Databricks Vector Search using [Delta Sync](https://docs.databricks.com/en/generative-ai/create-query-vector-search.html#create-a-vector-search-index)
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC 🚫 Run the embedding pipeline within Vector Search
-
-# COMMAND ----------
-
-from cookbook_utils.build_retriever_index import build_retriever_index
+from datapipeline_utils.build_retriever_index import build_retriever_index
 
 retriever_index_result = build_retriever_index(
     # Spark requires `` to escape names with special chars, VS client does not.
@@ -539,14 +544,14 @@ retriever_index_result = build_retriever_index(
     vector_search_index_name=storage_config.vector_index,
     # Must match the embedding endpoint you used to chunk your documents
     embedding_endpoint_name=chunking_config.embedding_model_endpoint,
-    # Set to true to re-create the vector search endpoint when re-running.  If set to True, syncing will not work if re-run the pipeline and change the schema of chunked_docs_table_name.
+    # Set to true to re-create the vector search endpoint when re-running the data pipeline.  If set to True, syncing will not work if re-run the pipeline and change the schema of chunked_docs_table_name.  Keeping this as False will allow Vector Search to avoid recomputing embeddings for any row with that has a chunk_id that was previously computed.  
     force_delete_index_before_create=False,
 )
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### 🚫 End the MLflow run
+# MAGIC #### 🚫✏️ End the MLflow run
 
 # COMMAND ----------
 
@@ -554,7 +559,12 @@ mlflow.end_run()
 
 # COMMAND ----------
 
-from cookbook_utils import get_table_url
+# MAGIC %md
+# MAGIC #### 🚫✏️ Print links to view the resulting tables/index
+
+# COMMAND ----------
+
+from cookbook_utils.shared import get_table_url
 print()
 print(f"Parsed docs table: {get_table_url(storage_config.parsed_docs_table)}\n")
 print(f"Chunked docs table: {get_table_url(storage_config.chunked_docs_table)}\n")

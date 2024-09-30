@@ -6,9 +6,6 @@ import pyspark.sql.functions as func
 from pyspark.sql.types import StructType, StringType, StructField, MapType, ArrayType
 from mlflow.utils import databricks_utils as du
 from functools import partial
-import tiktoken
-from transformers import AutoTokenizer
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from databricks.vector_search.client import VectorSearchClient
 import mlflow
 

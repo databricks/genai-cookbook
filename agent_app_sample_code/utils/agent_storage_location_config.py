@@ -11,7 +11,7 @@ class AgentStorageLocationConfig(BaseModel):
     Attributes:
         uc_catalog (str): Unity Catalog where the Agent's resources are stored.").
         uc_schema (str): Unity Catalog schema where the Agent's resources are stored..
-        uc_asset_prefix (str): Prefix for the UC assets created by these notebooks.  This is typically a short name to identify the Agent e.g., "my_agent_app".  Example usage: '`{uc_catalog}`.`{uc_schema}`.`{uc_asset_prefix}`_example_table_name'.
+        uc_asset_prefix (str): Prefix for the UC assets created by these notebooks.  This is typically a short name to identify the Agent e.g., "my_agent_app".  Used  usage: '`{uc_catalog}`.`{uc_schema}`.`{uc_asset_prefix}`_example_table_name'.
         mlflow_experiment_directory (str): The directory where the Agent's MLflow Experiment is stored. Defaults to '/Users/<curent-user-name>/{uc_asset_prefix}_mlflow_experiment'.
     """
     uc_catalog: str
@@ -48,7 +48,7 @@ class AgentStorageLocationConfig(BaseModel):
 
     @computed_field
     def uc_model_fqn(self) -> str:
-        return self.get_uc_fqn(f'model')
+        return self.get_uc_fqn(f'model1')
     
     @computed_field
     def evaluation_set_fqn(self) -> str:

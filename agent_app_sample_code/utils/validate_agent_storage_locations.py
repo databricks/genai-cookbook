@@ -4,7 +4,7 @@ import mlflow
 from .agent_storage_location_config import AgentStorageLocationConfig
 
 
-def validate_storage_config(agent_storage_locations_config: AgentStorageLocationConfig):
+def validate_and_create_storage_locations(agent_storage_locations_config: AgentStorageLocationConfig):
   _validate_or_create_uc_catalog(agent_storage_locations_config)
   _validate_or_create_uc_schema(agent_storage_locations_config)
   _validate_or_create_mlflow_experiment(agent_storage_locations_config)

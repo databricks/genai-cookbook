@@ -17,7 +17,6 @@ def _parse_and_extract(
     parse_file_udf: Callable[[[dict, Any]], str],
 ) -> Dict[str, Any]:
     """Parses raw bytes & extract metadata."""
-
     try:
         # Run the parser
         parser_output_dict = parse_file_udf(
@@ -81,6 +80,7 @@ def load_files_to_df(
             f"{source_path} passed to `load_uc_volume_files` does not exist."
         )
 
+    print(f"Loading the raw files from {source_path}...")
     # Load the raw riles
     raw_files_df = (
         spark.read.format("binaryFile").option("recursiveFileLookup", "true")
@@ -91,8 +91,8 @@ def load_files_to_df(
     if raw_files_df.count() == 0:
         raise Exception(f"`{source_path}` does not contain any files.")
 
-    print(f"Found {raw_files_df.count()} files in {source_path}.")
-    raw_files_df.show()
+    display_markdown(f"### Found {raw_files_df.count()} files in {source_path}: ", raw=True)
+    raw_files_df.display()
     return raw_files_df
 
 
@@ -119,21 +119,23 @@ def apply_parsing_udf(raw_files_df: DataFrame, parse_file_udf: Callable[[[dict, 
     num_errors = errors_df.count()
     if num_errors > 0:
         display_markdown(
-            f"### {num_errors} documents had parse errors. Please review.", raw=True
+            f"### {num_errors} documents had parse errors. Please review: ", raw=True
         )
-        errors_df.show()
+        errors_df.display()
 
         if errors_df.count() == parsed_files_staging_df.count():
             raise ValueError(
                 "All documents produced an error during parsing. Please review."
             )
 
-    num_empty_content = errors_df.filter(func.col("parsing.doc_content") == "").count()
+    num_empty_content = parsed_files_staging_df.filter(
+        func.col(f"parsing.parser_status") == "SUCCESS"
+    ).filter(func.col("parsing.doc_content") == "").count()
     if num_empty_content > 0:
         display_markdown(
-            f"### {num_errors} documents have no content. Please review.", raw=True
+            f"### {num_errors} documents have no content. Please review: ", raw=True
         )
-        errors_df.show()
+        errors_df.display()
 
         if num_empty_content == parsed_files_staging_df.count():
             raise ValueError("All documents are empty. Please review.")
@@ -146,7 +148,7 @@ def apply_parsing_udf(raw_files_df: DataFrame, parse_file_udf: Callable[[[dict, 
         parsed_files_staging_df.parsing.parser_status == "SUCCESS"
     )
 
-    parsed_files_df.show()
+    # parsed_files_df.display()
     parsed_files_df = parsed_files_df.select(
         *[func.col(f"parsing.{field}").alias(field) for field in resulting_fields]
     )

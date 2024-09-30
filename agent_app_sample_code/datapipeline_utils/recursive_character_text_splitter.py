@@ -1,6 +1,3 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from transformers import AutoTokenizer
-import tiktoken
 from typing import Callable, Tuple, Optional
 import os
 import re
@@ -15,7 +12,7 @@ from databricks.sdk import WorkspaceClient
 # **Arguments:**
 
 # - `model_serving_endpoint`: The name of the Model Serving endpoint with the embedding model.
-# - `embedding_model_name`: The name of the embedding model e.g., `gte-large-en-v1.5`, etc.   If `model_serving_endpoint` is an OpenAI External Model or FMAPI model and set to `None`, this will be automatically detected. 
+# - `embedding_model_name`: The name of the embedding model e.g., `gte-large-en-v1.5`, etc.   If `model_serving_endpoint` is an OpenAI External Model or FMAPI model and set to `None`, this will be automatically detected.
 # - `chunk_size_tokens`: An optional size for each chunk in tokens. Defaults to `None`, which uses the model's entire context window.
 # - `chunk_overlap_tokens`: Tokens that should overlap between chunks. Defaults to `0`.
 
@@ -27,39 +24,39 @@ HF_CACHE_DIR = "/tmp/hf_cache/"
 # Embedding Models Configuration
 EMBEDDING_MODELS = {
     "gte-large-en-v1.5": {
-        "tokenizer": lambda: AutoTokenizer.from_pretrained(
-            "Alibaba-NLP/gte-large-en-v1.5", cache_dir=HF_CACHE_DIR
-        ),
+        # "tokenizer": lambda: AutoTokenizer.from_pretrained(
+        #     "Alibaba-NLP/gte-large-en-v1.5", cache_dir=HF_CACHE_DIR
+        # ),
         "context_window": 8192,
         "type": "SENTENCE_TRANSFORMER",
     },
     "bge-large-en-v1.5": {
-        "tokenizer": lambda: AutoTokenizer.from_pretrained(
-            "BAAI/bge-large-en-v1.5", cache_dir=HF_CACHE_DIR
-        ),
+        # "tokenizer": lambda: AutoTokenizer.from_pretrained(
+        #     "BAAI/bge-large-en-v1.5", cache_dir=HF_CACHE_DIR
+        # ),
         "context_window": 512,
         "type": "SENTENCE_TRANSFORMER",
     },
     "bge_large_en_v1_5": {
-        "tokenizer": lambda: AutoTokenizer.from_pretrained(
-            "BAAI/bge-large-en-v1.5", cache_dir=HF_CACHE_DIR
-        ),
+        # "tokenizer": lambda: AutoTokenizer.from_pretrained(
+        #     "BAAI/bge-large-en-v1.5", cache_dir=HF_CACHE_DIR
+        # ),
         "context_window": 512,
         "type": "SENTENCE_TRANSFORMER",
     },
     "text-embedding-ada-002": {
         "context_window": 8192,
-        "tokenizer": lambda: tiktoken.encoding_for_model("text-embedding-ada-002"),
+        # "tokenizer": lambda: tiktoken.encoding_for_model("text-embedding-ada-002"),
         "type": "OPENAI",
     },
     "text-embedding-3-small": {
         "context_window": 8192,
-        "tokenizer": lambda: tiktoken.encoding_for_model("text-embedding-3-small"),
+        # "tokenizer": lambda: tiktoken.encoding_for_model("text-embedding-3-small"),
         "type": "OPENAI",
     },
     "text-embedding-3-large": {
         "context_window": 8192,
-        "tokenizer": lambda: tiktoken.encoding_for_model("text-embedding-3-large"),
+        # "tokenizer": lambda: tiktoken.encoding_for_model("text-embedding-3-large"),
         "type": "OPENAI",
     },
 }
@@ -69,11 +66,62 @@ def get_workspace_client() -> WorkspaceClient:
     """Returns a WorkspaceClient instance."""
     return WorkspaceClient()
 
+# TODO: this is a cheap hack to avoid importing tokenizer libs at the top level -  the datapipeline utils are imported by the agent notebook which won't have these libs loaded & we don't want to since autotokenizer is heavy weight.
+def get_embedding_model_tokenizer(endpoint_type: str) -> Optional[dict]:
+    from transformers import AutoTokenizer
+    import tiktoken
+    # copy here to prevent needing to install tokenizer libraries everywhere this is imported
+    EMBEDDING_MODELS_W_TOKENIZER = {
+        "gte-large-en-v1.5": {
+            "tokenizer": lambda: AutoTokenizer.from_pretrained(
+                "Alibaba-NLP/gte-large-en-v1.5", cache_dir=HF_CACHE_DIR
+            ),
+            "context_window": 8192,
+            "type": "SENTENCE_TRANSFORMER",
+        },
+        "bge-large-en-v1.5": {
+            "tokenizer": lambda: AutoTokenizer.from_pretrained(
+                "BAAI/bge-large-en-v1.5", cache_dir=HF_CACHE_DIR
+            ),
+            "context_window": 512,
+            "type": "SENTENCE_TRANSFORMER",
+        },
+        "bge_large_en_v1_5": {
+            "tokenizer": lambda: AutoTokenizer.from_pretrained(
+                "BAAI/bge-large-en-v1.5", cache_dir=HF_CACHE_DIR
+            ),
+            "context_window": 512,
+            "type": "SENTENCE_TRANSFORMER",
+        },
+        "text-embedding-ada-002": {
+            "context_window": 8192,
+            "tokenizer": lambda: tiktoken.encoding_for_model(
+                "text-embedding-ada-002"
+            ),
+            "type": "OPENAI",
+        },
+        "text-embedding-3-small": {
+            "context_window": 8192,
+            "tokenizer": lambda: tiktoken.encoding_for_model(
+                "text-embedding-3-small"
+            ),
+            "type": "OPENAI",
+        },
+        "text-embedding-3-large": {
+            "context_window": 8192,
+            "tokenizer": lambda: tiktoken.encoding_for_model(
+                "text-embedding-3-large"
+            ),
+            "type": "OPENAI",
+        },
+    }
+    return EMBEDDING_MODELS_W_TOKENIZER.get(endpoint_type).get('tokenizer')
 
 def get_embedding_model_config(endpoint_type: str) -> Optional[dict]:
     """
     Retrieve embedding model configuration by endpoint type.
     """
+
     return EMBEDDING_MODELS.get(endpoint_type)
 
 
@@ -108,6 +156,9 @@ def detect_fmapi_embedding_model_type(
     embedding_config = (
         get_embedding_model_config(endpoint_type) if endpoint_type else None
     )
+
+    embedding_config['tokenizer'] = get_embedding_model_tokenizer(endpoint_type) if endpoint_type else None
+
     return (endpoint_type, embedding_config)
 
 
@@ -119,22 +170,26 @@ def validate_chunk_size(chunk_spec: dict):
     if (
         chunk_spec["chunk_overlap_tokens"] + chunk_spec["chunk_size_tokens"]
     ) > chunk_spec["context_window"]:
-        return (False,
+        return (
+            False,
             f'Proposed chunk_size of {chunk_spec["chunk_size_tokens"]} + overlap of {chunk_spec["chunk_overlap_tokens"]} '
             f'is {chunk_spec["chunk_overlap_tokens"] + chunk_spec["chunk_size_tokens"]} which is greater than context '
-            f'window of {chunk_spec["context_window"]} tokens.'
+            f'window of {chunk_spec["context_window"]} tokens.',
         )
 
     if chunk_spec["chunk_overlap_tokens"] > chunk_spec["chunk_size_tokens"]:
-        return (False, 
+        return (
+            False,
             f'Proposed `chunk_overlap_tokens` of {chunk_spec["chunk_overlap_tokens"]} is greater than the '
-            f'`chunk_size_tokens` of {chunk_spec["chunk_size_tokens"]}. Reduce the size of `chunk_size_tokens`.'
+            f'`chunk_size_tokens` of {chunk_spec["chunk_size_tokens"]}. Reduce the size of `chunk_size_tokens`.',
         )
-    
-    # all good
-    return (True, f'PASS: `chunk_overlap_tokens` of {chunk_spec["chunk_overlap_tokens"]} and '
-            f'`chunk_size_tokens` of {chunk_spec["chunk_size_tokens"]} fits within the embedding model\'s context window of {chunk_spec["context_window"]}')
 
+    # all good
+    return (
+        True,
+        f'PASS: `chunk_overlap_tokens` of {chunk_spec["chunk_overlap_tokens"]} and '
+        f'`chunk_size_tokens` of {chunk_spec["chunk_size_tokens"]} fits within the embedding model\'s context window of {chunk_spec["context_window"]}',
+    )
 
 
 def get_recursive_character_text_splitter(
@@ -143,6 +198,12 @@ def get_recursive_character_text_splitter(
     chunk_size_tokens: int = None,
     chunk_overlap_tokens: int = 0,
 ) -> Callable[[str], list[str]]:
+    # imports here to prevent needing to install everywhere
+
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from transformers import AutoTokenizer
+    import tiktoken
+
     try:
         # Detect the embedding model and its configuration
         embedding_model_name, chunk_spec = detect_fmapi_embedding_model_type(

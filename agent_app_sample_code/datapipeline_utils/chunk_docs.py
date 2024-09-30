@@ -3,9 +3,6 @@ from databricks.vector_search.client import VectorSearchClient
 from pyspark.sql.functions import explode
 import pyspark.sql.functions as func
 from typing import Callable
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from transformers import AutoTokenizer
-import tiktoken
 from pyspark.sql.types import StructType, StringType, StructField, MapType, ArrayType
 from pyspark.sql import DataFrame, SparkSession
 
@@ -62,6 +59,11 @@ def compute_chunks(
     chunked_docs_table: str,
     spark: SparkSession
 ) -> str:
+    # imports here to avoid requiring these libraries in all notebooks since the data pipeline config imports this package
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from transformers import AutoTokenizer
+    import tiktoken
+
     chunked_docs_table = chunked_docs_table or f"{docs_table}_chunked"
 
     print(f"Computing chunks for `{docs_table}`...")

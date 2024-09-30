@@ -1,13 +1,14 @@
 from dataclasses import dataclass, field, asdict
 import yaml
 import json
-from .cookbook_dataclass import CookbookConfig
+from cookbook_utils.cookbook_dataclass import CookbookConfig
 from databricks.sdk import WorkspaceClient
 import os
 from databricks.sdk.service.catalog import VolumeType
 from databricks.sdk.errors.platform import ResourceAlreadyExists, ResourceDoesNotExist
 from databricks.sdk.service.vectorsearch import EndpointStatusState, EndpointType
 from databricks.sdk.service.serving import EndpointCoreConfigInput, EndpointStateReady
+
 
 from mlflow.utils import databricks_utils as du
 
@@ -46,6 +47,11 @@ class UnstructuredDataPipelineSourceConfig(CookbookConfig):
     @property
     def volume_path(self) -> str:
         return f"/Volumes/{self.uc_catalog_name}/{self.uc_schema_name}/{self.uc_volume_name}"
+
+    @property
+    def volume_uc_fqn(self) -> str:
+        return f"{self.uc_catalog_name}.{self.uc_schema_name}.{self.uc_volume_name}"
+
 
     def check_if_volume_exists(self) -> bool:
         if os.path.isdir(self.volume_path):
@@ -205,24 +211,35 @@ class UnstructuredDataPipelineStorageConfig(CookbookConfig):
             else table_postfix
         )
 
+        # don't add tag if already set when loading from yaml dump
+        # TODO: robustify this logic to check all tags
+        if self.tag ==  self.parsed_docs_table[-len(self.tag):]:
+            table_postfix = ""
+
         if self.parsed_docs_table is None:
             self.parsed_docs_table = self.get_uc_fqn(f"docs{table_postfix}")
         else:
-            self.parsed_docs_table = self.get_uc_fqn_for_asset_name(
-                self.parsed_docs_table + table_postfix
-            )
+            # if not a fully qualified UC path with catalog & schema, add the catalog & schema
+            if self.parsed_docs_table.count(".") != 2:
+                self.parsed_docs_table = self.get_uc_fqn_for_asset_name(
+                    self.parsed_docs_table + table_postfix
+                )
 
         if self.chunked_docs_table is None:
             self.chunked_docs_table = self.get_uc_fqn(f"docs_chunked{table_postfix}")
         else:
-            self.chunked_docs_table = self.get_uc_fqn_for_asset_name(
-                self.chunked_docs_table + table_postfix
-            )
+            # if not a fully qualified UC path with catalog & schema, add the catalog & schema
+            if self.chunked_docs_table.count(".") != 2:
+                self.chunked_docs_table = self.get_uc_fqn_for_asset_name(
+                    self.chunked_docs_table + table_postfix
+                )
 
         if self.vector_index is None:
             self.vector_index = f"{self.uc_catalog_name}.{self.uc_schema_name}.{self.uc_asset_prefix}_docs_chunked_index{table_postfix}"
         else:
-            self.vector_index = f"{self.uc_catalog_name}.{self.uc_schema_name}.{self.vector_index}{table_postfix}"
+            # if not a fully qualified UC path with catalog & schema, add the catalog & schema
+            if self.vector_index.count(".") != 2:
+                self.vector_index = f"{self.uc_catalog_name}.{self.uc_schema_name}.{self.vector_index}{table_postfix}"
 
     def are_any_uc_asset_names_empty(self) -> bool:
         """
@@ -322,6 +339,3 @@ class UnstructuredDataPipelineStorageConfig(CookbookConfig):
         else:
             return True
 
-
-from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.vectorsearch import EndpointType
