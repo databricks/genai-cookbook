@@ -146,37 +146,8 @@ from agents.function_calling_agent_openai_sdk.config import (
     RetrieverSchemaConfig,
 )
 from pydantic import Field, BaseModel
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC #### ✅✏️ Retriever tool that connects to the Vector Search index
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ###### 🚫✏️ Load the Vector Index location from the data pipeline configuration
-# MAGIC
-# MAGIC This loads the Vector Index Unity Catalog location from the data pipeline configuration.
-# MAGIC
-# MAGIC Usage:
-# MAGIC - If you used `01_data_pipeline` to create your Vector Index, run this cell.
-# MAGIC - If your Vector Index was created elsewhere, skip this cell and set the UC location in the Retriever config.
-
-# COMMAND ----------
-
-from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineStorageConfig
-
-datapipeline_output_config = UnstructuredDataPipelineStorageConfig.from_yaml_file('./configs/data_pipeline_storage_config.yaml')
-
-datapipeline_output_config.pretty_print()
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ###### ✅✏️ Retriever tool configuration
-
-# COMMAND ----------
+import yaml
+import json
 
 # View Retriever config documentation by inspecting the docstrings
 # 
@@ -184,7 +155,32 @@ datapipeline_output_config.pretty_print()
 # print(RetrieverToolInputSchema.__doc__)
 # print(RetrieverSchemaConfig.__doc__)
 
+# View documentation for the parameters by inspecting the docstring
+# 
+# print(FunctionCallingLLMConfig.__doc__)
+# print(LLMParametersConfig.__doc__)
+# print(AgentConfig.__doc__)
+
 # COMMAND ----------
+
+########################
+# #### 🚫✏️ Load the Vector Index location from the data pipeline configuration
+########################
+
+# This loads the Vector Index Unity Catalog location from the data pipeline configuration.
+
+# Usage:
+# - If you used `01_data_pipeline` to create your Vector Index, run this cell.
+# - If your Vector Index was created elsewhere, skip this cell and set the UC location in the Retriever config.
+
+from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineStorageConfig
+
+datapipeline_output_config = UnstructuredDataPipelineStorageConfig.from_yaml_file('./configs/data_pipeline_storage_config.yaml')
+
+
+########################
+# #### ✅✏️ Retriever tool that connects to the Vector Search index
+########################
 
 retriever_config = RetrieverToolConfig(
     vector_search_index=datapipeline_output_config.vector_index,  # UC Vector Search index
@@ -216,20 +212,9 @@ retriever_config = RetrieverToolConfig(
     tool_class_name="VectorSearchRetriever",  # Implementation detail, this is the name of the class inside the Agent's code that contains the retriever implementation.  When loading this tool, this class will be initialized.
 )
 
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ###### ✅✏️ LLM configuration
-
-# COMMAND ----------
-
-# View documentation for the parameters by inspecting the docstring
-# 
-# print(FunctionCallingLLMConfig.__doc__)
-# print(LLMParametersConfig.__doc__)
-# print(AgentConfig.__doc__)
-
-# COMMAND ----------
+########################
+#### ✅✏️ LLM configuration
+########################
 
 llm_config = FunctionCallingLLMConfig(
     llm_endpoint_name="ep-gpt4o-new",  # Model serving endpoint
@@ -254,19 +239,14 @@ agent_config = AgentConfig(
     },
 )
 
-# COMMAND ----------
 
-# MAGIC %md
-# MAGIC ###### 🚫✏️ Dump the configuration to a YAML
-# MAGIC
-# MAGIC We dump the dump the Pydantic model to a YAML file because:
-# MAGIC 1. MLflow ModelConfig only accepts YAML files or dictionaries
-# MAGIC 2. When importing the Agent's code, it needs to read this configuration
+########################
+##### 🚫✏️ Dump the configuration to a YAML
+########################
 
-# COMMAND ----------
-
-import yaml
-
+# We dump the dump the Pydantic model to a YAML file because:
+# 1. MLflow ModelConfig only accepts YAML files or dictionaries
+# 2. When importing the Agent's code, it needs to read this configuration
 def write_dict_to_yaml(data, file_path):
     with open(file_path, "w") as file:
         yaml.dump(data, file, default_flow_style=False)
@@ -274,6 +254,10 @@ def write_dict_to_yaml(data, file_path):
 # exclude_none = True prevents unused parameters, such as additional LLM parameters, from being included in the config
 write_dict_to_yaml(agent_config.dict(exclude_none=True), "./configs/agent_model_config.yaml")
 
+########################
+#### Print resulting config to the console
+########################
+print(json.dumps(agent_config, indent=4))
 
 # COMMAND ----------
 
