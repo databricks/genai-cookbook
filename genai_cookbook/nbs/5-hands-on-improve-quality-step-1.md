@@ -1,3 +1,4 @@
+<!-- TODO (prithvi): move this into the 5-hands-on-evaluate-poc -->
 ### **Step 5:** Identify the root cause of quality issues
 
 ```{image} ../images/5-hands-on/workflow_iterate.png
@@ -13,9 +14,9 @@
     - If you followed the previous step, this will be the case!
 2. All requirements from previous steps
 
-```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code)
 :class: tip
-You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code).
 ```
 
 #### **Overview**

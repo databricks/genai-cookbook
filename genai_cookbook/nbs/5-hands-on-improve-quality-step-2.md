@@ -1,3 +1,4 @@
+<!-- TODO (prithvi): move this into the 5-hands-on-evaluate-poc -->
 ### **Step 6:** Iteratively implement & evaluate quality fixes
 
 ```{image} ../images/5-hands-on/workflow_iterate.png
@@ -10,9 +11,9 @@
 1. Based on your [root cause analysis](./5-hands-on-improve-quality-step-1.md), you have identified a potential fixes to either [retrieval](./5-hands-on-improve-quality-step-1-retrieval.md) or [generation](./5-hands-on-improve-quality-step-1-generation.md) to implement and evaluate
 2. Your POC application (or another baseline chain) is logged to an MLflow Run with an Agent Evaluation evaluation stored in the same Run
 
-```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code)
 :class: tip
-You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code).
 ```
 
 #### Expected outcome

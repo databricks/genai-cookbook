@@ -11,9 +11,9 @@
 1. Completed [start here](./6-implement-overview.md) steps
 2. Data from your [requirements](/nbs/5-hands-on-requirements.md#requirements-questions) is available in your [Lakehouse](https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html) inside a Unity Catalog [volume](https://docs.databricks.com/en/connect/unity-catalog/volumes.html) <!-- or [Delta Table](https://docs.databricks.com/en/delta/index.html)-->
 
-```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code)
 :class: tip
-You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code).
 ```
 
 **Expected outcome**
@@ -62,49 +62,35 @@ By default, the POC uses the open source models available on [Mosaic AI Foundati
 
 
 
-1. **Open the POC code folder within [`A_POC_app`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app) based on your type of data:**
+1. **Open the POC code folder within [`agent_app_sample_code`](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code) for data in pdf, docx, or html.**
 
-   <br/>
-
-   | File type                  | Source                 | POC application folder |
-   |----------------------------|------------------------|------------------------|
-   | PDF files                  | UC Volume              |   [`pdf_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/pdf_uc_volume)                     |
-   | Powerpoint files           | UC Volume              |        [`pptx_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/pptx_uc_volume)                |
-   | DOCX files                 | UC Volume              |        [`docx_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/docx_uc_volume)                |
-   | JSON files w/ text/markdown/HTML content & metadata | UC Volume  |              [`json_uc_volume`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/A_POC_app/html_uc_volume)          |  
-   <!--| HTML content               | Delta Table            |                        |
-   | Markdown or regular text   | Delta Table            |                        | -->
-
-   If your data doesn't meet one of the above requirements, you can customize the parsing function (`parser_udf`) within `02_poc_data_pipeline` in the above POC directories to work with your file types.
+   If your data doesn't meet one of the above requirements, you can customize the parsing function (`file_parser`) within `02_data_pipeline` in the above directory to work with your file types.
 
    Inside the POC folder, you will see the following notebooks:
 
+<!-- TODO (prithvi): update this -->
 ```{image} ../images/5-hands-on/6_img.png
 :align: center
 ```
 
 ```{tip}
-The notebooks referenced below are relative to the specific POC you've chosen. For example, if you see a reference to `00_config` and you've chosen `pdf_uc_volume`, you'll find the relevant `00_config` notebook at [`A_POC_app/pdf_uc_volume/00_config`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/A_POC_app/pdf_uc_volume/00_config.py).
+The notebooks referenced below are relative to the specific POC you've chosen. For example, if you see a reference to `00_config` and you've chosen `pdf_uc_volume`, you'll find the relevant `00_global_config` notebook at [`00_global_config`](https://github.com/databricks/genai-cookbook/blob/main/agent_app_sample_code/00_global_config.py).
 ```
 
 <br/>
 
 2. **Optionally, review the default parameters**
 
-   Open the `00_config` Notebook within the POC directory you chose above to view the POC's applications default parameters for the data pipeline and RAG chain.
+   Open the `00_global_config` Notebook within the directory to view the POC's applications default parameters for the data pipeline and RAG chain.
 
 
    ```{note}
    **Important:** our recommended default parameters are by no means perfect, nor are they intended to be. Rather, they are a place to start from - the next steps of our workflow guide you through iterating on these parameters.
    ```
 
-3. **Validate the configuration**
+3. **Run the data pipeline**
 
-   Run the `01_validate_config` to check that your configuration is valid and all resources are available. You will see an `rag_chain_config.yaml` file appear in your directory - we will use this in step 4 to deploy the application.
-
-4. **Run the data pipeline**
-
-   The POC data pipeline is a Databricks Notebook based on Apache Spark. Open the `02_poc_data_pipeline` Notebook and press Run All to execute the pipeline. The pipeline will:
+   The POC data pipeline is a Databricks Notebook based on Apache Spark. Open the `02_data_pipeline` Notebook and press Run All to execute the pipeline. The pipeline will:
 
    1. Load the raw documents from the UC Volume
    2. Parse each document, saving the results to a Delta Table
@@ -142,7 +128,7 @@ The notebooks referenced below are relative to the specific POC you've chosen. F
    The POC Chain uses MLflow code-based logging. To understand more about code-based logging, visit the [docs](https://docs.databricks.com/generative-ai/create-log-agent.html#code-based-vs-serialization-based-logging).
    ```
 
-   1. Open the `03_deploy_poc_to_review_app` Notebook
+   1. Open the `03_agent_proof_of_concept` Notebook
 
    2. Run each cell of the Notebook.
 
@@ -155,7 +141,7 @@ The notebooks referenced below are relative to the specific POC you've chosen. F
    4. Modify the default instructions to be relevant to your use case.  These are displayed in the Review App.
 
       ```python
-         instructions_to_reviewer = f"""## Instructions for Testing the {RAG_APP_NAME}'s Initial Proof of Concept (PoC)
+         instructions_to_reviewer = f"""## Instructions for Testing the {AGENT_NAME}'s Initial Proof of Concept (PoC)
 
          Your inputs are invaluable for the development team. By providing detailed feedback and corrections, you help us fix issues and improve the overall quality of the application. We rely on your expertise to identify any gaps or areas needing enhancement.
 
@@ -170,7 +156,7 @@ The notebooks referenced below are relative to the specific POC you've chosen. F
             - Carefully review each document that the system returns in response to your question.
             - Use the thumbs up/down feature to indicate whether the document was relevant to the question asked. A thumbs up signifies relevance, while a thumbs down indicates the document was not useful.
 
-         Thank you for your time and effort in testing {RAG_APP_NAME}. Your contributions are essential to delivering a high-quality product to our end users."""
+         Thank you for your time and effort in testing {AGENT_NAME}. Your contributions are essential to delivering a high-quality product to our end users."""
 
          print(instructions_to_reviewer)
       ```

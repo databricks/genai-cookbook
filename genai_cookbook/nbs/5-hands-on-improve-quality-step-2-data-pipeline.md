@@ -1,3 +1,4 @@
+<!-- TODO (prithvi): move this into the 5-hands-on-evaluate-poc -->
 # **![Data pipeline](../images/5-hands-on/data_pipeline.png)** Implement data pipeline fixes
 
 Follow these steps to modify your data pipeline and run it to:
