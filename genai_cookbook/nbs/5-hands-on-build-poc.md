@@ -11,9 +11,9 @@
 1. Completed [start here](./6-implement-overview.md) steps
 2. Data from your [requirements](/nbs/5-hands-on-requirements.md#requirements-questions) is available in your [Lakehouse](https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html) inside a Unity Catalog [volume](https://docs.databricks.com/en/connect/unity-catalog/volumes.html) <!-- or [Delta Table](https://docs.databricks.com/en/delta/index.html)-->
 
-```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code)
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code)
 :class: tip
-You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code).
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code).
 ```
 
 **Expected outcome**
@@ -62,7 +62,7 @@ By default, the POC uses the open source models available on [Mosaic AI Foundati
 
 
 
-1. **Open the POC code folder within [`agent_app_sample_code`](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code) for data in pdf, docx, or html.**
+1. **Open the POC code folder within [`agent_app_sample_code`](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code) for data in pdf, docx, or html.**
 
    If your data doesn't meet one of the above requirements, you can customize the parsing function (`file_parser`) within `02_data_pipeline` in the above directory to work with your file types.
 
@@ -74,7 +74,7 @@ By default, the POC uses the open source models available on [Mosaic AI Foundati
 ```
 
 ```{tip}
-The notebooks referenced below are relative to the specific POC you've chosen. For example, if you see a reference to `00_config` and you've chosen `pdf_uc_volume`, you'll find the relevant `00_global_config` notebook at [`00_global_config`](https://github.com/databricks/genai-cookbook/blob/main/agent_app_sample_code/00_global_config.py).
+The notebooks referenced below are relative to the specific POC you've chosen. For example, if you see a reference to `00_config` and you've chosen `pdf_uc_volume`, you'll find the relevant `00_global_config` notebook at [`00_global_config`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/00_global_config.py).
 ```
 
 <br/>

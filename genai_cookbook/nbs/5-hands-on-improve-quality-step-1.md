@@ -14,9 +14,9 @@
     - If you followed the previous step, this will be the case!
 2. All requirements from previous steps
 
-```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code)
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code)
 :class: tip
-You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/agent_app_sample_code).
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code).
 ```
 
 #### **Overview**
