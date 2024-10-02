@@ -107,8 +107,6 @@ class VectorSearchRetriever:
 
         # de-duplicate
         columns = list(set(columns))
-        print(columns)
-        print(self.config.get("vector_search_parameters"))
 
 
         if filters is None:
