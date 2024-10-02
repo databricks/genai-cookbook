@@ -26,11 +26,11 @@ dbutils.library.restartPython()
 
 # COMMAND ----------
 
-from utils import AgentStorageLocationConfig
+from cookbook_utils.cookbook_config import AgentCookbookConfig
 from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineSourceConfig, UnstructuredDataPipelineStorageConfig
 
 # Load the shared configuration
-agent_storage_location_config = AgentStorageLocationConfig.from_yaml_file('./configs/agent_shared_storage_locations.yaml')
+cookbook_shared_config = AgentCookbookConfig.from_yaml_file('./configs/cookbook_config.yaml')
 
 # Data pipeline configuration
 datapipeline_source_config = UnstructuredDataPipelineSourceConfig.from_yaml_file('./configs/data_pipeline_source_config.yaml')
@@ -95,16 +95,17 @@ display_markdown(output, raw=True)
 # COMMAND ----------
 
 from cookbook_utils.get_inference_tables import get_inference_tables
+from databricks import agents
 
-inference_tables = get_inference_tables(agent_storage_location_config.uc_model_fqn)
+inference_tables = get_inference_tables(cookbook_shared_config.uc_model)
 
 output = f"""
 
 ## Outputs
 
-- Agent model: [{agent_storage_location_config.uc_model_fqn}]({get_table_url(agent_storage_location_config.uc_model_fqn).replace("explore/data/", "explore/data/models/")})
-- MLflow experiment: [{agent_storage_location_config.mlflow_experiment_directory}]({browser_url}/ml/experiments/{mlflow.get_experiment_by_name(agent_storage_location_config.mlflow_experiment_directory).experiment_id})
-- Evaluation set: [{agent_storage_location_config.evaluation_set_fqn}]({get_table_url(agent_storage_location_config.evaluation_set_fqn)})
+- Agent model: [{cookbook_shared_config.uc_model}]({get_table_url(cookbook_shared_config.uc_model).replace("explore/data/", "explore/data/models/")})
+- MLflow experiment: [{cookbook_shared_config.mlflow_experiment_name}]({browser_url}/ml/experiments/{mlflow.get_experiment_by_name(cookbook_shared_config.mlflow_experiment_name).experiment_id})
+- Evaluation set: [{cookbook_shared_config.evaluation_set_table}]({get_table_url(cookbook_shared_config.evaluation_set_table)})
 
 ## Inference table logs
 
@@ -116,7 +117,7 @@ output = f"""
 *Note: The above output tables are from the last run of the data pipeline.  If you have run the notebook multiple times with different `tag` values, check the Unity Catalog schema [{datapipeline_output_config.uc_catalog_name}.{datapipeline_output_config.uc_schema_name}]({browser_url}/explore/data/{datapipeline_output_config.uc_catalog_name}/{datapipeline_output_config.uc_schema_name}) for other tables & indexes.*
 
 ## Compute resources
-- Model Serving endpoint: [{agents.get_deployments(agent_storage_location_config.uc_model_fqn)[0].endpoint_name}]({agents.get_deployments(agent_storage_location_config.uc_model_fqn)[0].endpoint_url
+- Model Serving endpoint: [{agents.get_deployments(cookbook_shared_config.uc_model)[0].endpoint_name}]({agents.get_deployments(cookbook_shared_config.uc_model)[0].endpoint_url
 })
 
 *Note: Deleting the endpoint will also remove the Review App.*
@@ -125,7 +126,7 @@ Use the following code to delete the endpoint:
 ```
 from databricks import agents
 
-agents.delete_deployment(agent_storage_location_config.uc_model_fqn)
+agents.delete_deployment(cookbook_shared_config.uc_model)
 ```
 """
 
