@@ -40,18 +40,20 @@ def build_retriever_index(
     # Get the vector search index
     vsc = VectorSearchClient(disable_notice=True)
 
-    def find_index(endpoint_name, index_name):
-        all_indexes = vsc.list_indexes(name=vector_search_endpoint).get(
-            "vector_indexes", []
-        )
-        return vector_search_index_name in map(lambda i: i.get("name"), all_indexes)
+    def find_index(index_name):
+        try:
+            vsc.get_index(index_name=index_name)
+            return True
+        except Exception as e:
+            return False
+
 
     if find_index(
-        endpoint_name=vector_search_endpoint, index_name=vector_search_index_name
+        index_name=vector_search_index_name
     ):
         if force_delete_index_before_create:
             vsc.delete_index(
-                endpoint_name=vector_search_endpoint, index_name=vector_search_index_name
+                 index_name=vector_search_index_name
             )
             create_index = True
         else:
@@ -72,15 +74,18 @@ def build_retriever_index(
         print(
             f"Computing document embeddings and Vector Search Index. This can take 15 minutes or much longer if you have a larger number of documents."
         )
+        try:
+            vsc.create_delta_sync_index_and_wait(
+                endpoint_name=vector_search_endpoint,
+                index_name=vector_search_index_name,
+                primary_key=primary_key,
+                source_table_name=chunked_docs_table_name,
+                pipeline_type="TRIGGERED",
+                embedding_source_column=embedding_source_column,
+                embedding_model_endpoint_name=embedding_endpoint_name,
+            )
+            print("SUCCESS: Vector search index created.")
+        except Exception as e:
+            print(f"\n\nERROR: Vector search index creation failed. {e}.\n\nWait 5 minutes and try running this cell again.")
 
-        vsc.create_delta_sync_index_and_wait(
-            endpoint_name=vector_search_endpoint,
-            index_name=vector_search_index_name,
-            primary_key=primary_key,
-            source_table_name=chunked_docs_table_name,
-            pipeline_type="TRIGGERED",
-            embedding_source_column=embedding_source_column,
-            embedding_model_endpoint_name=embedding_endpoint_name,
-        )
-
-        print("SUCCESS: Vector search index created.")
+        
