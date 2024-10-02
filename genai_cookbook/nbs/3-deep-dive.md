@@ -1,4 +1,4 @@
-# RAG quality knobs
+# Agent quality knobs
 
 In the previous section, we introduced the key components of a RAG application and discussed the fundamental principles behind developing RAG applications over unstructured data. This section discusses how you can think about refining each component in order to increase the quality of your application.
 

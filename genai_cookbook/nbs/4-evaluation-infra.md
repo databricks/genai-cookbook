@@ -2,7 +2,7 @@
 
 Measuring quality is not easy and requires a significant infrastructure investment. This section details what you need to succeed and how Databricks provides these components.
 
-**Detailed trace logging.** The core of your RAG application's logic is a series of steps in the chain. In order to evaluate and debug quality, you need to implement instrumentation that tracks the chain's inputs and outputs, along with each step of the chain and its associated inputs and outputs. The instrumentation you put in place should work the same way in development and production.
+**Detailed trace logging.** The core of your Agent application's logic is a series of steps in the chain. In order to evaluate and debug quality, you need to implement instrumentation that tracks the chain's inputs and outputs, along with each step of the chain and its associated inputs and outputs. The instrumentation you put in place should work the same way in development and production.
 
 > In Databricks, [MLflow Tracing](https://docs.databricks.com/mlflow/mlflow-tracing.html) provides this capability. With MLflow Trace Logging, you instrument your code in production, and get the same traces during development and in production.  Production traces are logged as part of the [Inference Table](https://docs.databricks.com/machine-learning/model-serving/inference-tables.html).
 

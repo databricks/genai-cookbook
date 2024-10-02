@@ -1,17 +1,17 @@
 ## Assessing performance: Metrics that Matter
 
-With an evaluation set, you are able to measure the performance of your RAG application across a number of different dimensions, including:
+With an evaluation set, you are able to measure the performance of your Agent application across a number of different dimensions, including:
 
-- **Retrieval quality**: Retrieval metrics assess how successfully your RAG application retrieves relevant supporting data. Precision and recall are two key retrieval metrics.
-- **Response quality**: Response quality metrics assess how well the RAG application responds to a user's request. Response metrics can measure, for instance, if the resulting answer is accurate per the ground-truth, how well-grounded the response was given the retrieved context (e.g., did the LLM hallucinate), or how safe the response was (e.g., no toxicity).
-- **System performance (cost & latency):**  Metrics capture the overall cost and performance of RAG applications. Overall latency and token consumption are examples of chain performance metrics.
+- **Retrieval quality**: Retrieval metrics assess how successfully your Agent application retrieves relevant supporting data. Precision and recall are two key retrieval metrics.
+- **Response quality**: Response quality metrics assess how well the Agent application responds to a user's request. Response metrics can measure, for instance, if the resulting answer is accurate per the ground-truth, how well-grounded the response was given the retrieved context (e.g., did the LLM hallucinate), or how safe the response was (e.g., no toxicity).
+- **System performance (cost & latency):**  Metrics capture the overall cost and performance of Agent applications. Overall latency and token consumption are examples of chain performance metrics.
 
-It is very important to collect both response and retrieval metrics. A RAG application can respond poorly in spite of retrieving the correct context; it can also provide good responses on the basis of faulty retrievals. Only by measuring both components can we accurately diagnose and address issues in the application.
+It is very important to collect both response and retrieval metrics. A Agent application can respond poorly in spite of retrieving the correct context; it can also provide good responses on the basis of faulty retrievals. Only by measuring both components can we accurately diagnose and address issues in the application.
 
 There are two key approaches to measuring performance across these metrics:
 
 - **Deterministic measurement:** Cost and latency metrics can be computed deterministically based on the application's outputs.  If your evaluation set includes a list of documents that contain the answer to a question, a subset of the retrieval metrics can also be computed deterministically.
-- **LLM judge based measurement** In this approach, a separate [LLM acts as a judge](https://arxiv.org/abs/2306.05685) to evaluate the quality of the RAG application's retrieval and responses.  Some LLM judges, such as answer correctness, compare the human-labeled ground truth vs. the app's outputs.  Other LLM judges, such as groundedness, do not require human-labeled ground truth to assess their app's outputs.
+- **LLM judge based measurement** In this approach, a separate [LLM acts as a judge](https://arxiv.org/abs/2306.05685) to evaluate the quality of the Agent application's retrieval and responses.  Some LLM judges, such as answer correctness, compare the human-labeled ground truth vs. the app's outputs.  Other LLM judges, such as groundedness, do not require human-labeled ground truth to assess their app's outputs.
 
 ```{important}
 For an LLM judge to be effective, it must be tuned to understand the use case. Doing so requires careful attention to understand where the judge does and does not work well, and then tuning the judge to improve it for the failure cases.
@@ -21,7 +21,7 @@ For an LLM judge to be effective, it must be tuned to understand the use case. D
 
 ### Metric overview
 
-Below is a summary of the metrics that Databricks recommends for measuring the quality, cost, and latency of your RAG application.  These metrics are implemented in [Mosaic AI Agent Evaluation](https://docs.databricks.com/generative-ai/agent-evaluation/index.html).
+Below is a summary of the metrics that Databricks recommends for measuring the quality, cost, and latency of your Agent application.  These metrics are implemented in [Mosaic AI Agent Evaluation](https://docs.databricks.com/generative-ai/agent-evaluation/index.html).
 
 <table class="table">
 <thead>

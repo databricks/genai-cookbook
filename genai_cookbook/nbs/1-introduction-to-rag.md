@@ -1,6 +1,22 @@
-# RAG overview
+# Agents overview
 
-This section provides an overview of Retrieval-augmented generation (RAG): what it is, how it works, and key concepts.
+This section provides an overview of Agents: what it is, how it works, and key concepts.
+
+## What are AI agents?
+
+The industry is still defining **AI agents**, however it generally understood as an AI system where the model makes some or all of the planning decisions in contrast to hard-coded logic. These agents use large language models (LLMs) to make decisions and accomplish their objectives.
+
+Many AI agents applications are made of multiple systems, thus qualifying them as compound AI systems.
+
+Agency is a continuum, the more freedom we provide models to control the behavior of the system, the more agent-like the application becomes.
+
+## What are tools?
+
+AI agents use tools to perform actions besides language generation, for example to retrieve structured or unstructured data, run code, or talk to remote services like sending an email or Slack message.
+
+On Databricks, you can use [Unity Catalog functions](https://docs.databricks.com/en/udf/unity-catalog.html) as tools, enabling easy discovery, governance, and sharing of tools. You can also define tools using open source agent authoring libraries like LangChain. 
+
+In typical agentic workflows, the agent LLM is given metadata about tools, which it uses to determine when and how to use the tool. So when defining tools, you must ensure that the tool, its parameters, and its return value are well-documented, so that the agent LLM can best use the tool.
 
 ## What is retrieval-augmented generation?
 
