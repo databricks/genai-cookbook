@@ -137,34 +137,38 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # COMMAND ----------
 
 # Import Pydantic models
-from agents.rag_only_openai_sdk.config import (
+from agents.function_calling_agent.config import (
     AgentConfig,
-    LLMConfig,
+    FunctionCallingLLMConfig,
     LLMParametersConfig,
-    RetrieverConfig,
+    RetrieverToolConfig,
     RetrieverParametersConfig,
     RetrieverSchemaConfig,
 )
 from pydantic import Field, BaseModel
-import json
 import yaml
+import json
+
 # View Retriever config documentation by inspecting the docstrings
 # 
-# print(RetrieverConfig.__doc__)
+# print(RetrieverToolConfig.__doc__)
+# print(RetrieverToolInputSchema.__doc__)
 # print(RetrieverSchemaConfig.__doc__)
 
 # View documentation for the parameters by inspecting the docstring
 # 
-# print(LLMConfig.__doc__)
+# print(FunctionCallingLLMConfig.__doc__)
 # print(LLMParametersConfig.__doc__)
 # print(AgentConfig.__doc__)
 
 # COMMAND ----------
 
 ########################
-##### 🚫✏️ Load the Vector Index location from the data pipeline configuration
+# #### 🚫✏️ Load the Vector Index location from the data pipeline configuration
 ########################
+
 # This loads the Vector Index Unity Catalog location from the data pipeline configuration.
+
 # Usage:
 # - If you used `01_data_pipeline` to create your Vector Index, run this cell.
 # - If your Vector Index was created elsewhere, skip this cell and set the UC location in the Retriever config.
@@ -173,11 +177,12 @@ from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineStor
 
 datapipeline_output_config = UnstructuredDataPipelineStorageConfig.from_yaml_file('./configs/data_pipeline_storage_config.yaml')
 
+
 ########################
-#### ✅✏️ Retriever tool configuration
+# #### ✅✏️ Retriever tool that connects to the Vector Search index
 ########################
 
-retriever_config = RetrieverConfig(
+retriever_config = RetrieverToolConfig(
     vector_search_index=datapipeline_output_config.vector_index,  # UC Vector Search index
     # Retriever schema, this is required by Agent Evaluation to:
     # 1. Enable the Review App to properly display retrieved chunks
@@ -198,23 +203,31 @@ retriever_config = RetrieverConfig(
     chunk_template="Passage text: {chunk_text}\nPassage metadata: {metadata}\n\n",  # Prompt template used to format the retrieved information into {context} in `prompt_template`
     prompt_template="""Use the following pieces of retrieved context to answer the question.\nOnly use the passages from context that are relevant to the query to answer the question, ignore the irrelevant passages.  When responding, cite your source, referring to the passage by the columns in the passage's metadata.\n\nContext: {context}""",  # Prompt used to present the retrieved information to the LLM
     
+    # Retriever prompts: Tune these prompts if the Agent uses the retriever incorrectly e.g., doesn't call the retriever tool for the right queries or translates the user's intent to a query incorrectly.
+    retriever_query_parameter_prompt= "query to look up in retriever", # the prompt used to describe what inputs should go in the 'query' parameter which is used by the vector index to search for relevant documents
+    tool_description_prompt="Search for documents that are relevant to a user's query about the [REPLACE WITH DESCRIPTION OF YOUR DOCS].",  # the prompt used to describe when the tool so the LLM can decide when it is relevant to call.
+    tool_name="retrieve_documents",  # the prompt that describes the tool's name.  Used in combination with `tool_description_prompt` to describe when the tool so the LLM can decide when it is relevant to call.
+
+    # Retriever internals
+    tool_class_name="VectorSearchRetriever",  # Implementation detail, this is the name of the class inside the Agent's code that contains the retriever implementation.  When loading this tool, this class will be initialized.
 )
 
 ########################
 #### ✅✏️ LLM configuration
 ########################
-llm_config = LLMConfig(
+
+llm_config = FunctionCallingLLMConfig(
     llm_endpoint_name="ep-gpt4o-new",  # Model serving endpoint
     llm_system_prompt_template=(
-        """You are an assistant that answers questions. Use the following pieces of retrieved context to answer the question. Some pieces of context may be irrelevant, in which case you should not use them to form the answer.\n\nContext: {context}"""
+        """You are a helpful assistant that answers questions by calling tools.  Provide responses ONLY based on the outputs from tools.  If you do not have a relevant tool for a question, respond with 'Sorry, I'm not trained to answer that question'."""
     ),  # System prompt template
     llm_parameters=LLMParametersConfig(
         temperature=0.01, max_tokens=1500
     ),  # LLM parameters
+    tools=[retriever_config],
 )
 
 agent_config = AgentConfig(
-    retriever_config=retriever_config,
     llm_config=llm_config,
     input_example={
         "messages": [
@@ -225,6 +238,7 @@ agent_config = AgentConfig(
         ]
     },
 )
+
 
 ########################
 ##### 🚫✏️ Dump the configuration to a YAML
@@ -256,7 +270,7 @@ print(json.dumps(agent_config.model_dump(), indent=4))
 
 # COMMAND ----------
 
-# MAGIC %run ./agents/rag_only_openai_sdk/agent_code
+# MAGIC %run ./agents/function_calling_agent/function_calling_agent_mlflow_sdk
 
 # COMMAND ----------
 
@@ -310,28 +324,28 @@ def log_agent_to_mlflow(agent_config):
     ]
 
     # Add the Databricks resources for the retriever's vector indexes
-    # for tool in agent_config.llm_config.tools:
-    #     if type(tool) == RetrieverToolConfig:
-    databricks_resources.append(
-        DatabricksVectorSearchIndex(index_name=agent_config.retriever_config.vector_search_index)
-    )
-    index_embedding_model = (
-        VectorSearchClient(disable_notice=True)
-        .get_index(index_name=agent_config.retriever_config.vector_search_index)
-        .describe()
-        .get("delta_sync_index_spec")
-        .get("embedding_source_columns")[0]
-        .get("embedding_model_endpoint_name")
-    )
-    if index_embedding_model is not None:
-        databricks_resources.append(
-            DatabricksServingEndpoint(endpoint_name=index_embedding_model),
-        )
-    else:
-        print("Could not identify the embedding model endpoint resource for {tool.vector_search_index}.  Please manually add the embedding model endpoint to `databricks_resources`.")
+    for tool in agent_config.llm_config.tools:
+        if type(tool) == RetrieverToolConfig:
+            databricks_resources.append(
+                DatabricksVectorSearchIndex(index_name=tool.vector_search_index)
+            )
+            index_embedding_model = (
+                VectorSearchClient(disable_notice=True)
+                .get_index(index_name=retriever_config.vector_search_index)
+                .describe()
+                .get("delta_sync_index_spec")
+                .get("embedding_source_columns")[0]
+                .get("embedding_model_endpoint_name")
+            )
+            if index_embedding_model is not None:
+                databricks_resources.append(
+                    DatabricksServingEndpoint(endpoint_name=index_embedding_model),
+                )
+            else:
+                print("Could not identify the embedding model endpoint resource for {tool.vector_search_index}.  Please manually add the embedding model endpoint to `databricks_resources`.")
 
     # Specify the full path to the Agent notebook
-    model_file = "agents/rag_only_openai_sdk/agent_code"
+    model_file = "agents/function_calling_agent/function_calling_agent_mlflow_sdk"
     model_path = os.path.join(os.getcwd(), model_file)
 
     # Log the agent as an MLflow model
@@ -343,7 +357,7 @@ def log_agent_to_mlflow(agent_config):
         resources=databricks_resources,
         signature=ModelSignature(
             inputs=ChatCompletionRequest(),
-            outputs=StringResponse(),
+            outputs=StringResponse(), # TODO: Add in `messages` to signature
         ),
     )
 
@@ -369,7 +383,7 @@ with mlflow.start_run(run_name="vibe-check__"+datetime.now().strftime("%Y-%m-%d_
     logged_agent_info = log_agent_to_mlflow(agent_config)
 
     # Excute the Agent
-    agent = RAGAgent(agent_config = agent_config)
+    agent = FunctionCallingAgent(agent_config = agent_config)
 
     # Run the agent for this query
     response = agent.predict(model_input=vibe_check_query)

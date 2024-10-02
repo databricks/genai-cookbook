@@ -30,7 +30,9 @@
 # COMMAND ----------
 
 # Versions of Databricks code are not locked since Databricks ensures changes are backwards compatible.
-%pip install -qqqq -U -r requirements.txt
+%pip install -qqqq -U \
+  -r requirements.txt `# shared packages` \
+  langchain==0.2.11 langchain_core==0.2.23 langchain_community==0.2.10 `# Required if using the LangChain SDK notebooks`
 # Restart to load the packages into the Python environment
 dbutils.library.restartPython()
 

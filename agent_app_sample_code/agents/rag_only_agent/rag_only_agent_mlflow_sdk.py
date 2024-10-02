@@ -1,13 +1,13 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Function Calling Agent w/ Retriever 
+# MAGIC # RAG only Agent using MLflow SDK
 # MAGIC
-# MAGIC In this notebook, we construct the Agent with a Retriever tool.
+# MAGIC In this notebook, we construct an Agent that always uses a Retriever tool.  The Agent is encapsulated in a MLflow PyFunc class called `RAGAgent()`.
 
 # COMMAND ----------
 
 # # If running this notebook by itself, uncomment these.
-# %pip install --upgrade -qqqq databricks-agents databricks-vectorsearch mlflow openai pydantic
+# %pip install --upgrade -qqqq databricks-agents openai databricks-vectorsearch mlflow pydantic
 # dbutils.library.restartPython()
 
 # COMMAND ----------
@@ -15,18 +15,18 @@
 import json
 import os
 from typing import Any, Callable, Dict, List, Optional, Union
-import mlflow
 from dataclasses import asdict, dataclass
+import mlflow
 import pandas as pd
 from mlflow.models import set_model, ModelConfig
-from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
+from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, ChatCompletionResponse, ChainCompletionChoice, Message
 # from openai import OpenAI
 from mlflow.deployments import get_deploy_client
-import os
 
 # COMMAND ----------
 
-# MAGIC %md ##### Retriever tool
+# MAGIC %md
+# MAGIC #### Retriever
 
 # COMMAND ----------
 
@@ -47,6 +47,7 @@ class VectorSearchRetriever:
 
     def __init__(self, config: Dict[str, Any]):
         self.config = config
+        # print(self.config)
         self.vector_search_client = VectorSearchClient(disable_notice=True)
         self.vector_search_index = self.vector_search_client.get_index(
             index_name=self.config.get("vector_search_index")
@@ -106,6 +107,7 @@ class VectorSearchRetriever:
 
         # de-duplicate
         columns = list(set(columns))
+
 
         if filters is None:
             results = traced_search(
@@ -171,17 +173,10 @@ class VectorSearchRetriever:
 
 # COMMAND ----------
 
-class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
+class RAGAgent(mlflow.pyfunc.PythonModel):
     """
-    Class representing an Agent that does function-calling with tools using OpenAI SDK
+    Class representing an Agent that only includes an LLM
     """
-    # def __init__(self, agent_config: dict = None):
-    #     self.__agent_config = agent_config
-    #     if self.__agent_config is None:
-    #         self.__agent_config = globals().get("__mlflow_model_config__")
-
-    #     print(globals().get("__mlflow_model_config__"))
-
     def __init__(self, agent_config: dict = None):
         self.__agent_config = agent_config
         try:
@@ -195,44 +190,25 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
                 self.config = None
         if self.config is None:
             self.config = mlflow.models.ModelConfig(development_config="./configs/agent_model_config.yaml")
-            
-                
-        # vector_search_schema = self.config.get("retriever_config").get("schema")
-        # mlflow.models.set_retriever_schema(
-        #     primary_key=vector_search_schema.get("primary_key"),
-        #     text_column=vector_search_schema.get("chunk_text"),
-        #     doc_uri=vector_search_schema.get("doc_uri"),
-        # )
-
-        # OpenAI client used to query Databricks Chat Completion endpoint
-        # self.model_serving_client = OpenAI(
-        #     api_key=os.environ.get("DB_TOKEN"),
-        #     base_url=str(os.environ.get("DB_HOST")) + "/serving-endpoints",
-        # )
 
         self.model_serving_client = get_deploy_client("databricks")
 
-        # Initialize the tools
-        self.tool_functions = {}
-        self.tool_json_schemas =[]
-        for tool in self.config.get("llm_config").get("tools"):
-            # 1 Instantiate the tool's class w/ by passing the tool's config to it
-            # 2 Store the instantiated tool to use later
-            self.tool_functions[tool.get("tool_name")] = globals()[tool.get("tool_class_name")](config=tool)
-            self.tool_json_schemas.append(tool.get("tool_input_json_schema"))
+        # Load the retriever
+        self.retriever = VectorSearchRetriever(
+            self.config.get("retriever_config")
+        )
 
-        # # Init the retriever for `search_customer_notes_for_topic` tool
-        # self.retriever_tool = VectorSearchRetriever(
-        #     self.config.get("search_note_tool").get("retriever_config")
-        # )
 
-        # self.tool_functions = {
-        #     "retrieve_documents": self.retriever_tool,
-        # }
+    # def load_context(self, context):
+    #     # OpenAI client used to query Databricks Chat Completion endpoint
+    #     # self.model_serving_client = OpenAI(
+    #     #     api_key=os.environ.get("DB_TOKEN"),
+    #     #     base_url=str(os.environ.get("DB_WORKSPACE_URL")) + "/serving-endpoints",
+    #     # )
 
-        self.chat_history = []
+        
 
-    @mlflow.trace(name="agent", span_type="AGENT")
+    @mlflow.trace(name="chain", span_type="CHAIN")
     def predict(
         self,
         context: Any = None,
@@ -255,99 +231,59 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             )
 
         ##############################################################################
-        # Call LLM
+        # Retrieve docs
+        # If there is chat history, re-write the user's query based on that history
+        if len(self.chat_history) > 0:
+            vs_query = self.query_rewrite(user_query, self.chat_history)
+        else:
+            vs_query = user_query
 
-        # messages to send the model
-        # For models with shorter context length, you will need to trim this to ensure it fits within the model's context length
-        system_prompt = self.config.get("llm_config").get("llm_system_prompt_template")
-        messages = (
-            [{"role": "system", "content": system_prompt}]
-            + self.chat_history  # append chat history for multi turn
-            + [{"role": "user", "content": user_query}]
-        )
-
-        # Call the LLM to recursively calls tools and eventually deliver a generation to send back to the user
-        (
-            model_response,
-            messages_log_with_tool_calls,
-        ) = self.recursively_call_and_run_tools(messages=messages)
-
-        # If your front end keeps of converastion history and automatically appends the bot's response to the messages history, remove this line.
-        # messages_log_with_tool_calls.append(model_response.choices[0].message.to_dict()) #OpenAI client
-        messages_log_with_tool_calls.append(model_response.choices[0]["message"]) #Mlflow client
-
-        # remove the system prompt - this should not be exposed to the Agent caller
-        messages_log_with_tool_calls = messages_log_with_tool_calls[1:]
+        context = self.retriever(vs_query)
 
         
-        return {
-            # "content": model_response.choices[0].message.content, #openai client
-            "content": model_response.choices[0]["message"]["content"], #mlflow client
-            # messages should be returned back to the Review App (or any other front end app) and stored there so it can be passed back to this stateless agent with the next turns of converastion.
+        ##############################################################################
+        # Generate Answer
+        system_prompt = self.config.get("llm_config").get("llm_system_prompt_template")
+        response = self.chat_completion(
+            messages=[
+                {"role": "system", "content": system_prompt.format(context=context)},
+                {"role": "user", "content": user_query},
+            ],
+        )
+        
+        # TODO: make error handling more robust
+        
+        # model_response = response.choices[0].message.content #openai
+        model_response = response.choices[0]["message"]["content"] #mlflow
 
-            "messages": messages_log_with_tool_calls,
-        }
+        # 'content' is required to comply with the schema of the Agent, see https://docs.databricks.com/en/generative-ai/create-log-agent.html#input-schema-for-the-rag-agent
+        return asdict(StringResponse(model_response))
 
-    @mlflow.trace(span_type="AGENT")
-    def recursively_call_and_run_tools(self, max_iter=10, **kwargs):
-        messages = kwargs["messages"]
-        del kwargs["messages"]
-        i = 0
-        while i < max_iter:
-            response = self.chat_completion(messages=messages, tools=True)
-            # assistant_message = response.choices[0].message #openai client
-            assistant_message = response.choices[0]["message"] #mlflow client
-            # tool_calls = assistant_message.tool_calls #openai
-            tool_calls = assistant_message.get('tool_calls')#mlflow client
-            if tool_calls is None:
-                # the tool execution finished, and we have a generation
-                return (response, messages)
-            tool_messages = []
-            for tool_call in tool_calls:  # TODO: should run in parallel
-                # function = tool_call.function #openai
-                function = tool_call['function'] #openai
-                # uc_func_name = decode_function_name(function.name)
-                # args = json.loads(function.arguments) #openai
-                args = json.loads(function['arguments']) #mlflow
-                # result = exec_uc_func(uc_func_name, **args)
-                # result = self.execute_function(function.name, args) #openai
-                result = self.execute_function(function['name'], args) #mlflow
-                # tool_message = {
-                #     "role": "tool",
-                #     "tool_call_id": tool_call.id,
-                #     "content": result,
-                # } #openai
-                tool_message = {
-                    "role": "tool",
-                    "tool_call_id": tool_call['id'],
-                    "content": result,
-                } #mlflow
-                tool_messages.append(tool_message)
-            # assistant_message_dict = assistant_message.dict().copy() #openai
-            assistant_message_dict = assistant_message.copy() #mlflow
-            del assistant_message_dict["content"]
-            # del assistant_message_dict["function_call"] #openai only
-            messages = (
-                messages
-                + [
-                    assistant_message_dict,
-                ]
-                + tool_messages
-            )
-        # TODO: Handle more gracefully
-        raise "ERROR: max iter reached"
+    @mlflow.trace(span_type="PARSER")
+    def query_rewrite(self, query, chat_history) -> str:
+        ############
+        # Prompt Template for query rewriting to allow converastion history to work - this will translate a query such as "how does it work?" after a question such as "what is spark?" to "how does spark work?".
+        ############
+        query_rewrite_template = """Based on the chat history below, we want you to generate a query for an external data source to retrieve relevant documents so that we can better answer the question. The query should be in natural language. The external data source uses similarity search to search for relevant documents in a vector space. So the query should be similar to the relevant documents semantically. Answer with only the query. Do not add explanation.
 
-    @mlflow.trace(span_type="FUNCTION")
-    def execute_function(self, function_name, args):
-        the_function = self.tool_functions.get(function_name)
-        result = the_function(**args)
-        return result
+        Chat history: {chat_history}
 
-    def chat_completion(self, messages: List[Dict[str, str]], tools: bool = False):
+        Question: {question}"""
+
+        chat_history_formatted = self.format_chat_history(chat_history)
+
+        prompt = query_rewrite_template.format(question=query, chat_history=chat_history_formatted)
+
+        model_response = self.chat_completion(messages=[{"role": "user", "content": prompt}])
+        
+        return model_response.choices[0]["message"]["content"] #mlflow
+        #return model_response.choices[0].message.content # openai
+
+    def chat_completion(self, messages: List[Dict[str, str]]):
         endpoint_name = self.config.get("llm_config").get("llm_endpoint_name")
         llm_options = self.config.get("llm_config").get("llm_parameters")
 
-        # # Trace the call to Model Serving - openai versio
+        # Trace the call to Model Serving - openai
         # traced_create = mlflow.trace(
         #     self.model_serving_client.chat.completions.create,
         #     name="chat_completions_api",
@@ -361,41 +297,14 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             span_type="CHAT_MODEL",
         )
 
-        #mlflow client - start
-        if tools:
-            # Get all tools
-            tools = self.tool_json_schemas
-
-            inputs = {
-                "messages": messages,
-                "tools": tools,
-                **llm_options,
-            }
-        else:
-            inputs = {
-                "messages": messages,
-                **llm_options,
-            }
-
-        # Use the traced_create to make the prediction
-        return traced_create(
-            endpoint=endpoint_name,
-            inputs=inputs,
-        )
-
-        #mlflow client - end
-        # Openai - start
-        # if tools:
-        #     return traced_create(
-        #         model=endpoint_name,
-        #         messages=messages,
-        #         tools=self.config.get("tools"),
-        #         **llm_options,
-        #     )
-        # else:
-        #     return traced_create(model=endpoint_name, messages=messages, **llm_options)
-        # Openai - end
-
+        # Call LLM 
+        inputs = {
+            "messages": messages,
+            **llm_options
+        }
+        return traced_create(endpoint=endpoint_name, inputs=inputs) #mlflow
+        #return traced_create(model=endpoint_name, messages=messages, **llm_options) #openai
+    
     @mlflow.trace(span_type="PARSER")
     def get_messages_array(
         self, model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame]
@@ -406,7 +315,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             return model_input.get("messages")
         elif type(model_input) == pd.DataFrame:
             return model_input.iloc[0].to_dict().get("messages")
-
+        
     @mlflow.trace(span_type="PARSER")
     def extract_user_query_string(
         self, chat_messages_array: List[Dict[str, str]]
@@ -462,5 +371,59 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
                 "chat_messages_array is not an Array of Dictionary, Pandas DataFrame, or array of MLflow Message."
             )
 
+    @mlflow.trace(span_type="PARSER")
+    def format_chat_history(self, chat_history: List[Dict[str, str]]) -> str:
+        """
+        Formats the chat history into a string.
 
-set_model(FunctionCallingAgent())
+        Args:
+            chat_history: List of chat messages.
+
+        Returns:
+            Formatted chat history string.
+        """
+        if not chat_history:
+            return ""
+
+        formatted_history = []
+        for message in chat_history:
+            if message["role"] == "user":
+                formatted_history.append(f"User: {message['content']}")
+
+            # this logic ignores assistant messages that are just about tool calling and have no user facing content
+            elif message["role"] == "assistant" and message.get("content"):
+                formatted_history.append(f"Assistant: {message['content']}")
+
+        return "\n".join(formatted_history)
+
+set_model(RAGAgent())
+
+# COMMAND ----------
+
+# Set to False for logging, True for when iterating on code in this notebook 
+debug = False
+
+# To run this code, you will need to first run 02_agent to dump the configuration to a YAML file this notebook can load.
+if debug:
+    agent = RAGAgent()
+    input_example = {
+        "messages": [
+            {
+                "role": "user",
+                "content": "what is rag?",
+            },
+            {
+                "role": "assistant",
+                "content": "its raggy",
+            },
+            {
+                "role": "user",
+                "content": "so how do i use it?",
+            },
+        ]
+    }
+    agent.load_context(None)
+    response = agent.predict(
+        model_input=input_example
+    )
+
