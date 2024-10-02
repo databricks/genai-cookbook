@@ -25,7 +25,7 @@ You can find all of the sample code referenced throughout this section [here](ht
     - Write access to an existing [Unity Catalog](https://docs.databricks.com/en/data-governance/unity-catalog/index.html) and [Schema](https://docs.databricks.com/en/data-governance/unity-catalog/index.html#the-unity-catalog-object-model) 
     - Permissions to create a new Unity Catalog and Schema - the setup Notebook will do this for you
 4. A cluster running with access to the internet
-    - These tutorials have Python package conflicts with Machine Learning Runtime.  
+    - Internet access is required to download the necessary Python and system packages 
 
 ### **Instructions**
 
