@@ -62,13 +62,12 @@ By default, the POC uses the open source models available on [Mosaic AI Foundati
 
 
 
-1. **Open the POC code folder within [`agent_app_sample_code`](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code) for data in pdf, docx, or html.**
+1. **Open the [`agent_app_sample_code`](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code)**
 
    If your data doesn't meet one of the above requirements, you can customize the parsing function (`file_parser`) within `02_data_pipeline` in the above directory to work with your file types.
 
    Inside the POC folder, you will see the following notebooks:
 
-<!-- TODO (prithvi): update this -->
 ```{image} ../images/5-hands-on/6_img.png
 :align: center
 ```
