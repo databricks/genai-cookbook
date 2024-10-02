@@ -413,7 +413,7 @@ def file_parser(
 
 # COMMAND ----------
 
-from datapipeline_utils.file_loading import load_files_to_df, apply_parsing_udf
+from datapipeline_utils.file_loading import load_files_to_df, apply_parsing_udf, check_parsed_df_for_errors
 from datapipeline_utils.typed_dicts_to_spark_schema import typed_dicts_to_spark_schema
 from IPython.display import display_markdown
 
@@ -435,9 +435,19 @@ parsed_files_df.write.mode("overwrite").option(
     "overwriteSchema", "true"
 ).saveAsTable(storage_config.parsed_docs_table)
 
-# Display for debugging
-display_markdown(f"### Parsed {parsed_files_df.count()} documents: ", raw=True)
-parsed_files_df.display()
+
+# Check for errors
+parsed_files_df = spark.table(storage_config.parsed_docs_table)
+check_parsed_df_for_errors(parsed_files_df)
+
+# Filter for records without errors
+parsed_files_no_errors_df = parsed_files_df.filter(
+        parsed_files_df.parser_status == "SUCCESS"
+)
+
+# Display for results debugging
+display_markdown(f"### Parsed {parsed_files_no_errors_df.count()} documents: ", raw=True)
+parsed_files_no_errors_df.display()
 
 # Log the resulting table to MLflow
 mlflow.log_input(

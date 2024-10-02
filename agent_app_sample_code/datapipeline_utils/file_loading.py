@@ -111,9 +111,23 @@ def apply_parsing_udf(raw_files_df: DataFrame, parse_file_udf: Callable[[[dict, 
         "parsing", parser_udf("content", "modificationTime", "length", "path")
     ).drop("content")
 
-    # Check and warn on any errors
-    errors_df = parsed_files_staging_df.filter(
-        func.col(f"parsing.parser_status") != "SUCCESS"
+    # Filter for successfully parsed files
+    parsed_files_df = parsed_files_staging_df #.filter(
+    #    parsed_files_staging_df.parsing.parser_status == "SUCCESS"
+    #)
+
+    # Change the schema to the resulting schema
+    resulting_fields = [field.name for field in parsed_df_schema.fields]
+
+    parsed_files_df = parsed_files_df.select(
+        *[func.col(f"parsing.{field}").alias(field) for field in resulting_fields]
+    )
+    return parsed_files_df
+
+def check_parsed_df_for_errors(parsed_files_df):
+     # Check and warn on any errors
+    errors_df = parsed_files_df.filter(
+        func.col(f"parser_status") != "SUCCESS"
     )
 
     num_errors = errors_df.count()
@@ -123,33 +137,19 @@ def apply_parsing_udf(raw_files_df: DataFrame, parse_file_udf: Callable[[[dict, 
         )
         errors_df.display()
 
-        if errors_df.count() == parsed_files_staging_df.count():
+        if errors_df.count() == parsed_files_df.count():
             raise ValueError(
                 "All documents produced an error during parsing. Please review."
             )
 
-    num_empty_content = parsed_files_staging_df.filter(
-        func.col(f"parsing.parser_status") == "SUCCESS"
-    ).filter(func.col("parsing.doc_content") == "").count()
+    num_empty_content = parsed_files_df.filter(
+        func.col(f"parser_status") == "SUCCESS"
+    ).filter(func.col("doc_content") == "").count()
     if num_empty_content > 0:
         display_markdown(
             f"### {num_errors} documents have no content. Please review: ", raw=True
         )
-        errors_df.display()
+        num_empty_content.display()
 
-        if num_empty_content == parsed_files_staging_df.count():
+        if num_empty_content == parsed_files_df.count():
             raise ValueError("All documents are empty. Please review.")
-
-    # Filter for successfully parsed files
-    # Change the schema to the resulting schema
-    resulting_fields = [field.name for field in parsed_df_schema.fields]
-
-    parsed_files_df = parsed_files_staging_df.filter(
-        parsed_files_staging_df.parsing.parser_status == "SUCCESS"
-    )
-
-    # parsed_files_df.display()
-    parsed_files_df = parsed_files_df.select(
-        *[func.col(f"parsing.{field}").alias(field) for field in resulting_fields]
-    )
-    return parsed_files_df
