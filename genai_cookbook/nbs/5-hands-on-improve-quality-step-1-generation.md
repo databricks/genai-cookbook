@@ -1,4 +1,3 @@
-<!-- TODO (prithvi): move this into the 5-hands-on-evaluate-poc -->
 #### Debugging generation quality
 
 ##### Debugging generation quality
@@ -11,7 +10,7 @@ The following is a step-by-step process to address **generation quality** issues
 
 
 
-1. Open the [`B_quality_iteration/01_root_cause_quality_issues`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/01_root_cause_quality_issues.py) Notebook
+1. Open the [`05_evaluate_poc_quality`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/05_evaluate_poc_quality.py) Notebook
 
 2. Use the queries to load MLflow traces of the records that retrieval quality issues.
 

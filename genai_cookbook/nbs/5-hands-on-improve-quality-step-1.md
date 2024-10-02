@@ -1,4 +1,3 @@
-<!-- TODO (prithvi): move this into the 5-hands-on-evaluate-poc -->
 ### **Step 5:** Identify the root cause of quality issues
 
 ```{image} ../images/5-hands-on/workflow_iterate.png
@@ -32,7 +31,7 @@ Each row your evaluation set will be tagged as follows:
 
 The approach depends on if your evaluation set contains the ground-truth responses to your questions - stored in `expected_response`.  If you have `expected_response` available, use the first table below.  Otherwise, use the second table.
 
-1. Open the [`B_quality_iteration/01_root_cause_quality_issues`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/01_root_cause_quality_issues.py) Notebook
+1. Open the [`05_evaluate_poc_quality`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/05_evaluate_poc_quality.py) Notebook
 2. Run the cells that are relevant to your use case e.g., if you do or don't have `expected_response`
 3. Review the output tables to determine the most frequent root cause in your application
 4. For each root cause, follow the steps below to further debug and identify potential fixes:

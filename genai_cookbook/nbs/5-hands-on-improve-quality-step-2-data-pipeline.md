@@ -1,50 +1,8 @@
-<!-- TODO (prithvi): move this into the 5-hands-on-evaluate-poc -->
 # **![Data pipeline](../images/5-hands-on/data_pipeline.png)** Implement data pipeline fixes
 
-Follow these steps to modify your data pipeline and run it to:
-1. Create a new Vector Index 
-2. Create an MLflow Run with the data pipeline's metadata
-
-The resulting MLflow Run will be reference by the [`B_quality_iteration/02_evaluate_fixes`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/02_evaluate_fixes.py) Notebook.
-
-There are two approaches to modifying the data pipeline:
-1. [**Implement a single fix at a time:**](#approach-1-implement-a-single-fix-at-a-time) In this approach, you configure and run a single data pipeline at once.  This mode is best if you want to try a single embedding model, test out a single new parser, etc.  We suggest starting here to get familiar with these notebooks.
-2. [**Implement multiple fix at once:**](#approach-2-implement-multiple-fix-at-once) In this approach, also called a sweep, you, in parallel, run multiple data pipelines that each have a different configuration.  This mode is best if you want to "sweep" across many different strategies, for example, evaluate 3 PDF parsers or evaluate many different chunk sizes.
-
-```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code)
 :class: tip
-You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
-```
-
-### Approach 1: Implement a single fix at a time
-
-1. Open the [`B_quality_iteration/data_pipeline_fixes/single_fix/00_config`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/data_pipeline_fixes/single_fix/00_config.py) Notebook
-2. Either:
-    - Follow the instructions there to implement a [new configuration](#configuration-settings-deep-dive) provided by this Cookbook
-    - Follow these [steps](#implementing-a-custom-parserchunker) to implement custom code for a parsing or chunking.
-3. Run the pipeline, by either:
-    - Opening & running the [00_Run_Entire_Pipeline](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/data_pipeline_fixes/single_fix/00_Run_Entire_Pipeline.py) Notebook
-    - Following these [steps](#running-the-pipeline-manually) to run each step of the pipeline manually
-4. Add the name of the resulting MLflow Run that is outputted to the `DATA_PIPELINE_FIXES_RUN_NAMES` variable in [`B_quality_iteration/02_evaluate_fixes`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/02_evaluate_fixes.py) Notebook
-
-
-```{note}
-The data preparation pipeline employs Spark Structured Streaming to incrementally load and process files. This entails that files already loaded and prepared are tracked in checkpoints and won't be reprocessed. Only newly added files will be loaded, prepared, and appended to the corresponding tables.
-
-Therefore, if you wish to __rerun the entire pipeline from scratch__ and reprocess all documents, you need to delete the checkpoints and tables. You can accomplish this by using the [reset_tables_and_checkpoints](./reset_tables_and_checkpoints.py) notebook.
-```
-
-### Approach 2: Implement multiple fix at once
-
-1. Open the [`B_quality_iteration/data_pipeline_fixes/multiple_fixes/00_Run_Multiple_Pipelines`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/data_pipeline_fixes/multiple_fixes/00_Run_Multiple_Pipelines.py) Notebook
-2. Follow the instructions in the Notebook to add 2+ configurations of the data pipeline to run
-3. Run the Notebook to execute these pipelines
-4. Add the names of the resulting MLflow Runs that are outputted to the `DATA_PIPELINE_FIXES_RUN_NAMES` variable in [`B_quality_iteration/02_evaluate_fixes`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/02_evaluate_fixes.py) Notebook
-
-### Appendix
-
-```{note}
-You can find the notebooks referenced below in the [`single_fix`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/B_quality_iteration/data_pipeline_fixes/single_fix) and [`multiple_fixes`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/B_quality_iteration/data_pipeline_fixes/multiple_fixes) directories depending on whether you are implementing a single fix or multiple fixes at a time.
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code).
 ```
 
 #### Configuration settings deep dive
