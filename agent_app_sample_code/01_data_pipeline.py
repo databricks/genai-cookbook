@@ -250,7 +250,7 @@ if not chunking_config.validate_chunk_size_and_overlap():
 mlflow.end_run()
 
 # This tag appears in the MLflow UI so you can easily identify this run
-mlflow_run_tag = storage_config.tag if storage_config.tag is not None or len(storage_config.tag) > 0 else "initial-data-pipeline"
+mlflow_run_tag = f"data-pipeline__{storage_config.tag}" if storage_config.tag is not None and len(storage_config.tag) > 0 else "data-pipeline__initial"
 mlflow.start_run(run_name=mlflow_run_tag)
 
 # COMMAND ----------
