@@ -10,9 +10,9 @@
 1. Based on your [root cause analysis](./5-hands-on-improve-quality-step-1.md), you have identified a potential fixes to either [retrieval](./5-hands-on-improve-quality-step-1-retrieval.md) or [generation](./5-hands-on-improve-quality-step-1-generation.md) to implement and evaluate
 2. Your POC application (or another baseline chain) is logged to an MLflow Run with an Agent Evaluation evaluation stored in the same Run
 
-```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code)
 :class: tip
-You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code).
 ```
 
 #### Expected outcome
@@ -66,19 +66,17 @@ As a reminder, there are 3 types of potential fixes:
 -->
 
 #### Instructions
-For all types, you will use the [`B_quality_iteration/02_evaluate_fixes`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/02_evaluate_fixes.py) Notebook to evaluate the resulting chain versus your baseline configuration (at first, this is your POC) and pick a "winner".  This notebook will help you pick the winning experiment and deploy it to the Review App or a production-ready, scalable REST API.
+Based on which type of fix you want to make, modify the [`00_global_config`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/00_global_config.py), [`02_data_pipeline`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/02_data_pipeline.py), or the [`03_agent_proof_of_concept`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/03_agent_proof_of_concept.py). Use the [`05_evaluate_poc_quality`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/05_evaluate_poc_quality.py) notebook to evaluate the resulting chain versus your baseline configuration (at first, this is your POC) and pick a "winner".  This notebook will help you pick the winning experiment and deploy it to the Review App or a production-ready, scalable REST API.
 
 1. Open the [`B_quality_iteration/02_evaluate_fixes`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/02_evaluate_fixes.py) Notebook
 2. Based on the type of fix you are implementing:
       - **![Data pipeline](../images/5-hands-on/data_pipeline.png)**
-         1. Follow these [instructions](./5-hands-on-improve-quality-step-2-data-pipeline.md) to create the new data pipeline & get the name of the resulting MLflow Run.
-         2. Add the run name(s) to the `DATA_PIPELINE_FIXES_RUN_NAMES` variable
+         1. Follow these [instructions](./5-hands-on-improve-quality-step-2-data-pipeline.md) to create the new data pipeline.
       - **![Chain config](../images/5-hands-on/chain_config.png)** 
-         1. Follow the instructions in the `Chain configuration` section of the [`02_evaluate_fixes`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/02_evaluate_fixes.py) Notebook to add chain configuration fixes to the `CHAIN_CONFIG_FIXES` variable.
+         1. Modify the [`00_global_config`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/00_global_config.py) .
       - **![Chain code](../images/5-hands-on/chain_code.png)**
-         1. Create a modified chain code file and save it to the [`B_quality_iteration/chain_code_fixes`](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code/B_quality_iteration/chain_code_fixes) folder. Alternatively, select one of the provided chain code fixes from that folder.
-         2. Follow the instructions in the `Chain code` section of the [`02_evaluate_fixes`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/B_quality_iteration/02_evaluate_fixes.py) Notebook to add the chain code file and any additional chain configuration that is required to the `CHAIN_CODE_FIXES` variable
-3. Run the notebook from the `Run evaluation` cell to
+         1. Create a modified chain code file similar to [`agents/function_calling_agent_w_retriever_tool`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/agents/function_calling_agent_w_retriever_tool.py) and reference it from it to the [`03_agent_proof_of_concept`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/03_agent_proof_of_concept.py) notebook.
+3. Run the [`05_evaluate_poc_quality`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/05_evaluate_poc_quality.py) notebook and use MLflow to
       - Evaluate each fix
       - Determine the fix with the best quality/cost/latency metrics
       - Deploy the best one to the Review App and a production-ready REST API to get stakeholder feedback

@@ -367,7 +367,7 @@ with mlflow.start_run(run_id=logged_chain_info.run_id):
 # MAGIC
 # MAGIC ## Browse the code samples
 # MAGIC
-# MAGIC Open the `./genai-cookbook/rag_app_sample_code` folder that was synced to your Workspace by this notebook.  Documentation [here](https://ai-cookbook.io/nbs/6-implement-overview.html).
+# MAGIC Open the `./genai-cookbook/agent_app_sample_code` folder that was synced to your Workspace by this notebook.  Documentation [here](https://ai-cookbook.io/nbs/6-implement-overview.html).
 # MAGIC
 # MAGIC ## Read the [Generative AI Cookbook](https://ai-cookbook.io)!
 # MAGIC

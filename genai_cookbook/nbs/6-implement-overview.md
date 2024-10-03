@@ -9,9 +9,9 @@ The implement section is coupled with a repository of sample code designed to wo
 
 Follow these steps to load the sample code to your Databricks workspace and configure the global settings for the application.
 
-```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code)
 :class: tip
-You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code).
 ```
 
 
@@ -24,8 +24,7 @@ You can find all of the sample code referenced throughout this section [here](ht
 3. Unity Catalog Schema where the output Delta Tables with the parsed/chunked documents and Vector Search indexes are stored, either:
     - Write access to an existing [Unity Catalog](https://docs.databricks.com/en/data-governance/unity-catalog/index.html) and [Schema](https://docs.databricks.com/en/data-governance/unity-catalog/index.html#the-unity-catalog-object-model) 
     - Permissions to create a new Unity Catalog and Schema - the setup Notebook will do this for you
-4. A [**single-user**](https://docs.databricks.com/en/compute/configure.html#access-modes) cluster running [DBR 14.3+](https://docs.databricks.com/en/release-notes/runtime/index.html) with access to the internet
-    - These tutorials have Python package conflicts with Machine Learning Runtime.  
+4. A cluster running with access to the internet
     - Internet access is required to download the necessary Python and system packages 
 
 ### **Instructions**
@@ -38,11 +37,11 @@ You can find all of the sample code referenced throughout this section [here](ht
     ```
 <br/>
 
-2. Open the [`rag_app_sample_code/00_global_config`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/00_global_config.py) Notebook and adjust the settings there.
+2. Open the [`00_global_config`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/00_global_config.py) Notebook and adjust the settings there.
 
     ```python
     # The name of the RAG application.  This is used to name the chain's UC model and prepended to the output Delta Tables + Vector Indexes
-    RAG_APP_NAME = 'my_agent_app'
+    AGENT_NAME = 'my_agent_app'
 
     # UC Catalog & Schema where outputs tables/indexs are saved
     # If this catalog/schema does not exist, you need create catalog/schema permissions.
@@ -50,7 +49,7 @@ You can find all of the sample code referenced throughout this section [here](ht
     UC_SCHEMA = f'rag_{user_name}'
 
     ## UC Model name where the POC chain is logged
-    UC_MODEL_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{RAG_APP_NAME}"
+    UC_MODEL_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{AGENT_NAME}"
 
     # Vector Search endpoint where index is loaded
     # If this does not exist, it will be created
@@ -60,7 +59,5 @@ You can find all of the sample code referenced throughout this section [here](ht
     # You need to create this location and add files
     SOURCE_PATH = f"/Volumes/{UC_CATALOG}/{UC_SCHEMA}/source_docs"
     ```
-
-3. Open and run the [`01_validate_config_and_create_resources`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/01_validate_config_and_create_resources.py) Notebook
 
 > Proceed to the [Deploy POC](./5-hands-on-build-poc.md) step.

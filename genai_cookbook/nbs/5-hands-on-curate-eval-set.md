@@ -10,9 +10,9 @@
 
 *Time varies based on the quality of the responses provided by your stakeholders.  If the responses are messy or contain lots of irrelevant queries, you will need to spend more time filtering and cleaning the data.*
 
-```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code)
+```{admonition} [Code Repository](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code)
 :class: tip
-You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/main/rag_app_sample_code).
+You can find all of the sample code referenced throughout this section [here](https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code).
 ```
 
 #### **Overview & expected outcome**
@@ -49,6 +49,6 @@ Databricks recommends that your Evaluation Set contain at least 30 questions to 
 
 2. Inspect the Evaluation Set to understand the data that is included. You need to validate that your Evaluation Set contains a representative and challenging set of questions. Adjust the Evaluation Set as required.
 
-3. By default, your evaluation set is saved to the Delta Table configured in `EVALUATION_SET_FQN` in the [`00_global_config`](https://github.com/databricks/genai-cookbook/blob/main/rag_app_sample_code/00_global_config.py) Notebook.
+3. By default, your evaluation set is saved to the Delta Table configured in `EVALUATION_SET_FQN` in the [`00_global_config`](https://github.com/databricks/genai-cookbook/blob/v0.2.0/agent_app_sample_code/00_global_config.py) Notebook.
 
 > **Next step:** Now that you have an evaluation set, use it to [evaluate the POC app's](./5-hands-on-evaluate-poc.md) quality/cost/latency.
