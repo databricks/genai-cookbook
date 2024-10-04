@@ -1,10 +1,10 @@
-## Retrieval, augmentation, and generation (aka RAG Chain)
+## Retrieval, augmentation, and generation (aka RAG Agent)
 
 ```{image} ../images/3-deep-dive/5_img.png
 :align: center
 ```
 
-The RAG chain takes a user query as input, retrieves relevant information given that query, and generates an appropriate response grounded on the retrieved data. While the exact steps within a RAG chain can vary widely depending on the use case and requirements, the following are the key components to consider when building your RAG chain:
+The RAG Agent takes a user query as input, retrieves relevant information given that query, and generates an appropriate response grounded on the retrieved data. While the exact steps within a RAG Agent can vary widely depending on the use case and requirements, the following are the key components to consider when building your RAG Agent:
 
 1. **Query understanding:** Analyzing and transforming user queries to better represent intent and extract relevant information, such as filters or keywords, to improve the retrieval process.
 
@@ -16,7 +16,7 @@ The RAG chain takes a user query as input, retrieves relevant information given 
 
 5. **Post-processing and guardrails:** Applying additional processing steps and safety measures to ensure the LLM-generated responses are on-topic, factually consistent, and adhere to specific guidelines or constraints.
 
-In the [implementing RAG chain changes](/nbs/5-hands-on-improve-quality-step-2.md#rag-chain-changes) section we will demonstrate how to iterate over these various components of a chain.
+In the [implementing RAG Agent changes](/nbs/5-hands-on-improve-quality-step-2.md#rag-chain-changes) section we will demonstrate how to iterate over these various components of an Agent.
 
 ### Query understanding
 
@@ -65,11 +65,11 @@ Here's how a multi-step query understanding component might look for our a custo
 
 2. **Entity extraction:** Based on the identified intent, use another LLM call to extract relevant entities from the query, such as product names, reported errors, or account numbers.
 
-3. **Query rewriting:** Use the extracted intent and entities to rewrite the original query into a more specific and targeted format, e.g., "My RAG chain is failing to deploy on Model Serving, I'm seeing the following error...".
+3. **Query rewriting:** Use the extracted intent and entities to rewrite the original query into a more specific and targeted format, e.g., "My Agent chain is failing to deploy on Model Serving, I'm seeing the following error...".
 
 ### Retrieval
 
-The retrieval component of the RAG chain is responsible for finding the most relevant chunks of information given a retrieval query. In the context of unstructured data, retrieval typically involves one or a combination of semantic search, keyword-based search, and metadata filtering. The choice of retrieval strategy depends on the specific requirements of your application, the nature of the data, and the types of queries you expect to handle. Let's compare these options:
+The retrieval tool of the RAG Agent is responsible for finding the most relevant chunks of information given a retrieval query. In the context of unstructured data, retrieval typically involves one or a combination of semantic search, keyword-based search, and metadata filtering. The choice of retrieval strategy depends on the specific requirements of your application, the nature of the data, and the types of queries you expect to handle. Let's compare these options:
 
 1. **Semantic search:** Semantic search uses an embedding model to convert each chunk of text into a vector representation that captures its semantic meaning. By comparing the vector representation of the retrieval query with the vector representations of the chunks, semantic search can retrieve documents that are conceptually similar, even if they don't contain the exact keywords from the query.
 
@@ -90,13 +90,13 @@ In addition to these core retrieval strategies, there are several techniques you
 
 - **Query expansion:** Query expansion can help capture a broader range of relevant documents by using multiple variations of the retrieval query. This can be achieved by either conducting individual searches for each expanded query, or using a concatenation of all expanded search queries in a single retrieval query.
 
-> ***Note:** Query expansion must be done in conjunction with changes to the query understanding component [RAG chain]. The multiple variations of a retrieval query are typically generated in this step.*
+> ***Note:** Query expansion must be done in conjunction with changes to the query understanding component [RAG Agent]. The multiple variations of a retrieval query are typically generated in this step.*
 
 - **Re-ranking:** After retrieving an initial set of chunks, apply additional ranking criteria (e.g., sort by time) or a reranker model to re-order the results. Re-ranking can help prioritize the most relevant chunks given a specific retrieval query. Reranking with cross-encoder models such as [mxbai-rerank](https://huggingface.co/mixedbread-ai/mxbai-rerank-large-v1) and [ColBERTv2](https://docs.llamaindex.ai/en/stable/examples/node_postprocessor/ColbertRerank/) can yield an uplift in retrieval performance.
 
 - **Metadata filtering:** Use metadata filters extracted from the query understanding step to narrow down the search space based on specific criteria. Metadata filters can include attributes like document type, creation date, author, or domain-specific tags. By combining metadata filters with semantic or keyword-based search, you can create more targeted and efficient retrieval.
 
-> ***Note:** Metadata filtering must be done in conjunction with changes to the query understanding [RAG chain] and metadata extraction [data pipeline] components.*
+> ***Note:** Metadata filtering must be done in conjunction with changes to the query understanding [RAG Agent] and metadata extraction [data pipeline] components.*
 
 ### Prompt augmentation
 
@@ -123,7 +123,7 @@ There are entire [guides to prompt engineering](https://www.promptingguide.ai/),
 
 ### LLM
 
-The generation component of the RAG chain takes the augmented prompt template from the previous step and passes it to a LLM. When selecting and optimizing an LLM for the generation component of a RAG chain, consider the following factors, which are equally applicable to any other steps that involve LLM calls:
+The generation component of the RAG Agent takes the augmented prompt template from the previous step and passes it to a LLM. When selecting and optimizing an LLM for the generation component of a RAG chain, consider the following factors, which are equally applicable to any other steps that involve LLM calls:
 
 1. Experiment with different off-the-shelf models
    - Each model has its own unique properties, strengths, and weaknesses. Some models may have a better understanding of certain domains or perform better on specific tasks.
@@ -133,7 +133,7 @@ The generation component of the RAG chain takes the augmented prompt template fr
 2. Start small and scale up as needed
    - While it may be tempting to immediately reach for the most powerful and capable models available (e.g., GPT-4, Claude), it's often more efficient to start with smaller, more lightweight models.
    - In many cases, smaller open-source alternatives like Llama 3 or DBRX can provide satisfactory results at a lower cost and with faster inference times. These models can be particularly effective for tasks that don't require highly complex reasoning or extensive world knowledge.
-   - As you develop and refine your RAG chain, continuously assess the performance and limitations of your chosen model. If you find that the model struggles with certain types of queries or fails to provide sufficiently detailed or accurate responses, consider scaling up to a more capable model.
+   - As you develop and refine your RAG Agent, continuously assess the performance and limitations of your chosen model. If you find that the model struggles with certain types of queries or fails to provide sufficiently detailed or accurate responses, consider scaling up to a more capable model.
    - Monitor the impact of changing models on key metrics such as response quality, latency, and cost to ensure that you're striking the right balance for the requirements of your specific use case.
 
 3. Optimize model parameters
@@ -141,8 +141,8 @@ The generation component of the RAG chain takes the augmented prompt template fr
    - Be aware that the optimal parameter settings may vary depending on the specific task, prompt, and desired output style. Iteratively test and refine these settings based on evaluation of the generated responses.
 
 4. Task-specific fine-tuning
-   - As you refine performance, consider fine-tuning smaller models for specific sub-tasks within your RAG chain, such as query understanding.
-   - By training specialized models for individual tasks with the RAG chain, you can potentially improve the overall performance, reduce latency, and lower inference costs compared to using a single large model for all tasks.
+   - As you refine performance, consider fine-tuning smaller models for specific sub-tasks within your RAG Agent, such as query understanding.
+   - By training specialized models for individual tasks with the RAG Agent, you can potentially improve the overall performance, reduce latency, and lower inference costs compared to using a single large model for all tasks.
 
 5. Continued pre-training
    - If your RAG application deals with a specialized domain or requires knowledge that is not well-represented in the pre-trained LLM, consider performing continued pre-training (CPT) on domain-specific data.

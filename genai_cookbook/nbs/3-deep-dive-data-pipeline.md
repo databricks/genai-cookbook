@@ -43,7 +43,7 @@ The specific parsing techniques and tools you use will depend on the type of dat
 
 When parsing your data, consider the following best practices:
 
-1. **Data cleaning:** Preprocess the extracted text to remove any irrelevant or noisy information, such as headers, footers, or special characters. Be cognizant of reducing the amount of unnecessary or malformed information that your RAG chain will need to process.
+1. **Data cleaning:** Preprocess the extracted text to remove any irrelevant or noisy information, such as headers, footers, or special characters. Be cognizant of reducing the amount of unnecessary or malformed information that your RAG Agent will need to process.
 
 2. **Handling errors and exceptions:** Implement error handling and logging mechanisms to identify and resolve any issues encountered during the parsing process. This will help you quickly identify and fix problems. Doing so often points to upstream issues with the quality of the source data.
 

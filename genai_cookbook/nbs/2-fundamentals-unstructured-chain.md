@@ -1,6 +1,6 @@
-## Retrieval, augmentation, and generation (aka RAG Chain)
+## Retrieval, augmentation, and generation (aka RAG Agent)
 
-Once the data has been processed by the data pipeline, it is suitable for use in the RAG application. This section describes the process that occurs once the user submits a request to the RAG application in an online setting. The series, or *chain* of steps that are invoked at inference time is commonly referred to as the RAG chain.
+Once the data has been processed by the data pipeline, it is suitable for use in the retreival tool. This section describes the process that occurs once the user submits a request to the Agent application in an online setting. The series, or *chain* of steps that are invoked at inference time is commonly referred to as the Agent loop.
 
 ```{image} ../images/2-fundamentals-unstructured/3_img.png
 :align: center
@@ -17,6 +17,6 @@ Once the data has been processed by the data pipeline, it is suitable for use in
 
 5. **(Optional) Post-processing:** The LLM's response may be processed further to apply additional business logic, add citations, or otherwise refine the generated text based on predefined rules or constraints.
 
-As with the RAG application data pipeline, there are numerous consequential engineering decisions that can affect the quality of the RAG chain. For example, determining how many chunks to retrieve in (2) and how to combine them with the user's query in (3) can both significantly impact the model's ability to generate quality responses.
+As with the retriever tool data pipeline, there are numerous consequential engineering decisions that can affect the quality of the Agent. For example, determining how many chunks to retrieve in (2) and how to combine them with the user's query in (3) can both significantly impact the model's ability to generate quality responses.
 
 Throughout the chain, various guardrails may be applied to ensure compliance with enterprise policies. This might involve filtering for appropriate requests, checking user permissions before accessing data sources, and applying content moderation techniques to the generated responses.

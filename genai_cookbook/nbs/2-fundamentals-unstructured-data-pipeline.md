@@ -31,6 +31,6 @@ The following are the typical steps of a data pipeline in a RAG application usin
 
 The process of computing similarity can be computationally expensive. Vector indexes, such as [Databricks Vector Search](https://docs.databricks.com/en/generative-ai/vector-search.html), speed this process up by providing a mechanism for efﬁciently organizing and navigating embeddings, often via sophisticated approximation methods. This enables rapid ranking of the most relevant results without comparing each embedding to the user's query individually.
 
-Each step in the data pipeline involves engineering decisions that impact the RAG application's quality. For example, choosing the right chunk size in step (3) ensures the LLM receives specific yet contextualized information, while selecting an appropriate embedding model in step (4) determines the accuracy of the chunks returned during retrieval.
+Each step in the data pipeline involves engineering decisions that impact the Agent application's quality. For example, choosing the right chunk size in step (3) ensures the LLM receives specific yet contextualized information, while selecting an appropriate embedding model in step (4) determines the accuracy of the chunks returned during retrieval.
 
 This data preparation process is referred to as *offline* data preparation, as it occurs before the system answers queries, unlike the *online* steps triggered when a user submits a query.
