@@ -204,7 +204,7 @@ retriever_config = RetrieverConfig(
 #### ✅✏️ LLM configuration
 ########################
 llm_config = LLMConfig(
-    llm_endpoint_name="ep-gpt4o-new",  # Model serving endpoint
+    llm_endpoint_name="databricks-meta-llama-3-1-405b-instruct",  # Model serving endpoint
     llm_system_prompt_template=(
         """You are an assistant that answers questions. Use the following pieces of retrieved context to answer the question. Some pieces of context may be irrelevant, in which case you should not use them to form the answer.\n\nContext: {context}"""
     ),  # System prompt template

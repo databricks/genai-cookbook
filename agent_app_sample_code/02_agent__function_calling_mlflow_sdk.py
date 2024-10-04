@@ -217,7 +217,7 @@ retriever_config = RetrieverToolConfig(
 ########################
 
 llm_config = FunctionCallingLLMConfig(
-    llm_endpoint_name="ep-gpt4o-new",  # Model serving endpoint
+    llm_endpoint_name="databricks-meta-llama-3-1-405b-instruct",  # Model serving endpoint
     llm_system_prompt_template=(
         """You are a helpful assistant that answers questions by calling tools.  Provide responses ONLY based on the outputs from tools.  If you do not have a relevant tool for a question, respond with 'Sorry, I'm not trained to answer that question'."""
     ),  # System prompt template
