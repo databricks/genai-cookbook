@@ -6,7 +6,7 @@ This section provides an overview of Agents: what it is, how it works, and key c
 
 AI agents are systems where models make decisions, often using tools like Databricks' Unity Catalog functions toperform tasks such as retrieving data or interacting with external services.
 
-[Learn more](https://docs.databricks.com/en/generative-ai/ai-agents.html) 
+See Databricks docs ([AWS](https://docs.databricks.com/en/generative-ai/ai-agents.html)|[Azure](https://learn.microsoft.com/en-us/azure/databricks/generative-ai/ai-agents)) for more info.
 
 ## What is retrieval-augmented generation?
 
@@ -15,6 +15,8 @@ Retrieval-augmented generation (RAG) is a technique that enables a large languag
 For example, suppose you are building a question-and-answer chatbot to help employees answer questions about your company’s proprietary documents. A standalone LLM won’t be able to accurately answer questions about the content of these documents if it was not specifically trained on them. The LLM might refuse to answer due to a lack of information or, even worse, it might generate an incorrect response. 
 
 RAG addresses this issue by first retrieving relevant information from the company documents based on a user’s query, and then providing the retrieved information to the LLM as additional context. This allows the LLM to generate a more accurate response by drawing from the specific details found in the relevant documents. In essence, RAG enables the LLM to “consult” the retrieved information to formulate its answer.
+
+An agent with a retriever tool is one pattern for RAG, and has the advantage of deciding when to it needs to perform retrieval. This cookbook will describe how to build such an agent. 
 
 ## Core components of a RAG application
 
