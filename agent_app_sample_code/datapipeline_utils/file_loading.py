@@ -36,7 +36,7 @@ def _parse_and_extract(
         warnings.warn(status)
         return {
             "doc_content": "",
-            "doc_uri": "",
+            "doc_uri": doc_path,
             "parser_status": status,
         }
 
