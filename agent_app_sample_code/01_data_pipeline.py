@@ -409,6 +409,31 @@ def file_parser(
 
 # COMMAND ----------
 
+# MAGIC %md The below cell is debugging code to test your parsing function on a single record.  Only uncomment if you need to debug the `file_parser(...)` function.
+
+# COMMAND ----------
+
+# from datapipeline_utils.file_loading import load_files_to_df
+# from pyspark.sql import functions as F
+
+# test_filename= "/Volumes/catalog/schema/vol_name/filename.ext"
+
+# raw_files_df = load_files_to_df(
+#     spark=spark,
+#     source_path=source_config.volume_path,
+# )
+
+# test_records = raw_files_df.filter(F.col("path").contains(test_filename))
+
+# test_records_dict = test_records.toPandas().to_dict(orient="records")
+
+# for record in test_records_dict:
+#   test_result = file_parser(raw_doc_contents_bytes=record['content'], doc_path=record['path'], modification_time=record['modificationTime'], doc_bytes_length=record['length'])
+#   print(test_result)
+
+
+# COMMAND ----------
+
 # MAGIC %md 🚫✏️ The below cell is boilerplate code to apply the parsing function using Spark.
 
 # COMMAND ----------
