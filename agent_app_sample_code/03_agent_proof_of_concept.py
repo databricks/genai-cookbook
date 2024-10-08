@@ -92,6 +92,15 @@ validate_llm_config(llm_config)
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC ## Save the agent config
+
+# COMMAND ----------
+
+save_agent_config(agent_config.dict(), './agents/generated_configs/agent.yaml')
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ## Set the MLflow experiement name
 # MAGIC
 # MAGIC Used to store the Agent's model
