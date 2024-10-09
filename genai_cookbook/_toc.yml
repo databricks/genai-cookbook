@@ -10,7 +10,7 @@ parts:
 - caption: "Learn"
   numbered: true
   chapters:
-  - file: nbs/1-introduction-to-rag
+  - file: nbs/1-introduction-to-agents
   - file: nbs/2-fundamentals-unstructured
     sections:
     - file: nbs/2-fundamentals-unstructured-data-pipeline

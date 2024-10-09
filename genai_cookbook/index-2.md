@@ -57,7 +57,7 @@ The RAG cookbook is divided into 2 sections:
 ## Table of contents
 <!--
 **Table of contents**
-1. [RAG overview](./nbs/1-introduction-to-rag): Understand how RAG works at a high-level
+1. [RAG overview](./nbs/1-introduction-to-agents): Understand how RAG works at a high-level
 2. [RAG fundamentals](./nbs/2-fundamentals-unstructured): Understand the key components in a RAG app
 3. [RAG quality knobs](./nbs/3-deep-dive): Understand the knobs Databricks recommends tuning improve RAG app quality 
 4. [RAG quality evaluation deep dive](./nbs/4-evaluation): Understand how RAG evaluation works, including creating evaluation sets, the quality metrics that matter, and required developer tooling

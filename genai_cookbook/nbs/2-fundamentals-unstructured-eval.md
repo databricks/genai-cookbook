@@ -1,10 +1,10 @@
 ## Evaluation & monitoring
 
-Evaluation and monitoring are critical components to understand if your Agent application is performing to the *quality*, *cost*, and *latency* requirements dictated by your use case.  Technically, **evaluation** happens during development and **monitoring** happens once the application is deployed to production, but the fundamental components are similar.
+Evaluation and monitoring are critical components to understand if your agent application is performing to the *quality*, *cost*, and *latency* requirements dictated by your use case.  Technically, **evaluation** happens during development and **monitoring** happens once the application is deployed to production, but the fundamental components are similar.
 
 An Agent with retriever tool over unstructured data is a complex system with many components that impact the application's quality. Adjusting any single element can have cascading effects on the others. For instance, data formatting changes can influence the retrieved chunks and the LLM's ability to generate relevant responses. Therefore, it's crucial to evaluate each of the application's components in addition to the application as a whole in order to iteratively refine it based on those assessments.
 
-Evaluation and monitoring of Generative AI applications, including Agents, differs from classical machine learning in several ways:
+Evaluation and monitoring of Generative AI applications, including agents, differs from classical machine learning in several ways:
   
 |  | Classical ML | Generative AI | 
 |---------|---------|---------|
@@ -19,9 +19,9 @@ Effectively evaluating and monitoring application quality, cost and latency requ
 ```
 <br/>
 
-- **Evaluation set:** To rigorously evaluate your Agent application, you need a curated set of evaluation queries (and ideally outputs) that are representative of the application's intended use. These evaluation examples should be challenging, diverse, and updated to reflect changing usage and requirements.
+- **Evaluation set:** To rigorously evaluate your agent application, you need a curated set of evaluation queries (and ideally outputs) that are representative of the application's intended use. These evaluation examples should be challenging, diverse, and updated to reflect changing usage and requirements.
 
-- **Metric definitions**: You can't manage what you don't measure. In order to improve Agent quality, it is essential to define what quality means for your use case. Depending on the application, important metrics might include response accuracy, latency, cost, or ratings from key stakeholders.  You'll need metrics that measure each component, how the components interact with each other, and the overall system.
+- **Metric definitions**: You can't manage what you don't measure. In order to improve agent quality, it is essential to define what quality means for your use case. Depending on the application, important metrics might include response accuracy, latency, cost, or ratings from key stakeholders.  You'll need metrics that measure each component, how the components interact with each other, and the overall system.
 
 - **LLM judges**: Given the open ended nature of LLM responses, it is not feasible to read every single response each time you evaluate to determine if the output is correct.  Using an additional, different LLM to review outputs can help scale your evaluation and compute additional metrics such as the groundedness of a response to 1,000s of tokens of context, that would be infeasible for human raters to effectively asses at scale.
 
