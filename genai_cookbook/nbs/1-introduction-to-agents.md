@@ -18,19 +18,23 @@ RAG addresses this issue by first retrieving relevant information from the compa
 
 An agent with a retriever tool is one pattern for RAG, and has the advantage of deciding when to it needs to perform retrieval. This cookbook will describe how to build such an agent. 
 
-## Core components of a Agent application
+## Core components of an agent application
 
 An agent application is an example of a [compound AI system](https://bair.berkeley.edu/blog/2024/02/18/compound-ai-systems/): it expands on the language capabilities of the model alone by combining it with other tools and procedures.
 
 When using a standalone LLM, a user submits a request, such as a question, to the LLM, and the LLM responds with an answer based solely on its training data.  
 
-In its most basic form, the following steps happen in an agent application with a retriever tool:
+In its most basic form, the following steps happen in an agent application:
 
-1. **Retrieval:** The **user's request** is used to query some outside source of information. This might mean querying a vector store, conducting a keyword search over some text, or querying a SQL database. The goal of the retrieval step is to obtain **supporting data** that will help the LLM provide a useful response.
+1. **User query understanding**: First the agent needs to use an LLM to understand the user's query. This step may also consider the previous steps of the conversation if provided.
 
-2. **Augmentation:** The **supporting data** from the retrieval step is combined with the **user's request**, often using a template with additional formatting and instructions to the LLM, to create a **prompt**.
+2. **Tool selection**: The agent will use an LLM to determine if it should use a retriever tool. In the case of a vector search retriever, the LLM will create a retriever query, which will help retriever relevant chunks from the vector database. If no tool is selected, the agent will skip to step 4 and generate the final response.
 
-3. **Generation:** The resulting **prompt** is passed to the LLM, and the LLM generates a response to the **user's request**.
+3. **Tool execution**: The agent will then execute the tool with the parameters determined by the LLM and return the output. 
+
+4. **LLM Generation**: The LLM will then generate the final response.
+
+The image below demonstrates a RAG agent where a retrieval tool is selected.
 
 ```{image} ../images/1-introduction-to-agents/1_img.png
 :alt: RAG process

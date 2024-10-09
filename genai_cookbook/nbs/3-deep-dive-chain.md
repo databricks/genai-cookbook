@@ -65,7 +65,7 @@ Here's how a multi-step query understanding component might look for our a custo
 
 2. **Entity extraction:** Based on the identified intent, use another LLM call to extract relevant entities from the query, such as product names, reported errors, or account numbers.
 
-3. **Query rewriting:** Use the extracted intent and entities to rewrite the original query into a more specific and targeted format, e.g., "My Agent chain is failing to deploy on Model Serving, I'm seeing the following error...".
+3. **Query rewriting:** Use the extracted intent and entities to rewrite the original query into a more specific and targeted format, e.g., "My agent is failing to deploy on Model Serving, I'm seeing the following error...".
 
 ### Retrieval
 

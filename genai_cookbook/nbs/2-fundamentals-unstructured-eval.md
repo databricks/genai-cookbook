@@ -2,7 +2,7 @@
 
 Evaluation and monitoring are critical components to understand if your agent application is performing to the *quality*, *cost*, and *latency* requirements dictated by your use case.  Technically, **evaluation** happens during development and **monitoring** happens once the application is deployed to production, but the fundamental components are similar.
 
-An Agent with retriever tool over unstructured data is a complex system with many components that impact the application's quality. Adjusting any single element can have cascading effects on the others. For instance, data formatting changes can influence the retrieved chunks and the LLM's ability to generate relevant responses. Therefore, it's crucial to evaluate each of the application's components in addition to the application as a whole in order to iteratively refine it based on those assessments.
+Often, an agent is a complex system with many components that impact the application's quality. Adjusting any single element can have cascading effects on the others. For instance, data formatting changes can influence the retrieved chunks and the LLM's ability to generate relevant responses. Therefore, it's crucial to evaluate each of the application's components in addition to the application as a whole in order to iteratively refine it based on those assessments.
 
 Evaluation and monitoring of Generative AI applications, including agents, differs from classical machine learning in several ways:
   

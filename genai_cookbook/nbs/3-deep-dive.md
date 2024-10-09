@@ -32,13 +32,15 @@ This overlap underscores the need for a holistic approach to RAG quality improve
 
 [**RAG Agent**](/nbs/3-deep-dive-chain)
 
+<!-- TODO (prithvi): add this back in once updated to agents
 ```{image} ../images/5-hands-on/16_img.png
 :align: center
-```
+``` -->
 
 <br/>
 
 - The choice of LLM and its parameters (e.g., temperature, max tokens)
+- The tool selection logic (e.g., retriever tool description)
 - The retrieval parameters (e.g., number of chunks/documents retrieved)
 - The retrieval approach (e.g., keyword vs. hybrid vs. semantic search, rewriting the user's query, transforming a user's query into filters, re-ranking)
 - How to format the prompt with retrieved context, to guide the LLM towards desired output

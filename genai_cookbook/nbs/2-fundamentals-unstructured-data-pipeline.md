@@ -1,10 +1,10 @@
 ## Data pipeline
 
-Throughout this guide we will focus on preparing unstructured data for use in Agent applications. *Unstructured* data refers to data without a specific structure or organization, such as PDF documents that might include text and images, or multimedia content such as audio or videos.
+Throughout this guide we will focus on preparing unstructured data for use in agent applications. *Unstructured* data refers to data without a specific structure or organization, such as PDF documents that might include text and images, or multimedia content such as audio or videos.
 
 Unstructured data lacks a predefined data model or schema, making it impossible to query on the basis of structure and metadata alone. As a result, unstructured data requires techniques that can understand and extract semantic meaning from raw text, images, audio, or other content.
 
-During data preparation, the Agent application's data pipeline takes raw unstructured data and transforms it into discrete chunks that can be queried based on their relevance to a user's query. The key steps in data preprocessing are outlined below. Each step has a variety of knobs that can be tuned - for a deeper dive discussion on these knobs, please refer to the [deep dive into RAG section.](/nbs/3-deep-dive)
+During data preparation, the agent application's data pipeline takes raw unstructured data and transforms it into discrete chunks that can be queried based on their relevance to a user's query. The key steps in data preprocessing are outlined below. Each step has a variety of knobs that can be tuned - for a deeper dive discussion on these knobs, please refer to the [deep dive into RAG section.](/nbs/3-deep-dive)
 
 ```{image} ../images/2-fundamentals-unstructured/2_img.png
 :align: center

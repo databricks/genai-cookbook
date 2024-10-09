@@ -2,9 +2,10 @@
 
 Once the data has been processed by the data pipeline, it is suitable for use in a retriever tool. This section describes the process that occurs once the user submits a request to the agent application in an online setting.
 
+<!-- TODO (prithvi): add this back in once updated to agents
 ```{image} ../images/2-fundamentals-unstructured/3_img.png
 :align: center
-```
+``` -->
 <br/>
 
 1. **User query understanding**: First the agent needs to use an LLM to understand the user's query. This step may also consider the previous steps of the conversation if provided.
