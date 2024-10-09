@@ -2,8 +2,8 @@
     "datasets": [
         {
             "name": "b3e86a40",
-            "displayName": "request_logs_eval",
-            "query": "with ranked_logs as (\n    select \n        `timestamp`,\n        request_id,\n        source.id as source_id,\n        text_assessment.ratings[\"answer_correct\"][\"value\"] as text_rating,\n        retrieval_assessment.ratings[\"answer_correct\"][\"value\"] as retrieval_rating,\n        retrieval_assessment.position as retrieval_position,\n        row_number() over (\n            partition by request_id, source.id, retrieval_assessment.position order by `timestamp` desc\n        ) as rank\n    from {{assessment_log_table_name}}\n), human_assessments as (\n    select \n        `timestamp`,\n        request_id as databricks_request_id,\n        source_id,\n        text_rating,\n        case\n            when retrieval_rating = \"false\" then \"negative\"\n            when retrieval_rating = \"true\" then \"positive\"\n            when retrieval_rating = \"i_dont_know\" then \"i_dont_know\"\n            else null\n        end as retrieval_rating,\n        retrieval_position\n    from ranked_logs\n    where rank = 1\n    order by `timestamp` desc\n), aggregated_human_assessments as (\n    select \n        databricks_request_id,\n        sum(case when text_rating = 'positive' then 1 else 0 end) as positive_text_ratings,\n        sum(case when text_rating = 'negative' or text_rating = 'i_dont_know' then 1 else 0 end) as negative_text_ratings,\n        sum(case when retrieval_rating = 'positive' then 1 else 0 end) as positive_retrieval_ratings,\n        sum(case when retrieval_rating = 'negative' or retrieval_rating = 'i_dont_know' then 1 else 0 end) as negative_retrieval_ratings\n    from human_assessments\n    group by databricks_request_id\n), eval_log as (\n    select \n        *,\n        execution_time_ms / 1000 as execution_time_s,\n        concat(\n            '/ml/experiments/',\n            experiment_id,\n            '/runs/',\n            run_id,\n            '/evaluations?searchQuery=',\n            databricks_request_id\n        ) as eval_details\n    from {{eval_requests_log_table_name}}\n    where \n        run_id is not null \n        and run_id != \"skipped\"\n)\nselect\n    eval_log.*,\n    case \n        when negative_text_ratings = 0 and positive_text_ratings = 0 then null\n        when negative_text_ratings >= positive_text_ratings then \"negative\" \n        when negative_text_ratings < positive_text_ratings then \"positive\" \n        else null\n    end as user_text_rating,\n    case \n        when negative_retrieval_ratings = 0 and positive_retrieval_ratings = 0 then null\n        when negative_retrieval_ratings >= positive_retrieval_ratings then \"negative\" \n        when negative_retrieval_ratings < positive_retrieval_ratings then \"positive\" \n        else null\n    end as user_retrieval_rating\nfrom eval_log\nleft join aggregated_human_assessments \non eval_log.databricks_request_id = aggregated_human_assessments.databricks_request_id"
+            "displayName": "{{eval_requests_log_table_name}}",
+            "query": "select \n    *,\n    execution_time_ms / 1000 as execution_time_s,\n    concat(\n        '/ml/experiments/',\n        experiment_id,\n        '/runs/',\n        run_id,\n        '/evaluations?searchQuery=',\n        databricks_request_id\n     ) as eval_details\nfrom {{eval_requests_log_table_name}}\nwhere \n    run_id is not NULL \n    and run_id != \"skipped\""
         }
     ],
     "pages": [
@@ -76,10 +76,7 @@
                                             "fieldName": "percentile(execution_time_s, percentage=0_9)",
                                             "displayName": "90th Percentile of execution_time_s"
                                         }
-                                    ],
-                                    "axis": {
-                                        "title": "Seconds"
-                                    }
+                                    ]
                                 }
                             },
                             "frame": {
@@ -104,7 +101,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 15,
+                        "y": 11,
                         "width": 3,
                         "height": 5
                     }
@@ -116,9 +113,9 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 34,
+                        "y": 30,
                         "width": 6,
-                        "height": 1
+                        "height": 2
                     }
                 },
                 {
@@ -166,10 +163,7 @@
                                     "scale": {
                                         "type": "quantitative"
                                     },
-                                    "axis": {
-                                        "title": "# of Requests"
-                                    },
-                                    "displayName": "# of Requests"
+                                    "displayName": "Count of Records"
                                 },
                                 "color": {
                                     "fieldName": "response/llm_judged/safety/rating",
@@ -209,7 +203,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 22,
+                        "y": 18,
                         "width": 3,
                         "height": 6
                     }
@@ -259,10 +253,7 @@
                                     "scale": {
                                         "type": "quantitative"
                                     },
-                                    "axis": {
-                                        "title": "# of Requests"
-                                    },
-                                    "displayName": "# of Requests"
+                                    "displayName": "Count of Records"
                                 },
                                 "color": {
                                     "fieldName": "response/llm_judged/groundedness/rating",
@@ -302,7 +293,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 28,
+                        "y": 24,
                         "width": 3,
                         "height": 6
                     }
@@ -352,10 +343,7 @@
                                     "scale": {
                                         "type": "quantitative"
                                     },
-                                    "axis": {
-                                        "title": "# of Requests"
-                                    },
-                                    "displayName": "# of Requests"
+                                    "displayName": "Count of Records"
                                 },
                                 "color": {
                                     "fieldName": "response/llm_judged/relevance_to_query/rating",
@@ -399,7 +387,7 @@
                     },
                     "position": {
                         "x": 3,
-                        "y": 22,
+                        "y": 18,
                         "width": 3,
                         "height": 6
                     }
@@ -449,10 +437,7 @@
                                     "scale": {
                                         "type": "quantitative"
                                     },
-                                    "axis": {
-                                        "title": "# of Requests"
-                                    },
-                                    "displayName": "# of Requests"
+                                    "displayName": "Count of Records"
                                 },
                                 "color": {
                                     "fieldName": "status_code",
@@ -465,10 +450,7 @@
                                             }
                                         ]
                                     },
-                                    "legend": {
-                                        "title": "Status Code"
-                                    },
-                                    "displayName": "Status Code"
+                                    "displayName": "status_code"
                                 }
                             },
                             "frame": {
@@ -479,7 +461,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 5,
+                        "y": 6,
                         "width": 3,
                         "height": 5
                     }
@@ -525,10 +507,7 @@
                                     "scale": {
                                         "type": "quantitative"
                                     },
-                                    "axis": {
-                                        "title": "Precision"
-                                    },
-                                    "displayName": "Precision"
+                                    "displayName": "Average retrieval/llm_judged/chunk_relevance/precision"
                                 }
                             },
                             "frame": {
@@ -555,7 +534,7 @@
                     },
                     "position": {
                         "x": 3,
-                        "y": 28,
+                        "y": 24,
                         "width": 3,
                         "height": 6
                     }
@@ -563,7 +542,7 @@
                 {
                     "widget": {
                         "name": "f3cd0aff",
-                        "textbox_spec": "\n## Top-level metrics\nThe following charts give a quick overview of incoming traffic, the pass/fail rate of output quality, user feedback 👍 / 👎, the average execution time for the agent, and topic distribution. **Clicking on any data point inside a chart will filter all other charts to the requests covered by the selected data point.**"
+                        "textbox_spec": "\n## Top-level metrics\nThe following charts give a quick overview of incoming traffic, the pass/fail rate of output quality, the average execution time for the agent, and topic distribution. **Clicking on any data point inside a chart will filter all other charts to the requests covered by the selected data point.**"
                     },
                     "position": {
                         "x": 0,
@@ -1738,7 +1717,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 35,
+                        "y": 32,
                         "width": 6,
                         "height": 6
                     }
@@ -1750,7 +1729,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 20,
+                        "y": 16,
                         "width": 6,
                         "height": 2
                     }
@@ -1797,10 +1776,7 @@
                                     "scale": {
                                         "type": "quantitative"
                                     },
-                                    "axis": {
-                                        "title": "% of Requests"
-                                    },
-                                    "displayName": "% of Requests"
+                                    "displayName": "Count of Records"
                                 },
                                 "color": {
                                     "fieldName": "response/overall_assessment/rating",
@@ -1838,7 +1814,7 @@
                     },
                     "position": {
                         "x": 3,
-                        "y": 5,
+                        "y": 6,
                         "width": 3,
                         "height": 5
                     }
@@ -1880,12 +1856,12 @@
                             "selection": {
                                 "defaultSelection": {
                                     "range": {
-                                        "dataType": "DATETIME",
+                                        "dataType": "DATE",
                                         "min": {
-                                            "value": "now-7d/d"
+                                            "value": "2024-09-17T00:00:00.000"
                                         },
                                         "max": {
-                                            "value": "now-1d/d"
+                                            "value": "2024-09-25T23:59:59.999"
                                         }
                                     }
                                 }
@@ -1900,8 +1876,8 @@
                     "position": {
                         "x": 0,
                         "y": 4,
-                        "width": 3,
-                        "height": 1
+                        "width": 2,
+                        "height": 2
                     }
                 },
                 {
@@ -1954,10 +1930,7 @@
                                             "places": 2
                                         }
                                     },
-                                    "axis": {
-                                        "title": "# of Requests"
-                                    },
-                                    "displayName": "# of Requests"
+                                    "displayName": "Count of Records"
                                 },
                                 "color": {
                                     "fieldName": "topic",
@@ -1995,7 +1968,7 @@
                     },
                     "position": {
                         "x": 3,
-                        "y": 15,
+                        "y": 11,
                         "width": 3,
                         "height": 5
                     }
@@ -2041,206 +2014,22 @@
                         }
                     },
                     "position": {
+                        "x": 2,
+                        "y": 4,
+                        "width": 1,
+                        "height": 2
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "49eeddb4",
+                        "textbox_spec": "##### Mosaic Agent Framework & Evaluation can also help you track actual user feedback over your agent (e.g., thumbs up/down). Reach out to your Databricks representative if you are interested in enabling this feature.\n"
+                    },
+                    "position": {
                         "x": 3,
                         "y": 4,
                         "width": 3,
-                        "height": 1
-                    }
-                },
-                {
-                    "widget": {
-                        "name": "44027211",
-                        "queries": [
-                            {
-                                "name": "main_query",
-                                "query": {
-                                    "datasetName": "b3e86a40",
-                                    "fields": [
-                                        {
-                                            "name": "user_text_rating",
-                                            "expression": "`user_text_rating`"
-                                        },
-                                        {
-                                            "name": "daily(timestamp)",
-                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
-                                        },
-                                        {
-                                            "name": "count(user_text_rating)",
-                                            "expression": "COUNT(`user_text_rating`)"
-                                        }
-                                    ],
-                                    "disaggregated": false
-                                }
-                            }
-                        ],
-                        "spec": {
-                            "version": 3,
-                            "widgetType": "bar",
-                            "encodings": {
-                                "x": {
-                                    "fieldName": "daily(timestamp)",
-                                    "scale": {
-                                        "type": "temporal"
-                                    },
-                                    "displayName": "Timestamp"
-                                },
-                                "y": {
-                                    "fieldName": "count(user_text_rating)",
-                                    "scale": {
-                                        "type": "quantitative"
-                                    },
-                                    "axis": {
-                                        "title": "# of Requests"
-                                    },
-                                    "displayName": "# of Requests"
-                                },
-                                "color": {
-                                    "fieldName": "user_text_rating",
-                                    "scale": {
-                                        "type": "categorical",
-                                        "mappings": [
-                                            {
-                                                "value": null,
-                                                "color": "#077A9D"
-                                            },
-                                            {
-                                                "value": "no",
-                                                "color": "#FFAB00"
-                                            },
-                                            {
-                                                "value": "yes",
-                                                "color": "#00A972"
-                                            },
-                                            {
-                                                "value": "negative",
-                                                "color": "#FFAB00"
-                                            },
-                                            {
-                                                "value": "positive",
-                                                "color": "#00A972"
-                                            }
-                                        ]
-                                    },
-                                    "legend": {
-                                        "hideTitle": true
-                                    },
-                                    "displayName": "user_text_rating"
-                                }
-                            },
-                            "frame": {
-                                "title": "Human feedback on response quality",
-                                "showTitle": true,
-                                "showDescription": true,
-                                "description": "(i.e., more thumbs down than thumbs up and vice versa)"
-                            },
-                            "mark": {
-                                "layout": "stack"
-                            }
-                        }
-                    },
-                    "position": {
-                        "x": 0,
-                        "y": 10,
-                        "width": 3,
-                        "height": 5
-                    }
-                },
-                {
-                    "widget": {
-                        "name": "13a7e1aa",
-                        "queries": [
-                            {
-                                "name": "main_query",
-                                "query": {
-                                    "datasetName": "b3e86a40",
-                                    "fields": [
-                                        {
-                                            "name": "user_retrieval_rating",
-                                            "expression": "`user_retrieval_rating`"
-                                        },
-                                        {
-                                            "name": "daily(timestamp)",
-                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
-                                        },
-                                        {
-                                            "name": "count(user_retrieval_rating)",
-                                            "expression": "COUNT(`user_retrieval_rating`)"
-                                        }
-                                    ],
-                                    "disaggregated": false
-                                }
-                            }
-                        ],
-                        "spec": {
-                            "version": 3,
-                            "widgetType": "bar",
-                            "encodings": {
-                                "x": {
-                                    "fieldName": "daily(timestamp)",
-                                    "scale": {
-                                        "type": "temporal"
-                                    },
-                                    "displayName": "Timestamp"
-                                },
-                                "y": {
-                                    "fieldName": "count(user_retrieval_rating)",
-                                    "scale": {
-                                        "type": "quantitative"
-                                    },
-                                    "axis": {
-                                        "title": "# of Requests"
-                                    },
-                                    "displayName": "# of Requests"
-                                },
-                                "color": {
-                                    "fieldName": "user_retrieval_rating",
-                                    "scale": {
-                                        "type": "categorical",
-                                        "mappings": [
-                                            {
-                                                "value": null,
-                                                "color": "#077A9D"
-                                            },
-                                            {
-                                                "value": "no",
-                                                "color": "#FFAB00"
-                                            },
-                                            {
-                                                "value": "yes",
-                                                "color": "#00A972"
-                                            },
-                                            {
-                                                "value": "negative",
-                                                "color": "#FFAB00"
-                                            },
-                                            {
-                                                "value": "positive",
-                                                "color": "#00A972"
-                                            }
-                                        ]
-                                    },
-                                    "legend": {
-                                        "hideTitle": true
-                                    },
-                                    "displayName": "user_retrieval_rating"
-                                }
-                            },
-                            "frame": {
-                                "title": "Human feedback on retrieval quality",
-                                "showTitle": true,
-                                "showDescription": true,
-                                "description": "(i.e., more thumbs down than thumbs up and vice versa)"
-                            },
-                            "mark": {
-                                "layout": "stack"
-                            }
-                        }
-                    },
-                    "position": {
-                        "x": 3,
-                        "y": 10,
-                        "width": 3,
-                        "height": 5
+                        "height": 2
                     }
                 }
             ]
