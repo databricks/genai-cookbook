@@ -3,7 +3,7 @@
         {
             "name": "b3e86a40",
             "displayName": "request_logs_eval",
-            "query": "with ranked_logs as (\n    select \n        `timestamp`,\n        request_id,\n        source.id as source_id,\n        text_assessment.ratings[\"answer_correct\"][\"value\"] as text_rating,\n        retrieval_assessment.ratings[\"answer_correct\"][\"value\"] as retrieval_rating,\n        retrieval_assessment.position as retrieval_position,\n        row_number() over (\n            partition by request_id, source.id, retrieval_assessment.position order by `timestamp` desc\n        ) as rank\n    from {{assessment_log_table_name}}\n), human_assessments as (\n    select \n        `timestamp`,\n        request_id as databricks_request_id,\n        source_id,\n        text_rating,\n        case\n            when retrieval_rating = \"false\" then \"negative\"\n            when retrieval_rating = \"true\" then \"positive\"\n            when retrieval_rating = \"i_dont_know\" then \"i_dont_know\"\n            else null\n        end as retrieval_rating,\n        retrieval_position\n    from ranked_logs\n    where rank = 1\n    order by `timestamp` desc\n), aggregated_human_assessments as (\n    select \n        databricks_request_id,\n        sum(case when text_rating = 'positive' then 1 else 0 end) as positive_text_ratings,\n        sum(case when text_rating = 'negative' or text_rating = 'i_dont_know' then 1 else 0 end) as negative_text_ratings,\n        sum(case when retrieval_rating = 'positive' then 1 else 0 end) as positive_retrieval_ratings,\n        sum(case when retrieval_rating = 'negative' or retrieval_rating = 'i_dont_know' then 1 else 0 end) as negative_retrieval_ratings\n    from human_assessments\n    group by databricks_request_id\n), eval_log as (\n    select \n        *,\n        execution_time_ms / 1000 as execution_time_s,\n        concat(\n            '/ml/experiments/',\n            experiment_id,\n            '/runs/',\n            run_id,\n            '/evaluations?searchQuery=',\n            databricks_request_id\n        ) as eval_details\n    from {{eval_requests_log_table_name}}\n    where \n        run_id is not null \n        and run_id != \"skipped\"\n)\nselect\n    eval_log.*,\n    case \n        when negative_text_ratings = 0 and positive_text_ratings = 0 then null\n        when negative_text_ratings >= positive_text_ratings then \"negative\" \n        when negative_text_ratings < positive_text_ratings then \"positive\" \n        else null \n    end as overall_negative_text_rating,\n    case \n        when negative_retrieval_ratings = 0 and positive_retrieval_ratings = 0 then null\n        when negative_retrieval_ratings >= positive_retrieval_ratings then \"negative\" \n        when negative_retrieval_ratings < positive_retrieval_ratings then \"positive\" \n        else null \n    end as overall_negative_retrieval_rating\nfrom eval_log\nleft join aggregated_human_assessments \non eval_log.databricks_request_id = aggregated_human_assessments.databricks_request_id"
+            "query": "with ranked_logs as (\n    select \n        `timestamp`,\n        request_id,\n        source.id as source_id,\n        text_assessment.ratings[\"answer_correct\"][\"value\"] as text_rating,\n        retrieval_assessment.ratings[\"answer_correct\"][\"value\"] as retrieval_rating,\n        retrieval_assessment.position as retrieval_position,\n        row_number() over (\n            partition by request_id, source.id, retrieval_assessment.position order by `timestamp` desc\n        ) as rank\n    from {{assessment_log_table_name}}\n), human_assessments as (\n    select \n        `timestamp`,\n        request_id as databricks_request_id,\n        source_id,\n        text_rating,\n        case\n            when retrieval_rating = \"false\" then \"negative\"\n            when retrieval_rating = \"true\" then \"positive\"\n            when retrieval_rating = \"i_dont_know\" then \"i_dont_know\"\n            else null\n        end as retrieval_rating,\n        retrieval_position\n    from ranked_logs\n    where rank = 1\n    order by `timestamp` desc\n), aggregated_human_assessments as (\n    select \n        databricks_request_id,\n        sum(case when text_rating = 'positive' then 1 else 0 end) as positive_text_ratings,\n        sum(case when text_rating = 'negative' or text_rating = 'i_dont_know' then 1 else 0 end) as negative_text_ratings,\n        sum(case when retrieval_rating = 'positive' then 1 else 0 end) as positive_retrieval_ratings,\n        sum(case when retrieval_rating = 'negative' or retrieval_rating = 'i_dont_know' then 1 else 0 end) as negative_retrieval_ratings\n    from human_assessments\n    group by databricks_request_id\n), eval_log as (\n    select \n        *,\n        execution_time_ms / 1000 as execution_time_s,\n        concat(\n            '/ml/experiments/',\n            experiment_id,\n            '/runs/',\n            run_id,\n            '/evaluations?searchQuery=',\n            databricks_request_id\n        ) as eval_details\n    from {{eval_requests_log_table_name}}\n    where \n        run_id is not null \n        and run_id != \"skipped\"\n)\nselect\n    eval_log.*,\n    case \n        when negative_text_ratings = 0 and positive_text_ratings = 0 then null\n        when negative_text_ratings >= positive_text_ratings then \"negative\" \n        when negative_text_ratings < positive_text_ratings then \"positive\" \n        else null\n    end as user_text_rating,\n    case \n        when negative_retrieval_ratings = 0 and positive_retrieval_ratings = 0 then null\n        when negative_retrieval_ratings >= positive_retrieval_ratings then \"negative\" \n        when negative_retrieval_ratings < positive_retrieval_ratings then \"positive\" \n        else null\n    end as user_retrieval_rating\nfrom eval_log\nleft join aggregated_human_assessments \non eval_log.databricks_request_id = aggregated_human_assessments.databricks_request_id"
         }
     ],
     "pages": [
@@ -104,7 +104,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 16,
+                        "y": 15,
                         "width": 3,
                         "height": 5
                     }
@@ -116,9 +116,9 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 35,
+                        "y": 34,
                         "width": 6,
-                        "height": 2
+                        "height": 1
                     }
                 },
                 {
@@ -209,7 +209,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 23,
+                        "y": 22,
                         "width": 3,
                         "height": 6
                     }
@@ -302,7 +302,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 29,
+                        "y": 28,
                         "width": 3,
                         "height": 6
                     }
@@ -399,7 +399,7 @@
                     },
                     "position": {
                         "x": 3,
-                        "y": 23,
+                        "y": 22,
                         "width": 3,
                         "height": 6
                     }
@@ -465,11 +465,14 @@
                                             }
                                         ]
                                     },
-                                    "displayName": "status_code"
+                                    "legend": {
+                                        "title": "Status Code"
+                                    },
+                                    "displayName": "Status Code"
                                 }
                             },
                             "frame": {
-                                "title": "# of requests",
+                                "title": "Number of requests",
                                 "showTitle": true
                             }
                         }
@@ -523,9 +526,9 @@
                                         "type": "quantitative"
                                     },
                                     "axis": {
-                                        "title": "Judged Precision"
+                                        "title": "Precision"
                                     },
-                                    "displayName": "Judged Precision"
+                                    "displayName": "Precision"
                                 }
                             },
                             "frame": {
@@ -552,7 +555,7 @@
                     },
                     "position": {
                         "x": 3,
-                        "y": 29,
+                        "y": 28,
                         "width": 3,
                         "height": 6
                     }
@@ -560,7 +563,7 @@
                 {
                     "widget": {
                         "name": "f3cd0aff",
-                        "textbox_spec": "\n## Top-level metrics\nThe following charts give a quick overview of incoming traffic, the pass/fail rate of output quality, the average execution time for the agent, and topic distribution. **Clicking on any data point inside a chart will filter all other charts to the requests covered by the selected data point.**"
+                        "textbox_spec": "\n## Top-level metrics\nThe following charts give a quick overview of incoming traffic, the pass/fail rate of output quality, user feedback 👍 / 👎, the average execution time for the agent, and topic distribution. **Clicking on any data point inside a chart will filter all other charts to the requests covered by the selected data point.**"
                     },
                     "position": {
                         "x": 0,
@@ -785,58 +788,6 @@
                             },
                             "invisibleColumns": [
                                 {
-                                    "numberFormat": "0",
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "overall_negative_text_ratings",
-                                    "type": "integer",
-                                    "displayAs": "number",
-                                    "order": 100006,
-                                    "title": "overall_negative_text_ratings",
-                                    "allowSearch": false,
-                                    "alignContent": "right",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "numberFormat": "0",
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "overall_negative_retrieval_ratings",
-                                    "type": "integer",
-                                    "displayAs": "number",
-                                    "order": 100007,
-                                    "title": "overall_negative_retrieval_ratings",
-                                    "allowSearch": false,
-                                    "alignContent": "right",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
                                     "booleanValues": [
                                         "false",
                                         "true"
@@ -852,7 +803,7 @@
                                     "name": "client_request_id",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100000,
+                                    "order": 0,
                                     "title": "client_request_id",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -878,7 +829,7 @@
                                     "name": "date",
                                     "type": "date",
                                     "displayAs": "datetime",
-                                    "order": 100002,
+                                    "order": 1,
                                     "title": "date",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -904,7 +855,7 @@
                                     "name": "timestamp_ms",
                                     "type": "integer",
                                     "displayAs": "number",
-                                    "order": 100003,
+                                    "order": 2,
                                     "title": "timestamp_ms",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -930,7 +881,7 @@
                                     "name": "status_code",
                                     "type": "integer",
                                     "displayAs": "number",
-                                    "order": 100004,
+                                    "order": 3,
                                     "title": "status_code",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -956,7 +907,7 @@
                                     "name": "execution_time_ms",
                                     "type": "integer",
                                     "displayAs": "number",
-                                    "order": 100005,
+                                    "order": 4,
                                     "title": "execution_time_ms",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -981,7 +932,7 @@
                                     "name": "request_raw",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100006,
+                                    "order": 5,
                                     "title": "request_raw",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1006,7 +957,7 @@
                                     "name": "response_raw",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100007,
+                                    "order": 6,
                                     "title": "response_raw",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1032,7 +983,7 @@
                                     "name": "sampling_fraction",
                                     "type": "float",
                                     "displayAs": "number",
-                                    "order": 100008,
+                                    "order": 7,
                                     "title": "sampling_fraction",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -1057,7 +1008,7 @@
                                     "name": "request_metadata",
                                     "type": "complex",
                                     "displayAs": "json",
-                                    "order": 100009,
+                                    "order": 8,
                                     "title": "request_metadata",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1082,7 +1033,7 @@
                                     "name": "trace",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100011,
+                                    "order": 15,
                                     "title": "trace",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1107,7 +1058,7 @@
                                     "name": "conversation_id",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100012,
+                                    "order": 16,
                                     "title": "conversation_id",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1132,61 +1083,10 @@
                                     "name": "schema_version",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100015,
+                                    "order": 17,
                                     "title": "schema_version",
                                     "allowSearch": false,
                                     "alignContent": "left",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "experiment_id",
-                                    "type": "string",
-                                    "displayAs": "string",
-                                    "order": 100016,
-                                    "title": "experiment_id",
-                                    "allowSearch": false,
-                                    "alignContent": "left",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "numberFormat": "0.00",
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "retrieval/llm_judged/chunk_relevance/precision",
-                                    "type": "float",
-                                    "displayAs": "number",
-                                    "order": 100018,
-                                    "title": "retrieval/llm_judged/chunk_relevance/precision",
-                                    "allowSearch": false,
-                                    "alignContent": "right",
                                     "allowHTML": false,
                                     "highlightLinks": false,
                                     "useMonospaceFont": false,
@@ -1209,7 +1109,7 @@
                                     "name": "expected_retrieved_context",
                                     "type": "float",
                                     "displayAs": "number",
-                                    "order": 100019,
+                                    "order": 18,
                                     "title": "expected_retrieved_context",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -1235,7 +1135,7 @@
                                     "name": "expected_response",
                                     "type": "float",
                                     "displayAs": "number",
-                                    "order": 100020,
+                                    "order": 19,
                                     "title": "expected_response",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -1260,7 +1160,7 @@
                                     "name": "retrieved_context",
                                     "type": "complex",
                                     "displayAs": "json",
-                                    "order": 100021,
+                                    "order": 20,
                                     "title": "retrieved_context",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1286,7 +1186,7 @@
                                     "name": "grading_notes",
                                     "type": "float",
                                     "displayAs": "number",
-                                    "order": 100022,
+                                    "order": 21,
                                     "title": "grading_notes",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -1308,35 +1208,10 @@
                                     "linkTextTemplate": "{{ @ }}",
                                     "linkTitleTemplate": "{{ @ }}",
                                     "linkOpenInNewTab": true,
-                                    "name": "response/overall_assessment/rating",
-                                    "type": "string",
-                                    "displayAs": "string",
-                                    "order": 100023,
-                                    "title": "response/overall_assessment/rating",
-                                    "allowSearch": false,
-                                    "alignContent": "left",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
                                     "name": "response/llm_judged/groundedness/rating",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100024,
+                                    "order": 22,
                                     "title": "response/llm_judged/groundedness/rating",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1361,58 +1236,8 @@
                                     "name": "response/llm_judged/groundedness/rationale",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100025,
+                                    "order": 23,
                                     "title": "response/llm_judged/groundedness/rationale",
-                                    "allowSearch": false,
-                                    "alignContent": "left",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "retrieval/llm_judged/chunk_relevance/ratings",
-                                    "type": "complex",
-                                    "displayAs": "json",
-                                    "order": 100026,
-                                    "title": "retrieval/llm_judged/chunk_relevance/ratings",
-                                    "allowSearch": false,
-                                    "alignContent": "left",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "retrieval/llm_judged/chunk_relevance/rationales",
-                                    "type": "complex",
-                                    "displayAs": "json",
-                                    "order": 100027,
-                                    "title": "retrieval/llm_judged/chunk_relevance/rationales",
                                     "allowSearch": false,
                                     "alignContent": "left",
                                     "allowHTML": false,
@@ -1436,7 +1261,7 @@
                                     "name": "response/llm_judged/safety/rating",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100028,
+                                    "order": 24,
                                     "title": "response/llm_judged/safety/rating",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1461,7 +1286,7 @@
                                     "name": "response/llm_judged/safety/rationale",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100029,
+                                    "order": 25,
                                     "title": "response/llm_judged/safety/rationale",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1486,7 +1311,7 @@
                                     "name": "response/llm_judged/relevance_to_query/rating",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100030,
+                                    "order": 26,
                                     "title": "response/llm_judged/relevance_to_query/rating",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1511,7 +1336,7 @@
                                     "name": "response/llm_judged/relevance_to_query/rationale",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 100031,
+                                    "order": 27,
                                     "title": "response/llm_judged/relevance_to_query/rationale",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -1521,7 +1346,6 @@
                                     "preserveWhitespace": false
                                 },
                                 {
-                                    "numberFormat": "0",
                                     "booleanValues": [
                                         "false",
                                         "true"
@@ -1534,20 +1358,19 @@
                                     "linkTextTemplate": "{{ @ }}",
                                     "linkTitleTemplate": "{{ @ }}",
                                     "linkOpenInNewTab": true,
-                                    "name": "agent/total_input_token_count",
-                                    "type": "integer",
-                                    "displayAs": "number",
-                                    "order": 100032,
-                                    "title": "agent/total_input_token_count",
+                                    "name": "retrieval/llm_judged/chunk_relevance/ratings",
+                                    "type": "complex",
+                                    "displayAs": "json",
+                                    "order": 28,
+                                    "title": "retrieval/llm_judged/chunk_relevance/ratings",
                                     "allowSearch": false,
-                                    "alignContent": "right",
+                                    "alignContent": "left",
                                     "allowHTML": false,
                                     "highlightLinks": false,
                                     "useMonospaceFont": false,
                                     "preserveWhitespace": false
                                 },
                                 {
-                                    "numberFormat": "0",
                                     "booleanValues": [
                                         "false",
                                         "true"
@@ -1560,39 +1383,13 @@
                                     "linkTextTemplate": "{{ @ }}",
                                     "linkTitleTemplate": "{{ @ }}",
                                     "linkOpenInNewTab": true,
-                                    "name": "agent/total_output_token_count",
-                                    "type": "integer",
-                                    "displayAs": "number",
-                                    "order": 100033,
-                                    "title": "agent/total_output_token_count",
+                                    "name": "retrieval/llm_judged/chunk_relevance/rationales",
+                                    "type": "complex",
+                                    "displayAs": "json",
+                                    "order": 29,
+                                    "title": "retrieval/llm_judged/chunk_relevance/rationales",
                                     "allowSearch": false,
-                                    "alignContent": "right",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "numberFormat": "0",
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "agent/total_token_count",
-                                    "type": "integer",
-                                    "displayAs": "number",
-                                    "order": 100034,
-                                    "title": "agent/total_token_count",
-                                    "allowSearch": false,
-                                    "alignContent": "right",
+                                    "alignContent": "left",
                                     "allowHTML": false,
                                     "highlightLinks": false,
                                     "useMonospaceFont": false,
@@ -1615,7 +1412,7 @@
                                     "name": "agent/latency_seconds",
                                     "type": "float",
                                     "displayAs": "number",
-                                    "order": 100035,
+                                    "order": 30,
                                     "title": "agent/latency_seconds",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -1637,13 +1434,168 @@
                                     "linkTextTemplate": "{{ @ }}",
                                     "linkTitleTemplate": "{{ @ }}",
                                     "linkOpenInNewTab": true,
-                                    "name": "topic",
-                                    "type": "string",
-                                    "displayAs": "string",
-                                    "order": 100036,
-                                    "title": "topic",
+                                    "name": "retrieval/llm_judged/chunk_relevance/error_messages",
+                                    "type": "complex",
+                                    "displayAs": "json",
+                                    "order": 31,
+                                    "title": "retrieval/llm_judged/chunk_relevance/error_messages",
                                     "allowSearch": false,
                                     "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0.00",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "retrieval/llm_judged/chunk_relevance/precision",
+                                    "type": "float",
+                                    "displayAs": "number",
+                                    "order": 32,
+                                    "title": "retrieval/llm_judged/chunk_relevance/precision",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "thumbs_up",
+                                    "type": "integer",
+                                    "displayAs": "number",
+                                    "order": 33,
+                                    "title": "thumbs_up",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "thumbs_down",
+                                    "type": "integer",
+                                    "displayAs": "number",
+                                    "order": 34,
+                                    "title": "thumbs_down",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response/overall_assessment/rating",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 35,
+                                    "title": "response/overall_assessment/rating",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0.00",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "agent/total_input_token_count",
+                                    "type": "float",
+                                    "displayAs": "number",
+                                    "order": 36,
+                                    "title": "agent/total_input_token_count",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0.00",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "agent/total_output_token_count",
+                                    "type": "float",
+                                    "displayAs": "number",
+                                    "order": 37,
+                                    "title": "agent/total_output_token_count",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
                                     "allowHTML": false,
                                     "highlightLinks": false,
                                     "useMonospaceFont": false,
@@ -1666,10 +1618,111 @@
                                     "name": "execution_time_s",
                                     "type": "float",
                                     "displayAs": "number",
-                                    "order": 100037,
+                                    "order": 38,
                                     "title": "execution_time_s",
                                     "allowSearch": false,
                                     "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0.00",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "agent/total_token_count",
+                                    "type": "float",
+                                    "displayAs": "number",
+                                    "order": 39,
+                                    "title": "agent/total_token_count",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response/llm_judged/relevance_to_query/error_message",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 40,
+                                    "title": "response/llm_judged/relevance_to_query/error_message",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "experiment_id",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 41,
+                                    "title": "experiment_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "topic",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 42,
+                                    "title": "topic",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
                                     "allowHTML": false,
                                     "highlightLinks": false,
                                     "useMonospaceFont": false,
@@ -1685,7 +1738,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 37,
+                        "y": 35,
                         "width": 6,
                         "height": 6
                     }
@@ -1697,7 +1750,7 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 21,
+                        "y": 20,
                         "width": 6,
                         "height": 2
                     }
@@ -1795,7 +1848,7 @@
                         "name": "cf0fc2a5",
                         "queries": [
                             {
-                                "name": "dashboards/01ef81a2c6841256aab10f957171712e/datasets/01ef81a2c6871a2a8eb8e4b07372b7a2_daily(timestamp)",
+                                "name": "dashboards/01ef79fd14cb10d68096184e643a9bf2/datasets/01ef79fd14ce1b8e9dd7cefbbac6c1f7_daily(timestamp)",
                                 "query": {
                                     "datasetName": "b3e86a40",
                                     "fields": [
@@ -1820,7 +1873,7 @@
                                     {
                                         "fieldName": "daily(timestamp)",
                                         "displayName": "timestamp",
-                                        "queryName": "dashboards/01ef81a2c6841256aab10f957171712e/datasets/01ef81a2c6871a2a8eb8e4b07372b7a2_daily(timestamp)"
+                                        "queryName": "dashboards/01ef79fd14cb10d68096184e643a9bf2/datasets/01ef79fd14ce1b8e9dd7cefbbac6c1f7_daily(timestamp)"
                                     }
                                 ]
                             },
@@ -1942,7 +1995,7 @@
                     },
                     "position": {
                         "x": 3,
-                        "y": 16,
+                        "y": 15,
                         "width": 3,
                         "height": 5
                     }
@@ -1996,7 +2049,7 @@
                 },
                 {
                     "widget": {
-                        "name": "8f016483",
+                        "name": "44027211",
                         "queries": [
                             {
                                 "name": "main_query",
@@ -2004,16 +2057,16 @@
                                     "datasetName": "b3e86a40",
                                     "fields": [
                                         {
-                                            "name": "overall_negative_text_rating",
-                                            "expression": "`overall_negative_text_rating`"
+                                            "name": "user_text_rating",
+                                            "expression": "`user_text_rating`"
                                         },
                                         {
                                             "name": "daily(timestamp)",
                                             "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
                                         },
                                         {
-                                            "name": "count(overall_negative_text_rating)",
-                                            "expression": "COUNT(`overall_negative_text_rating`)"
+                                            "name": "count(user_text_rating)",
+                                            "expression": "COUNT(`user_text_rating`)"
                                         }
                                     ],
                                     "disaggregated": false
@@ -2029,53 +2082,59 @@
                                     "scale": {
                                         "type": "temporal"
                                     },
-                                    "axis": {
-                                        "title": "Timestamp"
-                                    },
                                     "displayName": "Timestamp"
                                 },
                                 "y": {
-                                    "fieldName": "count(overall_negative_text_rating)",
+                                    "fieldName": "count(user_text_rating)",
                                     "scale": {
                                         "type": "quantitative"
                                     },
                                     "axis": {
-                                        "title": "% of Requests"
+                                        "title": "# of Requests"
                                     },
-                                    "displayName": "% of Requests"
+                                    "displayName": "# of Requests"
                                 },
                                 "color": {
-                                    "fieldName": "overall_negative_text_rating",
+                                    "fieldName": "user_text_rating",
                                     "scale": {
                                         "type": "categorical",
                                         "mappings": [
                                             {
-                                                "value": "positive",
+                                                "value": null,
+                                                "color": "#077A9D"
+                                            },
+                                            {
+                                                "value": "no",
+                                                "color": "#FFAB00"
+                                            },
+                                            {
+                                                "value": "yes",
                                                 "color": "#00A972"
                                             },
                                             {
                                                 "value": "negative",
                                                 "color": "#FFAB00"
+                                            },
+                                            {
+                                                "value": "positive",
+                                                "color": "#00A972"
                                             }
                                         ]
                                     },
                                     "legend": {
-                                        "title": "Rating"
+                                        "hideTitle": true
                                     },
-                                    "displayName": "Rating"
-                                },
-                                "label": {
-                                    "show": false
+                                    "displayName": "user_text_rating"
                                 }
                             },
                             "frame": {
-                                "showTitle": true,
                                 "title": "Human feedback on response quality",
+                                "showTitle": true,
                                 "showDescription": true,
                                 "description": "(i.e., more thumbs down than thumbs up and vice versa)"
                             },
                             "mark": {
-                                "layout": "percent-stack"
+                                "layout": "stack"
                             }
                         }
                     },
@@ -2083,12 +2142,12 @@
                         "x": 0,
                         "y": 10,
                         "width": 3,
-                        "height": 6
+                        "height": 5
                     }
                 },
                 {
                     "widget": {
-                        "name": "040c8e33",
+                        "name": "13a7e1aa",
                         "queries": [
                             {
                                 "name": "main_query",
@@ -2096,16 +2155,16 @@
                                     "datasetName": "b3e86a40",
                                     "fields": [
                                         {
-                                            "name": "overall_negative_retrieval_rating",
-                                            "expression": "`overall_negative_retrieval_rating`"
+                                            "name": "user_retrieval_rating",
+                                            "expression": "`user_retrieval_rating`"
                                         },
                                         {
                                             "name": "daily(timestamp)",
                                             "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
                                         },
                                         {
-                                            "name": "count(overall_negative_retrieval_rating)",
-                                            "expression": "COUNT(`overall_negative_retrieval_rating`)"
+                                            "name": "count(user_retrieval_rating)",
+                                            "expression": "COUNT(`user_retrieval_rating`)"
                                         }
                                     ],
                                     "disaggregated": false
@@ -2121,53 +2180,59 @@
                                     "scale": {
                                         "type": "temporal"
                                     },
-                                    "axis": {
-                                        "title": "Timestamp"
-                                    },
                                     "displayName": "Timestamp"
                                 },
                                 "y": {
-                                    "fieldName": "count(overall_negative_retrieval_rating)",
+                                    "fieldName": "count(user_retrieval_rating)",
                                     "scale": {
                                         "type": "quantitative"
                                     },
                                     "axis": {
-                                        "title": "% of Requests"
+                                        "title": "# of Requests"
                                     },
-                                    "displayName": "% of Requests"
+                                    "displayName": "# of Requests"
                                 },
                                 "color": {
-                                    "fieldName": "overall_negative_retrieval_rating",
+                                    "fieldName": "user_retrieval_rating",
                                     "scale": {
                                         "type": "categorical",
                                         "mappings": [
                                             {
-                                                "value": "positive",
+                                                "value": null,
+                                                "color": "#077A9D"
+                                            },
+                                            {
+                                                "value": "no",
+                                                "color": "#FFAB00"
+                                            },
+                                            {
+                                                "value": "yes",
                                                 "color": "#00A972"
                                             },
                                             {
                                                 "value": "negative",
                                                 "color": "#FFAB00"
+                                            },
+                                            {
+                                                "value": "positive",
+                                                "color": "#00A972"
                                             }
                                         ]
                                     },
                                     "legend": {
-                                        "title": "Rating:"
+                                        "hideTitle": true
                                     },
-                                    "displayName": "Rating:"
-                                },
-                                "label": {
-                                    "show": false
+                                    "displayName": "user_retrieval_rating"
                                 }
                             },
                             "frame": {
-                                "showTitle": true,
                                 "title": "Human feedback on retrieval quality",
+                                "showTitle": true,
                                 "showDescription": true,
                                 "description": "(i.e., more thumbs down than thumbs up and vice versa)"
                             },
                             "mark": {
-                                "layout": "percent-stack"
+                                "layout": "stack"
                             }
                         }
                     },
@@ -2175,7 +2240,7 @@
                         "x": 3,
                         "y": 10,
                         "width": 3,
-                        "height": 6
+                        "height": 5
                     }
                 }
             ]
