@@ -13,6 +13,8 @@
 
 from pydantic import BaseModel
 from typing import Literal, Any, List
+import yaml
+import os
 
 # COMMAND ----------
 
@@ -86,3 +88,10 @@ class AgentConfig(BaseModel):
 
 def validate_agent_config(config: dict) -> None:
   AgentConfig.parse_obj(config)
+
+def save_agent_config(config: dict, file_path: str) -> None:
+  # Ensure the directory exists
+  os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+  with open(file_path, 'w') as file:
+      yaml.dump(config, file)
