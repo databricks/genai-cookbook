@@ -19,7 +19,7 @@
                 {
                     "widget": {
                         "name": "913aa033",
-                        "textbox_spec": "\n# Monitoring dashboard for {{fully_qualified_uc_model_name}}\n\n\n"
+                        "textbox_spec": "\n# Monitoring dashboard for {{fully_qualified_uc_model_name}}\n"
                     },
                     "position": {
                         "x": 0,
