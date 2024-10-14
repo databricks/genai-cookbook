@@ -19,7 +19,7 @@
                 {
                     "widget": {
                         "name": "913aa033",
-                        "textbox_spec": "\n# Monitoring dashboard for {{inference_table_name}}\n"
+                        "textbox_spec": "\n# Monitoring dashboard for {{fully_qualified_uc_model_name}}\n\n\n"
                     },
                     "position": {
                         "x": 0,
@@ -612,7 +612,7 @@
                 {
                     "widget": {
                         "name": "f3cd0aff",
-                        "textbox_spec": "## Usage Summary\nThese charts include **ALL** Agent traffic, not just the percent sampled for analysis with the LLM judges. **Clicking on the individual bars in the graphs will filter all other charts, including the table of requests shown below.** "
+                        "textbox_spec": "## Usage Summary\nThese charts include **ALL** Agent traffic, not just the {{sample_rate}} sampled for analysis with the LLM judges. **Clicking on the individual bars in the graphs will filter all other charts, including the table of requests shown below.** "
                     },
                     "position": {
                         "x": 0,
@@ -1146,7 +1146,7 @@
                 {
                     "widget": {
                         "name": "5013ca16",
-                        "textbox_spec": "## LLM Judge-based Quality Analysis\nThese charts **ONLY** show the percent of Agent traffic sampled for analysis with LLM judges. [Learn more](https://docs.databricks.com/en/generative-ai/agent-evaluation/llm-judge-metrics.html#use-agent-metrics--llm-judges-to-evaluate-app-performance) about the quality metrics computed from the Databricks documentation."
+                        "textbox_spec": "## LLM Judge-based Quality Analysis\nThese charts **ONLY** show the {{sample_rate}} of Agent traffic sampled for analysis with LLM judges. [Learn more](https://docs.databricks.com/en/generative-ai/agent-evaluation/llm-judge-metrics.html#use-agent-metrics--llm-judges-to-evaluate-app-performance) about the quality metrics computed from the Databricks documentation."
                     },
                     "position": {
                         "x": 0,
