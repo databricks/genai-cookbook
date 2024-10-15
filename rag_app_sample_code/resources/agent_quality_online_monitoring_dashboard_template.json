@@ -19,7 +19,7 @@
                 {
                     "widget": {
                         "name": "913aa033",
-                        "textbox_spec": "\n# Monitoring dashboard for {{fully_qualified_uc_model_name}}\n"
+                        "textbox_spec": "\n# Monitoring dashboard for {{fully_qualified_uc_model_name}}\n\nInference Table: {{inference_table_name}}\n"
                     },
                     "position": {
                         "x": 0,
@@ -35,7 +35,7 @@
                             {
                                 "name": "main_query",
                                 "query": {
-                                    "datasetName": "b3e86a40",
+                                    "datasetName": "f31542f7",
                                     "fields": [
                                         {
                                             "name": "daily(timestamp)",
