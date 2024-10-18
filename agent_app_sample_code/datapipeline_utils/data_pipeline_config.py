@@ -21,9 +21,9 @@ from .recursive_character_text_splitter import (
 # Helper function for display Delta Table URLs
 def get_table_url(table_fqdn):
     table_fqdn = table_fqdn.replace("`", "")
-    split = table_fqdn.split(".")
+    catalog, schema, table = table_fqdn.split(".")
     browser_url = du.get_browser_hostname()
-    url = f"https://{browser_url}/explore/data/{split[0]}/{split[1]}/{split[2]}"
+    url = f"https://{browser_url}/explore/data/{catalog}/{schema}/{table}"
     return url
 
 @dataclass
@@ -55,39 +55,26 @@ class UnstructuredDataPipelineSourceConfig(CookbookConfig):
 
     def check_if_volume_exists(self) -> bool:
         if os.path.isdir(self.volume_path):
-            print(f"\nPASS: `{self.volume_path}` exists")
             return True
         else:
-            print(f"\n`{self.volume_path}` does not exist")
             return False
 
-    def create_volume(self) -> bool:
+    def create_volume(self):
         try:
             w = WorkspaceClient()
-            created_volume = w.volumes.create(
+            w.volumes.create(
                 catalog_name=self.uc_catalog_name,
                 schema_name=self.uc_schema_name,
                 name=self.uc_volume_name,
                 volume_type=VolumeType.MANAGED,
             )
-            print(f"\nPASS: Created `{self.volume_path}`")
-            return True
-        except ResourceAlreadyExists as e:
-            print(
-                f"\nCould not create volume `{self.volume_path}` since it already exists"
-            )
-            return True
-        except Exception as e:
-            print(
-                f'\nFAIL: could not create {self.volume_path}` \n\nError details: "{e}"\n\nPlease retry with a `uc_volume_name` that you have permissions to access OR provide a `uc_catalog_name` & `uc_schema_name` where you have CREATE VOLUME permission.'
-            )
-            return False
+        except ResourceAlreadyExists:
+            pass
 
-    def create_or_check_volume(self) -> bool:
+    def create_or_check_volume(self):
         if not self.check_if_volume_exists():
-            return self.create_volume()
-        else:
-            return True
+            print(f"Volume {self.volume_path} does not exist. Creating...")
+            self.create_volume()
 
 
 @dataclass
@@ -108,50 +95,32 @@ class ChunkingConfig(CookbookConfig):
     chunk_size_tokens: int = 2048
     chunk_overlap_tokens: int = 256
 
-    def validate_embedding_endpoint(self) -> bool:
+    def validate_embedding_endpoint(self):
         task_type = "llm/v1/embeddings"
         w = WorkspaceClient()
-        try:
-            browser_url = du.get_browser_hostname()
-            llm_endpoint = w.serving_endpoints.get(name=self.embedding_model_endpoint)
-            if llm_endpoint.state.ready != EndpointStateReady.READY:
-                print(
-                    f"\nFAIL: Model serving endpoint {self.embedding_model_endpoint} is not in a READY state.  Please visit the status page to debug: https://{browser_url}/ml/endpoints/{self.embedding_model_endpoint}"
-                )
-                return False
-            else:
-                if llm_endpoint.task != task_type:
-                    print(
-                        f"\nFAIL: Model serving endpoint {self.embedding_model_endpoint} is online & ready, but does not support task type {task_type}.  Details at: https://{browser_url}/ml/endpoints/{self.embedding_model_endpoint}"
-                    )
-                    return False
-                else:
-                    print(
-                        f"\nPASS: Model serving endpoint {self.embedding_model_endpoint} is online & ready and supports task type {task_type}.  Details at: https://{browser_url}/ml/endpoints/{self.embedding_model_endpoint}"
-                    )
-                    return True
-        except ResourceDoesNotExist as e:
-            print(
-                f"\nFAIL: Model serving endpoint {self.embedding_model_endpoint} does not exist.  Please create it at: https://{browser_url}/ml/endpoints/"
+        browser_url = du.get_browser_hostname()
+        llm_endpoint = w.serving_endpoints.get(name=self.embedding_model_endpoint)
+        if llm_endpoint.state.ready != EndpointStateReady.READY:
+            raise ValueError(
+                f"\nFAIL: Model serving endpoint {self.embedding_model_endpoint} is not in a READY state.  Please visit the status page to debug: https://{browser_url}/ml/endpoints/{self.embedding_model_endpoint}"
             )
-            return False
+        if llm_endpoint.task != task_type:
+            raise ValueError(
+                f"\nFAIL: Model serving endpoint {self.embedding_model_endpoint} is online & ready, but does not support task type {task_type}.  Details at: https://{browser_url}/ml/endpoints/{self.embedding_model_endpoint}"
+            )
 
-    def validate_chunk_size_and_overlap(self) -> bool:
+    def validate_chunk_size_and_overlap(self):
         embedding_model_name, chunk_spec = detect_fmapi_embedding_model_type(
             self.embedding_model_endpoint
         )
         if chunk_spec is None or embedding_model_name is None:
-            print(
+            raise ValueError(
                 f"\nFAIL: {self.embedding_model_endpoint} is not currently supported by the default chunking logic.  Please update `cookbook_utils/recursive_character_text_splitter.py` to add support."
             )
-            return False
 
         chunk_spec["chunk_size_tokens"] = self.chunk_size_tokens
         chunk_spec["chunk_overlap_tokens"] = self.chunk_overlap_tokens
-
-        is_valid, reason = validate_chunk_size(chunk_spec)
-        print("\n" + reason)
-        return is_valid
+        validate_chunk_size(chunk_spec)
 
 
 @dataclass
@@ -306,14 +275,8 @@ class UnstructuredDataPipelineStorageConfig(CookbookConfig):
             )
             == 0
         ):
-            print(
-                f"\nVector Search endpoint `{self.vector_search_endpoint}` does not exist"
-            )
             return False
         else:
-            print(
-                f"\nPASS: Vector Search endpoint `{self.vector_search_endpoint}` exists"
-            )
             return True
 
     def create_vector_search_endpoint(self):
@@ -328,14 +291,8 @@ class UnstructuredDataPipelineStorageConfig(CookbookConfig):
         w.vector_search_endpoints.wait_get_endpoint_vector_search_endpoint_online(
             self.vector_search_endpoint
         )
-        print(
-            f"PASS: Vector Search endpoint `{self.vector_search_endpoint}` created and ready."
-        )
-        return True
-    
-    def create_or_check_vector_search_endpoint(self) -> bool:
+
+    def create_or_check_vector_search_endpoint(self):
         if not self.check_if_vector_search_endpoint_exists():
-            return self.create_vector_search_endpoint()
-        else:
-            return True
+            self.create_vector_search_endpoint()
 

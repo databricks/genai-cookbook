@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field, root_validator, computed_field, field_validator, FieldValidationInfo
-import os
 import json
 import mlflow
 from databricks.sdk import WorkspaceClient
@@ -31,10 +30,9 @@ class AgentCookbookConfig(BaseModel):
     evaluation_set_table: str = Field(None)
 
     def model_post_init(self, __context):
-
         if self.are_any_uc_asset_names_empty() and self.uc_asset_prefix is None:
             raise ValueError(
-                "Must provide `uc_asset_prefix` since you did not provide a value for 1+ of `mlflow_experiment_name`, `uc_model`, or `evaluation_set_table`.  `uc_asset_prefix` is used to compute the default values for these properties."
+                "Must provide `uc_asset_prefix` since you did not provide a value for one or more of `mlflow_experiment_name`, `uc_model`, or `evaluation_set_table`.  `uc_asset_prefix` is used to compute the default values for these properties."
             )
 
         if self.uc_model is None:
@@ -56,17 +54,11 @@ class AgentCookbookConfig(BaseModel):
                 )
 
         if self.mlflow_experiment_name is None:
-            try:
-              w = WorkspaceClient()
-
-              user_email = w.current_user.me().user_name #spark.sql("SELECT current_user() as username").collect()[0].username 
-            #   print(user_email)
-              user_home_directory = f"/Users/{user_email}"
-              
-              self.mlflow_experiment_name = f"{user_home_directory}/{self.uc_asset_prefix}_mlflow_experiment"
-            except Exception as e:
-            #   print(e)
-              raise ValueError(f"Failed to identify the current user's working directory, which is used to initialize the default value for `mlflow_experiment_name`.  Please explicitly specify `mlflow_experiment_name` and retry.")
+            print("No `mlflow_experiment_name` provided, attempting to infer from current user's home directory")
+            w = WorkspaceClient()
+            user_email = w.current_user.me().user_name
+            user_home_directory = f"/Users/{user_email}"
+            self.mlflow_experiment_name = f"{user_home_directory}/{self.uc_asset_prefix}_mlflow_experiment"
 
     def are_any_uc_asset_names_empty(self) -> bool:
         """
@@ -141,63 +133,21 @@ class AgentCookbookConfig(BaseModel):
         print(json.dumps(config_dump, indent=4))
       
 
-    def validate_or_create_uc_catalog(self) -> bool:
+    def validate_or_create_uc_catalog(self):
       w = WorkspaceClient()
-
-      # Create UC Catalog if it does not exist, otherwise, raise an exception
       try:
-          _ = w.catalogs.get(self.uc_catalog_name)
-          print(f"\nPASS: UC catalog `{self.uc_catalog_name}` exists")
-          return True
-      except PermissionDenied as e:
-          print(f"\n`{self.uc_catalog_name}` exists, but you do not have permissions to access.  Please pass a different `uc_catalog_name` or get permissions to {self.uc_catalog_name}")
-          return False
-      except (NotFound) as e:
+          w.catalogs.get(self.uc_catalog_name)
+      except NotFound:
           print(f"\n`{self.uc_catalog_name}` does not exist, trying to create...")
-          try:
-              _ = w.catalogs.create(name=self.uc_catalog_name)
-              print(f"\nPASS: UC catalog `{self.uc_catalog_name}` was created")
-              return True
-          except PermissionDenied as e:
-              print(
-                  f"\nFAIL: `{self.uc_catalog_name}` does not exist, and no permissions to create.  Please provide an existing UC Catalog."
-              )
-              return False
+          w.catalogs.create(name=self.uc_catalog_name)
 
     def validate_or_create_uc_schema(self) -> bool:
       w = WorkspaceClient()
-      # Create UC Schema if it does not exist, otherwise, raise an exception
       try:
           _ = w.schemas.get(full_name=f"{self.uc_catalog_name}.{self.uc_schema_name}")
-          print(f"\nPASS: UC schema `{self.uc_catalog_name}.{self.uc_schema_name}` exists")
-          return True
-      except PermissionDenied as e:
-          print(f"\n`{self.uc_catalog_name}.{self.uc_schema_name}` exists, but you do not have permissions to access.  Please pass a different `uc_schema_name` or get permissions to {self.uc_catalog_name}.{self.uc_schema_name}")
-          return False
-      except (NotFound) as e:
+      except NotFound:
           print(f"\n`{self.uc_catalog_name}.{self.uc_schema_name}` does not exist, trying to create...")
-          try:
-              _ = w.schemas.create(name=self.uc_schema_name, catalog_name=self.uc_catalog_name)
-              print(f"\nPASS: UC schema `{self.uc_catalog_name}.{self.uc_schema_name}` created")
-              return True
-          except PermissionDenied as e:
-              print(
-                  f"\nFAIL: `{self.uc_catalog_name}.{self.uc_schema_name}` does not exist, and no permissions to create.  Please provide an existing UC Schema within your UC Catalog {self.uc_catalog_name}."
-              )
-              return False
-            
-    def validate_or_create_mlflow_experiment(self) -> bool:
-      try:
-          mlflow.set_experiment(self.mlflow_experiment_name)
-          print(
-              f"\nPASS: Using MLflow experiment name `{self.mlflow_experiment_name}`."
-          )
-          return True
-      except Exception as e:
-          print(
-              f"\nFAIL: `{self.mlflow_experiment_name}` is not a valid directory for an MLflow experiment.  An experiment name must be an absolute path within the Databricks workspace, e.g. '/Users/<some-username>/my-experiment'.\n\nIf you tried to specify a directory, either remove the `mlflow_experiment_name` parameter to try the default value or manually specify a valid path for `mlflow_experiment_name` to `AgentCookbookConfig(...)`.\n\nIf you did not pass a value for `mlflow_experiment_name` and are seeing this message, pass a valid workspace directory for `mlflow_experiment_name` and try again."
-          )
-          return False
+          w.schemas.create(name=self.uc_schema_name, catalog_name=self.uc_catalog_name)
 
-# TODO: Add validation for the user having the correct permissions
-
+    def validate_or_create_mlflow_experiment(self):
+        mlflow.set_experiment(self.mlflow_experiment_name)

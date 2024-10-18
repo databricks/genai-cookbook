@@ -164,7 +164,6 @@ if not source_config.create_or_check_volume():
 # COMMAND ----------
 
 from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineStorageConfig
-from databricks.sdk import WorkspaceClient
 
 uc_asset_prefix = cookbook_shared_config.uc_asset_prefix
 
@@ -186,8 +185,7 @@ storage_config.pretty_print()
 storage_config.dump_to_yaml("./configs/data_pipeline_storage_config.yaml")
 
 # Verify Vector Search endpoint, create if it does not exist
-if not storage_config.create_or_check_vector_search_endpoint():
-  raise Exception("Vector Search endpoint is not valid, fix per the console notes above.")
+storage_config.create_or_check_vector_search_endpoint()
 
 # COMMAND ----------
 
@@ -227,11 +225,10 @@ chunking_config.pretty_print()
 # Save to reference in later notebooks
 chunking_config.dump_to_yaml("./configs/data_pipeline_chunking_config.yaml")
 
-if not chunking_config.validate_embedding_endpoint():
-  raise Exception("`embedding_model_endpoint` is not valid, fix per the console notes above.")
-
-if not chunking_config.validate_chunk_size_and_overlap():
-  raise Exception("`chunk_size_tokens` and `chunk_overlap_tokens` is not valid, fix per the console notes above.")
+print(f"Validating model serving embedding endpoint {chunking_config.embedding_model_endpoint}...")
+chunking_config.validate_embedding_endpoint()
+print(f"Validating chunk size and overlap...")
+chunking_config.validate_chunk_size_and_overlap()
 
 # COMMAND ----------
 

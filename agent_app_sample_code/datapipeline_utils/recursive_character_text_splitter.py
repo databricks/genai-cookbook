@@ -170,26 +170,17 @@ def validate_chunk_size(chunk_spec: dict):
     if (
         chunk_spec["chunk_overlap_tokens"] + chunk_spec["chunk_size_tokens"]
     ) > chunk_spec["context_window"]:
-        return (
-            False,
+        raise ValueError(
             f'Proposed chunk_size of {chunk_spec["chunk_size_tokens"]} + overlap of {chunk_spec["chunk_overlap_tokens"]} '
             f'is {chunk_spec["chunk_overlap_tokens"] + chunk_spec["chunk_size_tokens"]} which is greater than context '
             f'window of {chunk_spec["context_window"]} tokens.',
         )
 
     if chunk_spec["chunk_overlap_tokens"] > chunk_spec["chunk_size_tokens"]:
-        return (
-            False,
+        raise ValueError(
             f'Proposed `chunk_overlap_tokens` of {chunk_spec["chunk_overlap_tokens"]} is greater than the '
             f'`chunk_size_tokens` of {chunk_spec["chunk_size_tokens"]}. Reduce the size of `chunk_size_tokens`.',
         )
-
-    # all good
-    return (
-        True,
-        f'PASS: `chunk_overlap_tokens` of {chunk_spec["chunk_overlap_tokens"]} and '
-        f'`chunk_size_tokens` of {chunk_spec["chunk_size_tokens"]} fits within the embedding model\'s context window of {chunk_spec["context_window"]}',
-    )
 
 
 def get_recursive_character_text_splitter(

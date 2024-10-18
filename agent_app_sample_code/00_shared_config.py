@@ -61,7 +61,7 @@ from cookbook_utils.cookbook_config import AgentCookbookConfig
 
 shared_config = AgentCookbookConfig(
     uc_catalog_name=f"{default_catalog}",
-    uc_schema_name=f"{user_name}_agents", 
+    uc_schema_name=f"{user_name}_agents",
     uc_asset_prefix="agent_app_name", # Prefix to every created UC asset, typically the Agent's name
 )
 
@@ -85,11 +85,6 @@ shared_config.pretty_print()
 
 # COMMAND ----------
 
-if not shared_config.validate_or_create_uc_catalog():
-  raise Exception("UC Catalog is not valid, fix per the console notes above.")
-
-if not shared_config.validate_or_create_uc_schema():
-  raise Exception("UC Schema is not valid, fix per the console notes above.")
-
-if not shared_config.validate_or_create_mlflow_experiment():
-  raise Exception("MLflow experiment name is not valid, fix per the console notes above.")
+shared_config.validate_or_create_uc_catalog()
+shared_config.validate_or_create_uc_schema()
+shared_config.validate_or_create_mlflow_experiment()
