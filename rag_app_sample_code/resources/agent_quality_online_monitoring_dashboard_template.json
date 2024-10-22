@@ -2750,6 +2750,14 @@
                                             "expression": "`execution_time_s`"
                                         },
                                         {
+                                            "name": "agent/total_input_token_count",
+                                            "expression": "`agent/total_input_token_count`"
+                                        },
+                                        {
+                                            "name": "agent/total_output_token_count",
+                                            "expression": "`agent/total_output_token_count`"
+                                        },
+                                        {
                                             "name": "trace",
                                             "expression": "`trace`"
                                         },
@@ -2782,7 +2790,7 @@
                                         "linkTextTemplate": "{{ @ }}",
                                         "linkTitleTemplate": "{{ @ }}",
                                         "linkOpenInNewTab": true,
-                                        "type": "datetime",
+                                        "type": "string",
                                         "displayAs": "datetime",
                                         "visible": true,
                                         "order": 0,
@@ -2810,7 +2818,7 @@
                                         "linkTextTemplate": "{{ @ }}",
                                         "linkTitleTemplate": "{{ @ }}",
                                         "linkOpenInNewTab": true,
-                                        "type": "date",
+                                        "type": "string",
                                         "displayAs": "datetime",
                                         "visible": false,
                                         "order": 2,
@@ -3105,7 +3113,7 @@
                                         "type": "string",
                                         "displayAs": "string",
                                         "visible": true,
-                                        "order": 24,
+                                        "order": 21,
                                         "title": "LLM Judge: Overall",
                                         "allowSearch": false,
                                         "alignContent": "left",
@@ -3160,7 +3168,7 @@
                                         "type": "complex",
                                         "displayAs": "json",
                                         "visible": true,
-                                        "order": 25,
+                                        "order": 22,
                                         "title": "LLM Judge: Retrieval quality",
                                         "allowSearch": false,
                                         "alignContent": "left",
@@ -3194,7 +3202,7 @@
                                         "type": "complex",
                                         "displayAs": "json",
                                         "visible": true,
-                                        "order": 26,
+                                        "order": 23,
                                         "title": "LLM Judge: Retrieval quality rationale",
                                         "allowSearch": false,
                                         "alignContent": "left",
@@ -3222,7 +3230,7 @@
                                         "type": "string",
                                         "displayAs": "string",
                                         "visible": true,
-                                        "order": 27,
+                                        "order": 24,
                                         "title": "LLM Judge: Groundedness",
                                         "allowSearch": false,
                                         "alignContent": "left",
@@ -3277,7 +3285,7 @@
                                         "type": "string",
                                         "displayAs": "string",
                                         "visible": true,
-                                        "order": 28,
+                                        "order": 25,
                                         "title": "LLM Judge: Groundedness rationale",
                                         "allowSearch": false,
                                         "alignContent": "left",
@@ -3305,7 +3313,7 @@
                                         "type": "string",
                                         "displayAs": "string",
                                         "visible": true,
-                                        "order": 29,
+                                        "order": 26,
                                         "title": "LLM Judge: Response Relevance",
                                         "allowSearch": false,
                                         "alignContent": "left",
@@ -3360,7 +3368,7 @@
                                         "type": "string",
                                         "displayAs": "string",
                                         "visible": true,
-                                        "order": 30,
+                                        "order": 27,
                                         "title": "LLM Judge: Response Relevance rationale",
                                         "allowSearch": false,
                                         "alignContent": "left",
@@ -3388,7 +3396,7 @@
                                         "type": "string",
                                         "displayAs": "string",
                                         "visible": true,
-                                        "order": 31,
+                                        "order": 28,
                                         "title": "LLM Judge: Safety",
                                         "allowSearch": false,
                                         "alignContent": "left",
@@ -3444,7 +3452,7 @@
                                         "type": "float",
                                         "displayAs": "number",
                                         "visible": true,
-                                        "order": 32,
+                                        "order": 29,
                                         "title": "Latency (seconds)",
                                         "allowSearch": false,
                                         "alignContent": "right",
@@ -3453,6 +3461,98 @@
                                         "useMonospaceFont": false,
                                         "preserveWhitespace": false,
                                         "displayName": "execution_time_s"
+                                    },
+                                    {
+                                        "fieldName": "agent/total_input_token_count",
+                                        "numberFormat": "0",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "integer",
+                                        "displayAs": "number",
+                                        "visible": true,
+                                        "order": 30,
+                                        "title": "Input Tokens",
+                                        "allowSearch": false,
+                                        "alignContent": "right",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "agent/total_input_token_count",
+                                                        "fn": "is null",
+                                                        "literal": ""
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#ffffff"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "description": "null values indicate the tokens could not be computed from the trace",
+                                        "displayName": "agent/total_input_token_count"
+                                    },
+                                    {
+                                        "fieldName": "agent/total_output_token_count",
+                                        "numberFormat": "0",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "integer",
+                                        "displayAs": "number",
+                                        "visible": true,
+                                        "order": 31,
+                                        "title": "Output Tokens",
+                                        "allowSearch": false,
+                                        "alignContent": "right",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "agent/total_output_token_count",
+                                                        "fn": "is null",
+                                                        "literal": ""
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#fffefe"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "description": "null values indicate the tokens could not be computed from the trace",
+                                        "displayName": "agent/total_output_token_count"
                                     },
                                     {
                                         "fieldName": "trace",
@@ -3471,7 +3571,7 @@
                                         "type": "string",
                                         "displayAs": "json",
                                         "visible": true,
-                                        "order": 40,
+                                        "order": 37,
                                         "title": "MLflow trace",
                                         "allowSearch": false,
                                         "alignContent": "left",
@@ -3499,7 +3599,7 @@
                                         "type": "string",
                                         "displayAs": "string",
                                         "visible": true,
-                                        "order": 41,
+                                        "order": 38,
                                         "title": "Databricks Request ID",
                                         "allowSearch": false,
                                         "alignContent": "left",
@@ -3767,58 +3867,6 @@
                                     "preserveWhitespace": false
                                 },
                                 {
-                                    "numberFormat": "0.00",
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "expected_retrieved_context",
-                                    "type": "float",
-                                    "displayAs": "number",
-                                    "order": 19,
-                                    "title": "expected_retrieved_context",
-                                    "allowSearch": false,
-                                    "alignContent": "right",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "numberFormat": "0.00",
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "expected_response",
-                                    "type": "float",
-                                    "displayAs": "number",
-                                    "order": 20,
-                                    "title": "expected_response",
-                                    "allowSearch": false,
-                                    "alignContent": "right",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
                                     "booleanValues": [
                                         "false",
                                         "true"
@@ -3834,36 +3882,10 @@
                                     "name": "retrieved_context",
                                     "type": "complex",
                                     "displayAs": "json",
-                                    "order": 21,
+                                    "order": 19,
                                     "title": "retrieved_context",
                                     "allowSearch": false,
                                     "alignContent": "left",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "numberFormat": "0.00",
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "grading_notes",
-                                    "type": "float",
-                                    "displayAs": "number",
-                                    "order": 22,
-                                    "title": "grading_notes",
-                                    "allowSearch": false,
-                                    "alignContent": "right",
                                     "allowHTML": false,
                                     "highlightLinks": false,
                                     "useMonospaceFont": false,
@@ -3885,7 +3907,7 @@
                                     "name": "response/overall_assessment/rating",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 23,
+                                    "order": 20,
                                     "title": "LLM Judge: Overall",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -3938,7 +3960,7 @@
                                     "name": "response/llm_judged/safety/rationale",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 33,
+                                    "order": 32,
                                     "title": "response/llm_judged/safety/rationale",
                                     "allowSearch": false,
                                     "alignContent": "left",
@@ -3964,7 +3986,7 @@
                                     "name": "agent/latency_seconds",
                                     "type": "float",
                                     "displayAs": "number",
-                                    "order": 34,
+                                    "order": 33,
                                     "title": "agent/latency_seconds",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -3990,7 +4012,7 @@
                                     "name": "retrieval/llm_judged/chunk_relevance/precision",
                                     "type": "float",
                                     "displayAs": "number",
-                                    "order": 35,
+                                    "order": 34,
                                     "title": "retrieval/llm_judged/chunk_relevance/precision",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -4013,62 +4035,10 @@
                                     "linkTextTemplate": "{{ @ }}",
                                     "linkTitleTemplate": "{{ @ }}",
                                     "linkOpenInNewTab": true,
-                                    "name": "agent/total_input_token_count",
-                                    "type": "float",
-                                    "displayAs": "number",
-                                    "order": 36,
-                                    "title": "agent/total_input_token_count",
-                                    "allowSearch": false,
-                                    "alignContent": "right",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "numberFormat": "0.00",
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
-                                    "name": "agent/total_output_token_count",
-                                    "type": "float",
-                                    "displayAs": "number",
-                                    "order": 37,
-                                    "title": "agent/total_output_token_count",
-                                    "allowSearch": false,
-                                    "alignContent": "right",
-                                    "allowHTML": false,
-                                    "highlightLinks": false,
-                                    "useMonospaceFont": false,
-                                    "preserveWhitespace": false
-                                },
-                                {
-                                    "numberFormat": "0.00",
-                                    "booleanValues": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "imageUrlTemplate": "{{ @ }}",
-                                    "imageTitleTemplate": "{{ @ }}",
-                                    "imageWidth": "",
-                                    "imageHeight": "",
-                                    "linkUrlTemplate": "{{ @ }}",
-                                    "linkTextTemplate": "{{ @ }}",
-                                    "linkTitleTemplate": "{{ @ }}",
-                                    "linkOpenInNewTab": true,
                                     "name": "agent/total_token_count",
-                                    "type": "float",
+                                    "type": "integer",
                                     "displayAs": "number",
-                                    "order": 38,
+                                    "order": 35,
                                     "title": "agent/total_token_count",
                                     "allowSearch": false,
                                     "alignContent": "right",
@@ -4093,8 +4063,285 @@
                                     "name": "experiment_id",
                                     "type": "string",
                                     "displayAs": "string",
-                                    "order": 39,
+                                    "order": 36,
                                     "title": "experiment_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "cluster_title",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 39,
+                                    "title": "cluster_title",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response/overall_assessment/rationale",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 40,
+                                    "title": "response/overall_assessment/rationale",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "doc_id",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 41,
+                                    "title": "doc_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "embedding",
+                                    "type": "complex",
+                                    "displayAs": "json",
+                                    "order": 42,
+                                    "title": "embedding",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "cluster_id",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 43,
+                                    "title": "cluster_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0.00",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "cluster_membership_prob",
+                                    "type": "float",
+                                    "displayAs": "number",
+                                    "order": 44,
+                                    "title": "cluster_membership_prob",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "supercluster_id",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 45,
+                                    "title": "supercluster_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0.00",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "supercluster_membership_prob",
+                                    "type": "float",
+                                    "displayAs": "number",
+                                    "order": 46,
+                                    "title": "supercluster_membership_prob",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "supercluster_title",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 47,
+                                    "title": "supercluster_title",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "retrieval/llm_judged/chunk_relevance/error_messages",
+                                    "type": "complex",
+                                    "displayAs": "json",
+                                    "order": 48,
+                                    "title": "retrieval/llm_judged/chunk_relevance/error_messages",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response/llm_judged/groundedness/error_message",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 49,
+                                    "title": "response/llm_judged/groundedness/error_message",
                                     "allowSearch": false,
                                     "alignContent": "left",
                                     "allowHTML": false,
@@ -4118,8 +4365,271 @@
                     },
                     "position": {
                         "x": 0,
-                        "y": 45,
+                        "y": 51,
                         "width": 6,
+                        "height": 6
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "9edcdc14",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "daily(timestamp)",
+                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
+                                        },
+                                        {
+                                            "name": "percentile(agent/total_input_token_count, percentage=0_25)",
+                                            "expression": "PERCENTILE(`agent/total_input_token_count`, 0.25)"
+                                        },
+                                        {
+                                            "name": "percentile(agent/total_input_token_count, percentage=0_5)",
+                                            "expression": "PERCENTILE(`agent/total_input_token_count`, 0.5)"
+                                        },
+                                        {
+                                            "name": "percentile(agent/total_input_token_count, percentage=0_75)",
+                                            "expression": "PERCENTILE(`agent/total_input_token_count`, 0.75)"
+                                        },
+                                        {
+                                            "name": "percentile(agent/total_input_token_count, percentage=0_95)",
+                                            "expression": "PERCENTILE(`agent/total_input_token_count`, 0.95)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 3,
+                            "widgetType": "line",
+                            "encodings": {
+                                "x": {
+                                    "fieldName": "daily(timestamp)",
+                                    "scale": {
+                                        "type": "temporal"
+                                    },
+                                    "axis": {
+                                        "title": "Date"
+                                    },
+                                    "displayName": "Date"
+                                },
+                                "y": {
+                                    "axis": {
+                                        "title": "Token Count"
+                                    },
+                                    "scale": {
+                                        "type": "quantitative"
+                                    },
+                                    "fields": [
+                                        {
+                                            "fieldName": "percentile(agent/total_input_token_count, percentage=0_25)",
+                                            "displayName": "p25 of Input Tokens"
+                                        },
+                                        {
+                                            "fieldName": "percentile(agent/total_input_token_count, percentage=0_5)",
+                                            "displayName": "p50 of Input Tokens"
+                                        },
+                                        {
+                                            "fieldName": "percentile(agent/total_input_token_count, percentage=0_75)",
+                                            "displayName": "p75 of Input Tokens"
+                                        },
+                                        {
+                                            "fieldName": "percentile(agent/total_input_token_count, percentage=0_95)",
+                                            "displayName": "p95 of Input Tokens"
+                                        }
+                                    ]
+                                },
+                                "label": {
+                                    "show": false
+                                }
+                            },
+                            "frame": {
+                                "showTitle": true,
+                                "title": "Input token usage",
+                                "showDescription": true,
+                                "description": "How many input tokens are used per-request?"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 2,
+                        "y": 45,
+                        "width": 2,
+                        "height": 6
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "07940a01",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "daily(timestamp)",
+                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
+                                        },
+                                        {
+                                            "name": "percentile(agent/total_output_token_count, percentage=0_25)",
+                                            "expression": "PERCENTILE(`agent/total_output_token_count`, 0.25)"
+                                        },
+                                        {
+                                            "name": "percentile(agent/total_output_token_count, percentage=0_5)",
+                                            "expression": "PERCENTILE(`agent/total_output_token_count`, 0.5)"
+                                        },
+                                        {
+                                            "name": "percentile(agent/total_output_token_count, percentage=0_75)",
+                                            "expression": "PERCENTILE(`agent/total_output_token_count`, 0.75)"
+                                        },
+                                        {
+                                            "name": "percentile(agent/total_output_token_count, percentage=0_95)",
+                                            "expression": "PERCENTILE(`agent/total_output_token_count`, 0.95)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 3,
+                            "widgetType": "line",
+                            "encodings": {
+                                "x": {
+                                    "fieldName": "daily(timestamp)",
+                                    "scale": {
+                                        "type": "temporal"
+                                    },
+                                    "axis": {
+                                        "title": "Date"
+                                    },
+                                    "displayName": "Date"
+                                },
+                                "y": {
+                                    "axis": {
+                                        "title": "Token Count"
+                                    },
+                                    "scale": {
+                                        "type": "quantitative"
+                                    },
+                                    "fields": [
+                                        {
+                                            "fieldName": "percentile(agent/total_output_token_count, percentage=0_25)",
+                                            "displayName": "p25 of Output Tokens"
+                                        },
+                                        {
+                                            "fieldName": "percentile(agent/total_output_token_count, percentage=0_5)",
+                                            "displayName": "p50 of Output Tokens"
+                                        },
+                                        {
+                                            "fieldName": "percentile(agent/total_output_token_count, percentage=0_75)",
+                                            "displayName": "p75 of Output Tokens"
+                                        },
+                                        {
+                                            "fieldName": "percentile(agent/total_output_token_count, percentage=0_95)",
+                                            "displayName": "p95 of Output Tokens"
+                                        }
+                                    ]
+                                },
+                                "label": {
+                                    "show": false
+                                }
+                            },
+                            "frame": {
+                                "showTitle": true,
+                                "title": "Output token usage",
+                                "showDescription": true,
+                                "description": "How many output tokens are used per-request?"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 4,
+                        "y": 45,
+                        "width": 2,
+                        "height": 6
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "8f39db71",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "daily(timestamp)",
+                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
+                                        },
+                                        {
+                                            "name": "sum(agent/total_input_token_count)",
+                                            "expression": "SUM(`agent/total_input_token_count`)"
+                                        },
+                                        {
+                                            "name": "sum(agent/total_output_token_count)",
+                                            "expression": "SUM(`agent/total_output_token_count`)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 3,
+                            "widgetType": "area",
+                            "encodings": {
+                                "x": {
+                                    "fieldName": "daily(timestamp)",
+                                    "scale": {
+                                        "type": "temporal"
+                                    },
+                                    "axis": {
+                                        "title": "Date"
+                                    },
+                                    "displayName": "Date"
+                                },
+                                "y": {
+                                    "axis": {
+                                        "title": "Token Count"
+                                    },
+                                    "scale": {
+                                        "type": "quantitative"
+                                    },
+                                    "fields": [
+                                        {
+                                            "fieldName": "sum(agent/total_input_token_count)",
+                                            "displayName": "Input Tokens"
+                                        },
+                                        {
+                                            "fieldName": "sum(agent/total_output_token_count)",
+                                            "displayName": "Output Tokens"
+                                        }
+                                    ]
+                                },
+                                "label": {
+                                    "show": false
+                                }
+                            },
+                            "frame": {
+                                "showTitle": true,
+                                "title": "Total token usage",
+                                "showDescription": true,
+                                "description": "How many tokens (input and output) are used per day?"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 45,
+                        "width": 2,
                         "height": 6
                     }
                 }
