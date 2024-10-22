@@ -4406,7 +4406,7 @@
                         ],
                         "spec": {
                             "version": 3,
-                            "widgetType": "area",
+                            "widgetType": "line",
                             "encodings": {
                                 "x": {
                                     "fieldName": "daily(timestamp)",
@@ -4499,7 +4499,7 @@
                         ],
                         "spec": {
                             "version": 3,
-                            "widgetType": "area",
+                            "widgetType": "line",
                             "encodings": {
                                 "x": {
                                     "fieldName": "daily(timestamp)",
