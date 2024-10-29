@@ -1,6 +1,12 @@
-# RAG overview
+# Agents overview
 
-This section provides an overview of Retrieval-augmented generation (RAG): what it is, how it works, and key concepts.
+This section provides an overview of Agents: what it is, how it works, and key concepts.
+
+## What are AI agents and tools?
+
+AI agents are systems where models make decisions, often using tools like Databricks' Unity Catalog functions toperform tasks such as retrieving data or interacting with external services.
+
+See Databricks docs ([AWS](https://docs.databricks.com/en/generative-ai/ai-agents.html)|[Azure](https://learn.microsoft.com/en-us/azure/databricks/generative-ai/ai-agents)) for more info.
 
 ## What is retrieval-augmented generation?
 
@@ -10,28 +16,34 @@ For example, suppose you are building a question-and-answer chatbot to help empl
 
 RAG addresses this issue by first retrieving relevant information from the company documents based on a user’s query, and then providing the retrieved information to the LLM as additional context. This allows the LLM to generate a more accurate response by drawing from the specific details found in the relevant documents. In essence, RAG enables the LLM to “consult” the retrieved information to formulate its answer.
 
-## Core components of a RAG application
+An agent with a retriever tool is one pattern for RAG, and has the advantage of deciding when to it needs to perform retrieval. This cookbook will describe how to build such an agent. 
 
-A RAG application is an example of a [compound AI system](https://bair.berkeley.edu/blog/2024/02/18/compound-ai-systems/): it expands on the language capabilities of the model alone by combining it with other tools and procedures.
+## Core components of an agent application
+
+An agent application is an example of a [compound AI system](https://bair.berkeley.edu/blog/2024/02/18/compound-ai-systems/): it expands on the language capabilities of the model alone by combining it with other tools and procedures.
 
 When using a standalone LLM, a user submits a request, such as a question, to the LLM, and the LLM responds with an answer based solely on its training data.  
 
-In its most basic form, the following steps happen in a RAG application:
+In its most basic form, the following steps happen in an agent application:
 
-1. **Retrieval:** The **user's request** is used to query some outside source of information. This might mean querying a vector store, conducting a keyword search over some text, or querying a SQL database. The goal of the retrieval step is to obtain **supporting data** that will help the LLM provide a useful response.
+1. **User query understanding**: First the agent needs to use an LLM to understand the user's query. This step may also consider the previous steps of the conversation if provided.
 
-2. **Augmentation:** The **supporting data** from the retrieval step is combined with the **user's request**, often using a template with additional formatting and instructions to the LLM, to create a **prompt**.
+2. **Tool selection**: The agent will use an LLM to determine if it should use a retriever tool. In the case of a vector search retriever, the LLM will create a retriever query, which will help retriever relevant chunks from the vector database. If no tool is selected, the agent will skip to step 4 and generate the final response.
 
-3. **Generation:** The resulting **prompt** is passed to the LLM, and the LLM generates a response to the **user's request**.
+3. **Tool execution**: The agent will then execute the tool with the parameters determined by the LLM and return the output. 
 
-```{image} ../images/1-introduction-to-rag/1_img.png
+4. **LLM Generation**: The LLM will then generate the final response.
+
+The image below demonstrates a RAG agent where a retrieval tool is selected.
+
+```{image} ../images/1-introduction-to-agents/1_img.png
 :alt: RAG process
 :align: center
 ```
 
 <br>
 
-This is a simplified overview of the RAG process, but it's important to note that implementing a RAG application involves a number of complex tasks. Preprocessing source data to make it suitable for use in RAG, effectively retrieving data, formatting the augmented prompt, and evaluating the generated responses all require careful consideration and effort. These topics will be covered in greater detail in later sections of this guide.
+This is a simplified overview of the RAG process, but it's important to note that implementing an agent application involves a number of complex tasks. Preprocessing source data to make it suitable for retrieval, formatting the augmented prompt, and evaluating the generated responses all require careful consideration and effort. These topics will be covered in greater detail in later sections of this guide.
 
 ## Why use RAG?
 
@@ -53,4 +65,4 @@ The RAG architecture can work with 2 types of **supporting data**:
 | **Definition** | Tabular data arranged in rows & columns with a specific schema e.g., tables in a database. | Data without a specific structure or organization, e.g., documents that include text and images or multimedia content such as audio or videos. |
 | **Example data sources** | - Customer records in a BI or Data Warehouse system<br>- Transaction data from a SQL database<br>- Data from application APIs (e.g., SAP, Salesforce, etc) | - PDFs<br>- Google/Office documents<br>- Wikis<br>- Images<br>- Videos |
 
-Which data you use with RAG depends on your use case. The remainder of this guide focuses on RAG for unstructured data.
+Which data you use for your retriever depends on your use case. The remainder of this guide focuses on agents that use a retriever tool for unstructured data.

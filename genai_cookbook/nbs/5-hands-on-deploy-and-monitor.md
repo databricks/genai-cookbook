@@ -6,7 +6,7 @@
 
 Now that you have [built your RAG POC](/nbs/5-hands-on-build-poc.md#deploy-poc-to-collect-stakeholder-feedback), [evaluated it](/nbs/5-hands-on-evaluate-poc.md), and [improved its quality](/nbs/5-hands-on-improve-quality.md), it's time to deploy your RAG application to production. It is important to note that this does not mean that you are done monitoring performance and collecting feedback! Iterating on quality remains extremely important, even after deployment, as both data and usage patterns can change over time.
 
-> With Databricks, your chain is ready to deploy as-is using Mosaic AI Agent Serving.  For instructions, refer to the [agent serving documentation](https://docs.databricks.com/generative-ai/deploy-agent.html).
+> With Databricks, your chain is ready to deploy as-is using Mosaic AI Agent Serving.  For instructions, refer to the [agent serving documentation](https://docs.databricks.com/generative-ai/deploy-agent.html). After deploying your agent, you can monitor the quality of deployed agents on production traffic using Mosaic AI Agent Evaluation. For instructions, refer to the [agent evaluation documentation](https://docs.databricks.com/en/generative-ai/agent-evaluation/evaluating-production-traffic.html).
 
 ## Deployment
 

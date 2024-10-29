@@ -1,10 +1,10 @@
 ## Data pipeline
 
-Throughout this guide we will focus on preparing unstructured data for use in RAG applications. *Unstructured* data refers to data without a specific structure or organization, such as PDF documents that might include text and images, or multimedia content such as audio or videos.
+Throughout this guide we will focus on preparing unstructured data for use in agent applications. *Unstructured* data refers to data without a specific structure or organization, such as PDF documents that might include text and images, or multimedia content such as audio or videos.
 
 Unstructured data lacks a predefined data model or schema, making it impossible to query on the basis of structure and metadata alone. As a result, unstructured data requires techniques that can understand and extract semantic meaning from raw text, images, audio, or other content.
 
-During data preparation, the RAG application's data pipeline takes raw unstructured data and transforms it into discrete chunks that can be queried based on their relevance to a user's query. The key steps in data preprocessing are outlined below. Each step has a variety of knobs that can be tuned - for a deeper dive discussion on these knobs, please refer to the [deep dive into RAG section.](/nbs/3-deep-dive)
+During data preparation, the agent application's data pipeline takes raw unstructured data and transforms it into discrete chunks that can be queried based on their relevance to a user's query. The key steps in data preprocessing are outlined below. Each step has a variety of knobs that can be tuned - for a deeper dive discussion on these knobs, please refer to the [deep dive into RAG section.](/nbs/3-deep-dive)
 
 ```{image} ../images/2-fundamentals-unstructured/2_img.png
 :align: center
@@ -17,7 +17,7 @@ Semantic search is one of several approaches that can be taken when implementing
 
 
 
-The following are the typical steps of a data pipeline in a RAG application using unstructured data:
+The following are the typical steps of a data pipeline in an agent application using unstructured data:
 
 1. **Parse the raw documents:** The initial step involves transforming raw data into a usable format. This can include extracting text, tables, and images from a collection of PDFs or employing optical character recognition (OCR) techniques to extract text from images.
 
@@ -31,6 +31,6 @@ The following are the typical steps of a data pipeline in a RAG application usin
 
 The process of computing similarity can be computationally expensive. Vector indexes, such as [Databricks Vector Search](https://docs.databricks.com/en/generative-ai/vector-search.html), speed this process up by providing a mechanism for efﬁciently organizing and navigating embeddings, often via sophisticated approximation methods. This enables rapid ranking of the most relevant results without comparing each embedding to the user's query individually.
 
-Each step in the data pipeline involves engineering decisions that impact the RAG application's quality. For example, choosing the right chunk size in step (3) ensures the LLM receives specific yet contextualized information, while selecting an appropriate embedding model in step (4) determines the accuracy of the chunks returned during retrieval.
+Each step in the data pipeline involves engineering decisions that impact the agent application's quality. For example, choosing the right chunk size in step (3) ensures the LLM receives specific yet contextualized information, while selecting an appropriate embedding model in step (4) determines the accuracy of the chunks returned during retrieval.
 
 This data preparation process is referred to as *offline* data preparation, as it occurs before the system answers queries, unlike the *online* steps triggered when a user submits a query.
