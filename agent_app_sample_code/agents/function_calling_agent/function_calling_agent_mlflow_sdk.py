@@ -268,16 +268,17 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         messages = kwargs["messages"]
         del kwargs["messages"]
         for _ in range(max_iter):
-            response = self.chat_completion(messages=messages, tools=True)
+            response = self.chat_completion(messages=messages)
             assistant_message = response.choices[0]["message"]
             tool_calls = assistant_message.get('tool_calls')
             if tool_calls is None:
                 # the tool execution finished, and we have a generation
                 return (response, messages)
             tool_messages = []
-            for tool_call in tool_calls:  # TODO: should run in parallel
-                function = tool_call['function'] #openai
+            for tool_call in tool_calls:
+                function = tool_call['function']
                 args = json.loads(function['arguments'])
+                print(tool_call)
                 result = self.execute_function(function['name'], args)
                 tool_message = {
                     "role": "tool",
@@ -298,11 +299,11 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
 
     @mlflow.trace(span_type="FUNCTION")
     def execute_function(self, function_name, args):
-        the_function = self.tool_functions.get(function_name)
+        the_function = self.tool_functions[function_name]
         result = the_function(**args)
         return result
 
-    def chat_completion(self, messages: List[Dict[str, str]], tools: bool = False):
+    def chat_completion(self, messages: List[Dict[str, str]]):
         endpoint_name = self.config.get("llm_config").get("llm_endpoint_name")
         llm_options = self.config.get("llm_config").get("llm_parameters")
 
@@ -313,20 +314,14 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             span_type="CHAT_MODEL",
         )
 
-        if tools:
-            # Get all tools
-            tools = self.tool_json_schemas
+        # Get all tools
+        tools = self.tool_json_schemas
 
-            inputs = {
-                "messages": messages,
-                "tools": tools,
-                **llm_options,
-            }
-        else:
-            inputs = {
-                "messages": messages,
-                **llm_options,
-            }
+        inputs = {
+            "messages": messages,
+            "tools": tools,
+            **llm_options,
+        }
 
         # Use the traced_create to make the prediction
         return traced_create(
