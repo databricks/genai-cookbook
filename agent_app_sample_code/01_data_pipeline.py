@@ -24,7 +24,7 @@
 # MAGIC
 # MAGIC     *Note: While you can adjust the other settings and modify the parsing/chunking code, we suggest doing so only after evaluating your Agent's quality so you can make improvements that specifically address root causes of quality issues.*
 # MAGIC
-# MAGIC 2. **Use later notebooks to intergate the retriever into an the agent and evaluate the agent/retriever's quality.**
+# MAGIC 2. **Use later notebooks to integrate the retriever into an the agent and evaluate the agent/retriever's quality.**
 # MAGIC
 # MAGIC 3. **If the evaluation results show retrieval issues as a root cause, use this notebook to iterate on your data pipeline's code & config.** Below are some potential fixes you can try, see the AI Cookbook's [debugging retrieval issues](https://ai-cookbook.io/nbs/5-hands-on-improve-quality-step-1-retrieval.html) section for details.**
 # MAGIC     - Add missing, but relevant source documents into in the index.
@@ -32,7 +32,7 @@
 # MAGIC     - Adjust the data pipeline configuration:
 # MAGIC       - Modify chunk size or overlap.
 # MAGIC       - Experiment with different embedding models.
-# MAGIC     - 3️Adjust the data pipeline code:
+# MAGIC     - Adjust the data pipeline code:
 # MAGIC       - Create a custom parser or use different parsing libraries.
 # MAGIC       - Develop a custom chunker or use different chunking techniques.
 # MAGIC       - Extract additional metadata for each document.
@@ -95,11 +95,11 @@ dbutils.library.restartPython()
 
 # COMMAND ----------
 
-from cookbook_utils.cookbook_config import AgentCookbookConfig
+from utils.cookbook.agent_config import CookbookAgentConfig
 import mlflow
 
 # Load the shared configuration
-cookbook_shared_config = AgentCookbookConfig.from_yaml_file('./configs/cookbook_config.yaml')
+cookbook_shared_config = CookbookAgentConfig.from_yaml_file('./configs/cookbook_config.yaml')
 
 # Print configuration 
 cookbook_shared_config.pretty_print()
@@ -122,7 +122,7 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 
 # COMMAND ----------
 
-from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineSourceConfig
+from utils.data_pipeline.data_pipeline_config import UnstructuredDataPipelineSourceConfig
 
 # Default is a Volume called `{uc_asset_prefix}_source_docs` in the configured UC catalog/schema
 source_config = UnstructuredDataPipelineSourceConfig(
@@ -138,8 +138,7 @@ source_config.pretty_print()
 source_config.dump_to_yaml("./configs/data_pipeline_source_config.yaml")
 
 # Check if volume exists, create otherwise
-if not source_config.create_or_check_volume():
-  raise Exception("UC Volume is not valid, fix per the console notes above.")
+source_config.create_or_check_volume()
 
 # COMMAND ----------
 
@@ -163,7 +162,7 @@ if not source_config.create_or_check_volume():
 
 # COMMAND ----------
 
-from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineStorageConfig
+from utils.data_pipeline.data_pipeline_config import UnstructuredDataPipelineStorageConfig
 
 uc_asset_prefix = cookbook_shared_config.uc_asset_prefix
 
@@ -211,7 +210,7 @@ storage_config.create_or_check_vector_search_endpoint()
 
 # COMMAND ----------
 
-from datapipeline_utils.data_pipeline_config import ChunkingConfig
+from utils.data_pipeline.data_pipeline_config import ChunkingConfig
 
 chunking_config = ChunkingConfig(
     embedding_model_endpoint="databricks-gte-large-en", # A Model Serving endpoint supporting the /llm/v1/embeddings task
@@ -273,18 +272,15 @@ mlflow.start_run(run_name=mlflow_run_tag)
 from typing import TypedDict
 from datetime import datetime
 import warnings
-import io
 import traceback
 import os
 from urllib.parse import urlparse
 
 # PDF libraries
-# from pypdf import PdfReader
 import fitz
 import pymupdf4llm
 
 # HTML libraries
-from markdownify import markdownify as md
 import markdownify
 import re
 
@@ -335,17 +331,10 @@ def file_parser(
       whether the parsing was successful or if an error occurred.
     """
     try:
+        from markdownify import markdownify as md
         filename, file_extension = os.path.splitext(doc_path)
-        parsed_document = {}
 
         if file_extension == ".pdf":
-            # pdf = io.BytesIO(raw_doc_contents_bytes)
-            # reader = PdfReader(pdf)
-
-            # parsed_content = [
-            #     page_content.extract_text() for page_content in reader.pages
-            # ]
-
             pdf_doc = fitz.Document(stream=raw_doc_contents_bytes, filetype="pdf")
             md_text = pymupdf4llm.to_markdown(pdf_doc)
 
@@ -354,8 +343,6 @@ def file_parser(
                 "parser_status": "SUCCESS",
             }
         elif file_extension == ".html":
-            from markdownify import markdownify as md
-
             html_content = raw_doc_contents_bytes.decode("utf-8")
 
             markdown_contents = md(
@@ -435,8 +422,8 @@ def file_parser(
 
 # COMMAND ----------
 
-from datapipeline_utils.file_loading import load_files_to_df, apply_parsing_udf, check_parsed_df_for_errors
-from datapipeline_utils.typed_dicts_to_spark_schema import typed_dicts_to_spark_schema
+from utils.data_pipeline.file_loading import load_files_to_df, apply_parsing_udf, check_parsed_df_for_errors
+from utils.data_pipeline.typed_dicts_to_spark_schema import typed_dicts_to_spark_schema
 from IPython.display import display_markdown
 
 raw_files_df = load_files_to_df(
@@ -495,7 +482,7 @@ mlflow.log_input(
 
 # COMMAND ----------
 
-from datapipeline_utils.recursive_character_text_splitter import get_recursive_character_text_splitter
+from utils.data_pipeline.recursive_character_text_splitter import get_recursive_character_text_splitter
 
 # Configure the chunker
 chunk_fn = get_recursive_character_text_splitter(
@@ -525,10 +512,7 @@ propagate_columns = [
 
 # COMMAND ----------
 
-from datapipeline_utils.chunk_docs import compute_chunks
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from transformers import AutoTokenizer
-import tiktoken
+from utils.data_pipeline.chunk_docs import compute_chunks
 
 chunked_docs_table = compute_chunks(
     # The source documents table.
@@ -564,7 +548,7 @@ mlflow.log_input(
 
 # COMMAND ----------
 
-from datapipeline_utils.build_retriever_index import build_retriever_index
+from utils.data_pipeline.build_retriever_index import build_retriever_index
 
 retriever_index_result = build_retriever_index(
     # Spark requires `` to escape names with special chars, VS client does not.
@@ -595,7 +579,7 @@ mlflow.end_run()
 
 # COMMAND ----------
 
-from cookbook_utils.shared import get_table_url
+from utils.cookbook.url_utils import get_table_url
 print()
 print(f"Parsed docs table: {get_table_url(storage_config.parsed_docs_table)}\n")
 print(f"Chunked docs table: {get_table_url(storage_config.chunked_docs_table)}\n")

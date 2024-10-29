@@ -132,11 +132,6 @@ class RetrieverToolConfig(ToolConfig):
             },
             "type": "object",
         }
-        # class RetrieverToolInputSchema(BaseModel):
-        #     query: str = Field(
-        #         default=None, description=self.retriever_query_parameter_prompt
-        #     )
-        # return RetrieverToolInputSchema()
 
 
 class LLMParametersConfig(BaseModel):

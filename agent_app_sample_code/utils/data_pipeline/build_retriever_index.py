@@ -1,13 +1,4 @@
-from typing import TypedDict, Dict
-import io
-from typing import List, Dict, Any, Tuple, Optional, TypedDict
-import warnings
-import pyspark.sql.functions as func
-from pyspark.sql.types import StructType, StringType, StructField, MapType, ArrayType
-from mlflow.utils import databricks_utils as du
-from functools import partial
 from databricks.vector_search.client import VectorSearchClient
-import mlflow
 
 
 
@@ -62,7 +53,7 @@ def build_retriever_index(
                 f"Syncing index {vector_search_index_name}, this can take 15 minutes or much longer if you have a larger number of documents..."
             )
 
-            sync_result = vsc.get_index(index_name=vector_search_index_name).sync()
+            vsc.get_index(index_name=vector_search_index_name).sync()
 
     else:
         print(
@@ -86,6 +77,6 @@ def build_retriever_index(
             )
             print("SUCCESS: Vector search index created.")
         except Exception as e:
-            print(f"\n\nERROR: Vector search index creation failed. {e}.\n\nWait 5 minutes and try running this cell again.")
+            raise Exception("ERROR: Vector search index creation failed. Wait 5 minutes and try running this cell again.") from e
 
         

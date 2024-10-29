@@ -56,7 +56,6 @@
 # Shared imports
 from datetime import datetime
 from databricks.vector_search.client import VectorSearchClient
-import mlflow
 from IPython.display import display_markdown
 
 # COMMAND ----------
@@ -79,11 +78,11 @@ from IPython.display import display_markdown
 
 # COMMAND ----------
 
-from cookbook_utils.cookbook_config import AgentCookbookConfig
+from utils.cookbook.agent_config import CookbookAgentConfig
 import mlflow
 
 # Load the shared configuration
-cookbook_shared_config = AgentCookbookConfig.from_yaml_file('./configs/cookbook_config.yaml')
+cookbook_shared_config = CookbookAgentConfig.from_yaml_file('./configs/cookbook_config.yaml')
 
 # Print configuration 
 cookbook_shared_config.pretty_print()
@@ -145,21 +144,19 @@ from agents.function_calling_agent.config import (
     RetrieverParametersConfig,
     RetrieverSchemaConfig,
 )
-from pydantic import Field, BaseModel
-import yaml
 import json
+import yaml
 
-# View Retriever config documentation by inspecting the docstrings
-# 
-# print(RetrieverToolConfig.__doc__)
-# print(RetrieverToolInputSchema.__doc__)
-# print(RetrieverSchemaConfig.__doc__)
-
-# View documentation for the parameters by inspecting the docstring
-# 
-# print(FunctionCallingLLMConfig.__doc__)
-# print(LLMParametersConfig.__doc__)
-# print(AgentConfig.__doc__)
+# # View Retriever config documentation by inspecting the docstrings
+#
+# help(RetrieverToolConfig)
+# help(RetrieverSchemaConfig)
+#
+# # View documentation for the parameters by inspecting the docstring
+#
+# help(FunctionCallingLLMConfig)
+# help(LLMParametersConfig)
+# help(AgentConfig)
 
 # COMMAND ----------
 
@@ -173,7 +170,7 @@ import json
 # - If you used `01_data_pipeline` to create your Vector Index, run this cell.
 # - If your Vector Index was created elsewhere, skip this cell and set the UC location in the Retriever config.
 
-from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineStorageConfig
+from utils.data_pipeline.data_pipeline_config import UnstructuredDataPipelineStorageConfig
 
 datapipeline_output_config = UnstructuredDataPipelineStorageConfig.from_yaml_file('./configs/data_pipeline_storage_config.yaml')
 
@@ -244,7 +241,7 @@ agent_config = AgentConfig(
 ##### 🚫✏️ Dump the configuration to a YAML
 ########################
 
-# We dump the dump the Pydantic model to a YAML file because:
+# We dump the Pydantic model to a YAML file because:
 # 1. MLflow ModelConfig only accepts YAML files or dictionaries
 # 2. When importing the Agent's code, it needs to read this configuration
 def write_dict_to_yaml(data, file_path):
@@ -264,7 +261,7 @@ print(json.dumps(agent_config.model_dump(), indent=4))
 # MAGIC %md
 # MAGIC #### ✅✏️ Adjust the Agent's code
 # MAGIC
-# MAGIC Here, we import the Agent's code so we can run the Agent locally within the notebook.  To modify the code, open this Notebook in a seperate window, make your changes, and re-run this cell.
+# MAGIC Here, we import the Agent's code so we can run the Agent locally within the notebook.  To modify the code, open this Notebook in a separate window, make your changes, and re-run this cell.
 # MAGIC
 # MAGIC **Important: Typically, when building the first version of your agent, you will not need to modify the code.**
 
@@ -309,10 +306,7 @@ from mlflow.models.resources import (
     DatabricksServingEndpoint,
 )
 from mlflow.models.signature import ModelSignature
-from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
-import yaml
-from databricks import agents
-from databricks import vector_search
+from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest
 
 
 def log_agent_to_mlflow(agent_config):
@@ -342,7 +336,7 @@ def log_agent_to_mlflow(agent_config):
                     DatabricksServingEndpoint(endpoint_name=index_embedding_model),
                 )
             else:
-                print("Could not identify the embedding model endpoint resource for {tool.vector_search_index}.  Please manually add the embedding model endpoint to `databricks_resources`.")
+                raise Exception("Could not identify the embedding model endpoint resource for {tool.vector_search_index}.  Please manually add the embedding model endpoint to `databricks_resources`.")
 
     # Specify the full path to the Agent notebook
     model_file = "agents/function_calling_agent/function_calling_agent_mlflow_sdk"
@@ -382,7 +376,7 @@ with mlflow.start_run(run_name="vibe-check__"+datetime.now().strftime("%Y-%m-%d_
     # Log the current Agent code/config to MLflow
     logged_agent_info = log_agent_to_mlflow(agent_config)
 
-    # Excute the Agent
+    # Execute the Agent
     agent = FunctionCallingAgent(agent_config = agent_config)
 
     # Run the agent for this query

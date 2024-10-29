@@ -1,7 +1,5 @@
 from dataclasses import dataclass, field, asdict
-import yaml
-import json
-from cookbook_utils.cookbook_dataclass import CookbookConfig
+from utils.cookbook.config_dataclass import CookbookConfig
 from databricks.sdk import WorkspaceClient
 import os
 from databricks.sdk.service.catalog import VolumeType
@@ -13,7 +11,6 @@ from databricks.sdk.service.serving import EndpointCoreConfigInput, EndpointStat
 from mlflow.utils import databricks_utils as du
 
 from .recursive_character_text_splitter import (
-    EMBEDDING_MODELS,
     detect_fmapi_embedding_model_type,
     validate_chunk_size,
 )
@@ -54,10 +51,7 @@ class UnstructuredDataPipelineSourceConfig(CookbookConfig):
 
 
     def check_if_volume_exists(self) -> bool:
-        if os.path.isdir(self.volume_path):
-            return True
-        else:
-            return False
+        return os.path.isdir(self.volume_path)
 
     def create_volume(self):
         try:
@@ -115,7 +109,7 @@ class ChunkingConfig(CookbookConfig):
         )
         if chunk_spec is None or embedding_model_name is None:
             raise ValueError(
-                f"\nFAIL: {self.embedding_model_endpoint} is not currently supported by the default chunking logic.  Please update `cookbook_utils/recursive_character_text_splitter.py` to add support."
+                f"\nFAIL: {self.embedding_model_endpoint} is not currently supported by the default chunking logic.  Please update `recursive_character_text_splitter.py` to add support."
             )
 
         chunk_spec["chunk_size_tokens"] = self.chunk_size_tokens

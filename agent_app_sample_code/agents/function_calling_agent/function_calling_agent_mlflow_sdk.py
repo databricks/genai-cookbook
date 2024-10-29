@@ -7,20 +7,18 @@
 # COMMAND ----------
 
 # # If running this notebook by itself, uncomment these.
-# %pip install --upgrade -qqqq databricks-agents databricks-vectorsearch mlflow openai pydantic
+# %pip install --upgrade -qqqq databricks-agents databricks-vectorsearch mlflow pydantic
 # dbutils.library.restartPython()
 
 # COMMAND ----------
 
 import json
-import os
 from typing import Any, Callable, Dict, List, Optional, Union
 import mlflow
 from dataclasses import asdict, dataclass
 import pandas as pd
 from mlflow.models import set_model, ModelConfig
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
-# from openai import OpenAI
 from mlflow.deployments import get_deploy_client
 import os
 
@@ -173,15 +171,8 @@ class VectorSearchRetriever:
 
 class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
     """
-    Class representing an Agent that does function-calling with tools using OpenAI SDK
+    Class representing an Agent that does function-calling with tools
     """
-    # def __init__(self, agent_config: dict = None):
-    #     self.__agent_config = agent_config
-    #     if self.__agent_config is None:
-    #         self.__agent_config = globals().get("__mlflow_model_config__")
-
-    #     print(globals().get("__mlflow_model_config__"))
-
     def __init__(self, agent_config: dict = None):
         self.__agent_config = agent_config
         try:
@@ -196,20 +187,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         if self.config is None:
             self.config = mlflow.models.ModelConfig(development_config="./configs/agent_model_config.yaml")
             
-                
-        # vector_search_schema = self.config.get("retriever_config").get("schema")
-        # mlflow.models.set_retriever_schema(
-        #     primary_key=vector_search_schema.get("primary_key"),
-        #     text_column=vector_search_schema.get("chunk_text"),
-        #     doc_uri=vector_search_schema.get("doc_uri"),
-        # )
-
-        # OpenAI client used to query Databricks Chat Completion endpoint
-        # self.model_serving_client = OpenAI(
-        #     api_key=os.environ.get("DB_TOKEN"),
-        #     base_url=str(os.environ.get("DB_HOST")) + "/serving-endpoints",
-        # )
-
         self.model_serving_client = get_deploy_client("databricks")
 
         # Initialize the tools
@@ -273,15 +250,13 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         ) = self.recursively_call_and_run_tools(messages=messages)
 
         # If your front end keeps of converastion history and automatically appends the bot's response to the messages history, remove this line.
-        # messages_log_with_tool_calls.append(model_response.choices[0].message.to_dict()) #OpenAI client
-        messages_log_with_tool_calls.append(model_response.choices[0]["message"]) #Mlflow client
+        messages_log_with_tool_calls.append(model_response.choices[0]["message"])
 
         # remove the system prompt - this should not be exposed to the Agent caller
         messages_log_with_tool_calls = messages_log_with_tool_calls[1:]
 
         
         return {
-            # "content": model_response.choices[0].message.content, #openai client
             "content": model_response.choices[0]["message"]["content"], #mlflow client
             # messages should be returned back to the Review App (or any other front end app) and stored there so it can be passed back to this stateless agent with the next turns of converastion.
 
@@ -292,41 +267,26 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
     def recursively_call_and_run_tools(self, max_iter=10, **kwargs):
         messages = kwargs["messages"]
         del kwargs["messages"]
-        i = 0
-        while i < max_iter:
+        for _ in range(max_iter):
             response = self.chat_completion(messages=messages, tools=True)
-            # assistant_message = response.choices[0].message #openai client
-            assistant_message = response.choices[0]["message"] #mlflow client
-            # tool_calls = assistant_message.tool_calls #openai
-            tool_calls = assistant_message.get('tool_calls')#mlflow client
+            assistant_message = response.choices[0]["message"]
+            tool_calls = assistant_message.get('tool_calls')
             if tool_calls is None:
                 # the tool execution finished, and we have a generation
                 return (response, messages)
             tool_messages = []
             for tool_call in tool_calls:  # TODO: should run in parallel
-                # function = tool_call.function #openai
                 function = tool_call['function'] #openai
-                # uc_func_name = decode_function_name(function.name)
-                # args = json.loads(function.arguments) #openai
-                args = json.loads(function['arguments']) #mlflow
-                # result = exec_uc_func(uc_func_name, **args)
-                # result = self.execute_function(function.name, args) #openai
-                result = self.execute_function(function['name'], args) #mlflow
-                # tool_message = {
-                #     "role": "tool",
-                #     "tool_call_id": tool_call.id,
-                #     "content": result,
-                # } #openai
+                args = json.loads(function['arguments'])
+                result = self.execute_function(function['name'], args)
                 tool_message = {
                     "role": "tool",
                     "tool_call_id": tool_call['id'],
                     "content": result,
-                } #mlflow
+                }
                 tool_messages.append(tool_message)
-            # assistant_message_dict = assistant_message.dict().copy() #openai
-            assistant_message_dict = assistant_message.copy() #mlflow
+            assistant_message_dict = assistant_message.copy()
             del assistant_message_dict["content"]
-            # del assistant_message_dict["function_call"] #openai only
             messages = (
                 messages
                 + [
@@ -334,7 +294,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
                 ]
                 + tool_messages
             )
-        # TODO: Handle more gracefully
         raise "ERROR: max iter reached"
 
     @mlflow.trace(span_type="FUNCTION")
@@ -347,13 +306,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         endpoint_name = self.config.get("llm_config").get("llm_endpoint_name")
         llm_options = self.config.get("llm_config").get("llm_parameters")
 
-        # # Trace the call to Model Serving - openai versio
-        # traced_create = mlflow.trace(
-        #     self.model_serving_client.chat.completions.create,
-        #     name="chat_completions_api",
-        #     span_type="CHAT_MODEL",
-        # )
-
         # Trace the call to Model Serving - mlflow version 
         traced_create = mlflow.trace(
             self.model_serving_client.predict,
@@ -361,7 +313,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             span_type="CHAT_MODEL",
         )
 
-        #mlflow client - start
         if tools:
             # Get all tools
             tools = self.tool_json_schemas
@@ -382,19 +333,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             endpoint=endpoint_name,
             inputs=inputs,
         )
-
-        #mlflow client - end
-        # Openai - start
-        # if tools:
-        #     return traced_create(
-        #         model=endpoint_name,
-        #         messages=messages,
-        #         tools=self.config.get("tools"),
-        #         **llm_options,
-        #     )
-        # else:
-        #     return traced_create(model=endpoint_name, messages=messages, **llm_options)
-        # Openai - end
 
     @mlflow.trace(span_type="PARSER")
     def get_messages_array(

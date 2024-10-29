@@ -84,11 +84,11 @@ from IPython.display import display_markdown
 
 # COMMAND ----------
 
-from cookbook_utils.cookbook_config import AgentCookbookConfig
+from utils.cookbook.agent_config import CookbookAgentConfig
 import mlflow
 
 # Load the shared configuration
-cookbook_shared_config = AgentCookbookConfig.from_yaml_file('./configs/cookbook_config.yaml')
+cookbook_shared_config = CookbookAgentConfig.from_yaml_file('./configs/cookbook_config.yaml')
 
 # Print configuration 
 cookbook_shared_config.pretty_print()
@@ -174,7 +174,7 @@ import yaml
 # - If you used `01_data_pipeline` to create your Vector Index, run this cell.
 # - If your Vector Index was created elsewhere, skip this cell and set the UC location in the Retriever config.
 
-from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineStorageConfig
+from utils.data_pipeline.data_pipeline_config import UnstructuredDataPipelineStorageConfig
 
 datapipeline_output_config = UnstructuredDataPipelineStorageConfig.from_yaml_file('./configs/data_pipeline_storage_config.yaml')
 

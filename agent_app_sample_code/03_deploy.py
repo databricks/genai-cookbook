@@ -69,11 +69,10 @@ uc_model_version_number = 1
 
 # COMMAND ----------
 
-from cookbook_utils.cookbook_config import AgentCookbookConfig
-import mlflow
+from utils.cookbook.agent_config import CookbookAgentConfig
 
 # Load the shared configuration
-cookbook_shared_config = AgentCookbookConfig.from_yaml_file('./configs/cookbook_config.yaml')
+cookbook_shared_config = CookbookAgentConfig.from_yaml_file('./configs/cookbook_config.yaml')
 
 # Print configuration 
 cookbook_shared_config.pretty_print()
@@ -176,8 +175,8 @@ agents.set_review_instructions(cookbook_shared_config.uc_model, instructions_to_
 
 # COMMAND ----------
 
-from cookbook_utils.get_inference_tables import get_inference_tables
-from cookbook_utils.shared import get_table_url
+from utils.get_inference_tables import get_inference_tables
+from utils.cookbook.url_utils import get_table_url
 from IPython.display import display_markdown
 
 inference_tables = get_inference_tables(cookbook_shared_config.uc_model)

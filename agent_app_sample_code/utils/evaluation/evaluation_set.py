@@ -1,15 +1,11 @@
-import pandas as pd
 from typing import List, Mapping, Optional
 
-import mlflow
 import mlflow.entities as mlflow_entities
 
 from pyspark import sql
 from pyspark.sql import functions as F, types as T
 from pyspark.sql.window import Window
 
-from databricks import agents
-from databricks.sdk import WorkspaceClient
 from databricks.rag_eval.evaluation import traces
 
 # Deduplicate the assessment log

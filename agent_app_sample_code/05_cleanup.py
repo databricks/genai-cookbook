@@ -26,11 +26,11 @@ dbutils.library.restartPython()
 
 # COMMAND ----------
 
-from cookbook_utils.cookbook_config import AgentCookbookConfig
-from datapipeline_utils.data_pipeline_config import UnstructuredDataPipelineSourceConfig, UnstructuredDataPipelineStorageConfig
+from utils.cookbook.agent_config import CookbookAgentConfig
+from utils.data_pipeline.data_pipeline_config import UnstructuredDataPipelineSourceConfig, UnstructuredDataPipelineStorageConfig
 
 # Load the shared configuration
-cookbook_shared_config = AgentCookbookConfig.from_yaml_file('./configs/cookbook_config.yaml')
+cookbook_shared_config = CookbookAgentConfig.from_yaml_file('./configs/cookbook_config.yaml')
 
 # Data pipeline configuration
 datapipeline_source_config = UnstructuredDataPipelineSourceConfig.from_yaml_file('./configs/data_pipeline_source_config.yaml')
@@ -40,8 +40,7 @@ datapipeline_output_config = UnstructuredDataPipelineStorageConfig.from_yaml_fil
 
 # DBTITLE 1,Shared imports
 from mlflow.utils import databricks_utils as du
-from cookbook_utils.shared import get_table_url
-from IPython.display import display_markdown
+from utils.cookbook.url_utils import get_table_url
 import mlflow
 from IPython.display import display_markdown
 
@@ -94,7 +93,7 @@ display_markdown(output, raw=True)
 
 # COMMAND ----------
 
-from cookbook_utils.get_inference_tables import get_inference_tables
+from utils.get_inference_tables import get_inference_tables
 from databricks import agents
 
 inference_tables = get_inference_tables(cookbook_shared_config.uc_model)

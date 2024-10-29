@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC ## Shared configuration
 # MAGIC
-# MAGIC This notebook initializes a `AgentCookbookConfig` Pydantic class to define parameters that are shared between the cookbook notebooks:
+# MAGIC This notebook initializes a `CookbookAgentConfig` Pydantic class to define parameters that are shared between the cookbook notebooks:
 # MAGIC - Unity Catalog schema 
 # MAGIC - MLflow Experiment to track versions of the Agent and their associated quality/cost/latency evaluation results
 # MAGIC - Unity Catalog model that stores versions of the Agent's code/config that are deployed
@@ -57,9 +57,9 @@ default_catalog = spark.sql("select current_catalog() as cur_catalog").collect()
 
 # COMMAND ----------
 
-from cookbook_utils.cookbook_config import AgentCookbookConfig
+from utils.cookbook.agent_config import CookbookAgentConfig
 
-shared_config = AgentCookbookConfig(
+shared_config = CookbookAgentConfig(
     uc_catalog_name=f"{default_catalog}",
     uc_schema_name=f"{user_name}_agents",
     uc_asset_prefix="agent_app_name", # Prefix to every created UC asset, typically the Agent's name

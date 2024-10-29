@@ -7,7 +7,7 @@
 # COMMAND ----------
 
 # # If running this notebook by itself, uncomment these.
-# %pip install --upgrade -qqqq databricks-agents openai databricks-vectorsearch mlflow pydantic
+# %pip install --upgrade -qqqq databricks-agents databricks-vectorsearch mlflow pydantic
 # dbutils.library.restartPython()
 
 # COMMAND ----------
@@ -20,7 +20,6 @@ import mlflow
 import pandas as pd
 from mlflow.models import set_model, ModelConfig
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, ChatCompletionResponse, ChainCompletionChoice, Message
-# from openai import OpenAI
 from mlflow.deployments import get_deploy_client
 
 # COMMAND ----------
@@ -198,16 +197,6 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
             self.config.get("retriever_config")
         )
 
-
-    # def load_context(self, context):
-    #     # OpenAI client used to query Databricks Chat Completion endpoint
-    #     # self.model_serving_client = OpenAI(
-    #     #     api_key=os.environ.get("DB_TOKEN"),
-    #     #     base_url=str(os.environ.get("DB_WORKSPACE_URL")) + "/serving-endpoints",
-    #     # )
-
-        
-
     @mlflow.trace(name="chain", span_type="CHAIN")
     def predict(
         self,
@@ -250,11 +239,8 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
                 {"role": "user", "content": user_query},
             ],
         )
-        
-        # TODO: make error handling more robust
-        
-        # model_response = response.choices[0].message.content #openai
-        model_response = response.choices[0]["message"]["content"] #mlflow
+
+        model_response = response.choices[0]["message"]["content"]
 
         # 'content' is required to comply with the schema of the Agent, see https://docs.databricks.com/en/generative-ai/create-log-agent.html#input-schema-for-the-rag-agent
         return asdict(StringResponse(model_response))
@@ -276,21 +262,13 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
 
         model_response = self.chat_completion(messages=[{"role": "user", "content": prompt}])
         
-        return model_response.choices[0]["message"]["content"] #mlflow
-        #return model_response.choices[0].message.content # openai
+        return model_response.choices[0]["message"]["content"]
 
     def chat_completion(self, messages: List[Dict[str, str]]):
         endpoint_name = self.config.get("llm_config").get("llm_endpoint_name")
         llm_options = self.config.get("llm_config").get("llm_parameters")
 
-        # Trace the call to Model Serving - openai
-        # traced_create = mlflow.trace(
-        #     self.model_serving_client.chat.completions.create,
-        #     name="chat_completions_api",
-        #     span_type="CHAT_MODEL",
-        # )
-
-        # Trace the call to Model Serving - mlflow version 
+        # Trace the call to Model Serving
         traced_create = mlflow.trace(
             self.model_serving_client.predict,
             name="chat_completions_api",
@@ -302,9 +280,8 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
             "messages": messages,
             **llm_options
         }
-        return traced_create(endpoint=endpoint_name, inputs=inputs) #mlflow
-        #return traced_create(model=endpoint_name, messages=messages, **llm_options) #openai
-    
+        return traced_create(endpoint=endpoint_name, inputs=inputs)
+
     @mlflow.trace(span_type="PARSER")
     def get_messages_array(
         self, model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame]

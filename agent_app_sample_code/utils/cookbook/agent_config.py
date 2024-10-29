@@ -4,7 +4,7 @@ import mlflow
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors.platform import ResourceAlreadyExists, ResourceDoesNotExist, NotFound, PermissionDenied
 
-class AgentCookbookConfig(BaseModel):
+class CookbookAgentConfig(BaseModel):
     """
     Global configuration for an Agent.
 
@@ -124,7 +124,7 @@ class AgentCookbookConfig(BaseModel):
         with open(file_path, 'r') as file:
             data = yaml.safe_load(file)
             # print(data)
-        config = AgentCookbookConfig.parse_obj(data)
+        config = CookbookAgentConfig.parse_obj(data)
         # print(config.model_dump())
         return config
     

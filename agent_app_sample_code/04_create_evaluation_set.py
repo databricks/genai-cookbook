@@ -66,11 +66,11 @@
 
 # COMMAND ----------
 
-from cookbook_utils.cookbook_config import AgentCookbookConfig
+from utils.cookbook.agent_config import CookbookAgentConfig
 import mlflow
 
 # Load the shared configuration
-cookbook_shared_config = AgentCookbookConfig.from_yaml_file('./configs/cookbook_config.yaml')
+cookbook_shared_config = CookbookAgentConfig.from_yaml_file('./configs/cookbook_config.yaml')
 
 # Print configuration 
 cookbook_shared_config.pretty_print()
@@ -84,8 +84,7 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # MAGIC 🚫✏️ Import the cookbook utilities for transforming inference tables into an evaluation set
 
 # COMMAND ----------
-
-# MAGIC %run ./utils/eval_set_utilities
+from utils.evaluation.evaluation_set import create_potential_evaluation_set, _dedup_assessment_log
 
 # COMMAND ----------
 
@@ -95,7 +94,7 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 
 # COMMAND ----------
 
-from cookbook_utils.get_inference_tables import get_inference_tables
+from utils.get_inference_tables import get_inference_tables
 
 inference_table_locations = get_inference_tables(cookbook_shared_config.uc_model)
 inference_table_locations = get_inference_tables("main.eric_peter_agents.agent_app_name_model1")
