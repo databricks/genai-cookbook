@@ -145,9 +145,9 @@ from agents.rag_only_agent.config import (
     RetrieverParametersConfig,
     RetrieverSchemaConfig,
 )
-from pydantic import Field, BaseModel
 import json
-import yaml
+from utils.agents.agent_utils import log_agent_to_mlflow
+
 # View Retriever config documentation by inspecting the docstrings
 # 
 # print(RetrieverConfig.__doc__)
@@ -289,62 +289,7 @@ print(json.dumps(agent_config.model_dump(), indent=4))
 # MAGIC This helper function wraps the code required to log a version of the Agent's code & config to MLflow.  It is used by all 3 modes.
 
 # COMMAND ----------
-
-from mlflow.models.resources import (
-    DatabricksVectorSearchIndex,
-    DatabricksServingEndpoint,
-)
-from mlflow.models.signature import ModelSignature
-from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
 import yaml
-from databricks import agents
-from databricks import vector_search
-
-def log_agent_to_mlflow(agent_config):
-    # Add the Databricks resources so that credentials are automatically provisioned by agents.deploy(...)
-    databricks_resources = [
-        DatabricksServingEndpoint(
-            endpoint_name=agent_config.llm_config.llm_endpoint_name
-        ),
-    ]
-
-    # Add the Databricks resources for the retriever's vector indexes
-    # for tool in agent_config.llm_config.tools:
-    #     if type(tool) == RetrieverToolConfig:
-    databricks_resources.append(
-        DatabricksVectorSearchIndex(index_name=agent_config.retriever_config.vector_search_index)
-    )
-    index_embedding_model = (
-        VectorSearchClient(disable_notice=True)
-        .get_index(index_name=agent_config.retriever_config.vector_search_index)
-        .describe()
-        .get("delta_sync_index_spec")
-        .get("embedding_source_columns")[0]
-        .get("embedding_model_endpoint_name")
-    )
-    if index_embedding_model is not None:
-        databricks_resources.append(
-            DatabricksServingEndpoint(endpoint_name=index_embedding_model),
-        )
-    else:
-        print("Could not identify the embedding model endpoint resource for {tool.vector_search_index}.  Please manually add the embedding model endpoint to `databricks_resources`.")
-
-    # Specify the full path to the Agent notebook
-    model_file = "agents/rag_only_agent/rag_only_agent_mlflow_sdk"
-    model_path = os.path.join(os.getcwd(), model_file)
-
-    # Log the agent as an MLflow model
-    return mlflow.pyfunc.log_model(
-        python_model=model_path,
-        model_config=agent_config.dict(),
-        artifact_path="agent",
-        input_example=agent_config.input_example,
-        resources=databricks_resources,
-        signature=ModelSignature(
-            inputs=ChatCompletionRequest(),
-            outputs=StringResponse(),
-        ),
-    )
 
 # COMMAND ----------
 
@@ -365,7 +310,7 @@ vibe_check_query = {
 # `run_name` provides a human-readable name for this vibe check in the MLflow experiment
 with mlflow.start_run(run_name="vibe-check__"+datetime.now().strftime("%Y-%m-%d_%I:%M:%S_%p")):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config)
+    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
 
     # Excute the Agent
     agent = RAGAgent(agent_config = agent_config)
@@ -408,7 +353,7 @@ evaluation_set = [
 # `run_name` provides a human-readable name for this vibe check in the MLflow experiment
 with mlflow.start_run(run_name="vibe-check__"+datetime.now().strftime("%Y-%m-%d_%I:%M:%S_%p")):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config)
+    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
 
     # Run the agent for these queries, using Agent evaluation to parallelize the calls
     eval_results = mlflow.evaluate(
@@ -437,7 +382,7 @@ evaluation_set = spark.table(cookbook_shared_config.evaluation_set_table).toPand
 # `run_name` provides a human-readable name for this vibe check in the MLflow experiment
 with mlflow.start_run(run_name="evaluation__"+datetime.now().strftime("%Y-%m-%d_%I:%M:%S_%p")):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config)
+    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
 
     # Run the agent for these queries, using Agent evaluation to parallelize the calls
     eval_results = mlflow.evaluate(
@@ -510,7 +455,7 @@ agent_version_short_name = "friendly-name-to-identify-this-version" # set to Non
 
 with mlflow.start_run(run_name=agent_version_short_name):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config)
+    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
 
     # Use Unity Catalog as the model registry
     mlflow.set_registry_uri("databricks-uc")

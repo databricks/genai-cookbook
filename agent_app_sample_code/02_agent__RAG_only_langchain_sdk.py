@@ -153,12 +153,13 @@ from agents.rag_only_agent.config import (
 from pydantic import Field, BaseModel
 import json
 import yaml
-# View Retriever config documentation by inspecting the docstrings
+
+## View Retriever config documentation by inspecting the docstrings
 # 
 # print(RetrieverConfig.__doc__)
 # print(RetrieverSchemaConfig.__doc__)
 
-# View documentation for the parameters by inspecting the docstring
+## View documentation for the parameters by inspecting the docstring
 # 
 # print(LLMConfig.__doc__)
 # print(LLMParametersConfig.__doc__)
@@ -301,23 +302,8 @@ import yaml
 from databricks import agents
 from databricks import vector_search
 
-def log_agent_to_mlflow(agent_config):
-    # Specify the full path to the Agent notebook
-    model_file = "agents/rag_only_agent/rag_only_agent_langchain_sdk"
-    model_path = os.path.join(os.getcwd(), model_file)
+from utils.agents.agent_utils import log_agent_to_mlflow
 
-    return mlflow.langchain.log_model(
-        lc_model=os.path.join(
-            os.getcwd(), model_path
-        ),  # Chain code file e.g., /path/to/the/chain.py
-        model_config=agent_config.dict(),  # Chain configuration set in 00_config
-        artifact_path="chain",  # Required by MLflow
-        input_example=agent_config.input_example, # Save the chain's input schema.  MLflow will execute the chain before logging & capture it's output schema.
-        signature=ModelSignature(
-            inputs=ChatCompletionRequest(),
-            outputs=StringResponse(),
-        )
-    )
 
 # COMMAND ----------
 
@@ -338,7 +324,7 @@ vibe_check_query = {
 # `run_name` provides a human-readable name for this vibe check in the MLflow experiment
 with mlflow.start_run(run_name="vibe-check__"+datetime.now().strftime("%Y-%m-%d_%I:%M:%S_%p")):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config)
+    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
 
     # Excute the Agent
     # agent = RAGAgent(agent_config = agent_config)
@@ -381,7 +367,7 @@ evaluation_set = [
 # `run_name` provides a human-readable name for this vibe check in the MLflow experiment
 with mlflow.start_run(run_name="vibe-check__"+datetime.now().strftime("%Y-%m-%d_%I:%M:%S_%p")):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config)
+    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
 
     # Run the agent for these queries, using Agent evaluation to parallelize the calls
     eval_results = mlflow.evaluate(
@@ -410,7 +396,7 @@ evaluation_set = spark.table(cookbook_shared_config.evaluation_set_table).toPand
 # `run_name` provides a human-readable name for this vibe check in the MLflow experiment
 with mlflow.start_run(run_name="evaluation__"+datetime.now().strftime("%Y-%m-%d_%I:%M:%S_%p")):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config)
+    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
 
     # Run the agent for these queries, using Agent evaluation to parallelize the calls
     eval_results = mlflow.evaluate(
@@ -483,7 +469,7 @@ agent_version_short_name = "friendly-name-to-identify-this-version" # set to Non
 
 with mlflow.start_run(run_name=agent_version_short_name):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config)
+    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
 
     # Use Unity Catalog as the model registry
     mlflow.set_registry_uri("databricks-uc")

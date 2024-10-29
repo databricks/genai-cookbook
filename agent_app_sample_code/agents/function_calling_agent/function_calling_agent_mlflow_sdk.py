@@ -21,6 +21,7 @@ from mlflow.models import set_model, ModelConfig
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
 from mlflow.deployments import get_deploy_client
 import os
+from utils.agents.agent_utils import get_messages_array, extract_user_query_string, extract_chat_history
 
 # COMMAND ----------
 
@@ -141,12 +142,8 @@ class VectorSearchRetriever:
                 score = item[-1]
                 if score >= vector_search_threshold:
                     metadata["similarity_score"] = score
-                    # print(score)
-                    i = 0
-                    for field in item[0:-1]:
-                        # print(field + "--")
+                    for i, field in enumerate(item[0:-1]):
                         metadata[column_names[i]["name"]] = field
-                        i = i + 1
                     # put contents of the chunk into page_content
                     page_content = metadata[
                         self.config.get("vector_search_schema").get("chunk_text")
@@ -198,15 +195,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             self.tool_functions[tool.get("tool_name")] = globals()[tool.get("tool_class_name")](config=tool)
             self.tool_json_schemas.append(tool.get("tool_input_json_schema"))
 
-        # # Init the retriever for `search_customer_notes_for_topic` tool
-        # self.retriever_tool = VectorSearchRetriever(
-        #     self.config.get("search_note_tool").get("retriever_config")
-        # )
-
-        # self.tool_functions = {
-        #     "retrieve_documents": self.retriever_tool,
-        # }
-
         self.chat_history = []
 
     @mlflow.trace(name="agent", span_type="AGENT")
@@ -218,15 +206,15 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
     ) -> StringResponse:
         ##############################################################################
         # Extract `messages` key from the `model_input`
-        messages = self.get_messages_array(model_input)
+        messages = get_messages_array(model_input)
 
         ##############################################################################
         # Parse `messages` array into the user's query & the chat history
         with mlflow.start_span(name="parse_input", span_type="PARSER") as span:
             span.set_inputs({"messages": messages})
-            user_query = self.extract_user_query_string(messages)
+            user_query = extract_user_query_string(messages)
             # Save the history inside the Agent's internal state
-            self.chat_history = self.extract_chat_history(messages)
+            self.chat_history = extract_chat_history(messages)
             span.set_outputs(
                 {"user_query": user_query, "chat_history": self.chat_history}
             )
@@ -278,7 +266,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             for tool_call in tool_calls:
                 function = tool_call['function']
                 args = json.loads(function['arguments'])
-                print(tool_call)
                 result = self.execute_function(function['name'], args)
                 tool_message = {
                     "role": "tool",
@@ -307,7 +294,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         endpoint_name = self.config.get("llm_config").get("llm_endpoint_name")
         llm_options = self.config.get("llm_config").get("llm_parameters")
 
-        # Trace the call to Model Serving - mlflow version 
+        # Trace the call to Model Serving - mlflow version
         traced_create = mlflow.trace(
             self.model_serving_client.predict,
             name="chat_completions_api",
@@ -328,72 +315,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             endpoint=endpoint_name,
             inputs=inputs,
         )
-
-    @mlflow.trace(span_type="PARSER")
-    def get_messages_array(
-        self, model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame]
-    ) -> List[Dict[str, str]]:
-        if type(model_input) == ChatCompletionRequest:
-            return model_input.messages
-        elif type(model_input) == dict:
-            return model_input.get("messages")
-        elif type(model_input) == pd.DataFrame:
-            return model_input.iloc[0].to_dict().get("messages")
-
-    @mlflow.trace(span_type="PARSER")
-    def extract_user_query_string(
-        self, chat_messages_array: List[Dict[str, str]]
-    ) -> str:
-        """
-        Extracts user query string from the chat messages array.
-
-        Args:
-            chat_messages_array: Array of chat messages.
-
-        Returns:
-            User query string.
-        """
-
-        if isinstance(chat_messages_array, pd.Series):
-            chat_messages_array = chat_messages_array.tolist()
-
-        if isinstance(chat_messages_array[-1], dict):
-            return chat_messages_array[-1]["content"]
-        elif isinstance(chat_messages_array[-1], Message):
-            return chat_messages_array[-1].content
-        else:
-            return chat_messages_array[-1]
-
-    @mlflow.trace(span_type="PARSER")
-    def extract_chat_history(
-        self, chat_messages_array: List[Dict[str, str]]
-    ) -> List[Dict[str, str]]:
-        """
-        Extracts the chat history from the chat messages array.
-
-        Args:
-            chat_messages_array: Array of chat messages.
-
-        Returns:
-            The chat history.
-        """
-        # Convert DataFrame to dict
-        if isinstance(chat_messages_array, pd.Series):
-            chat_messages_array = chat_messages_array.tolist()
-
-        # Dictionary, return as is
-        if isinstance(chat_messages_array[0], dict):
-            return chat_messages_array[:-1]  # return all messages except the last one
-        # MLflow Message, convert to Dictionary
-        elif isinstance(chat_messages_array[0], Message):
-            new_array = []
-            for message in chat_messages_array[:-1]:
-                new_array.append(asdict(message))
-            return new_array
-        else:
-            raise ValueError(
-                "chat_messages_array is not an Array of Dictionary, Pandas DataFrame, or array of MLflow Message."
-            )
 
 
 set_model(FunctionCallingAgent())
