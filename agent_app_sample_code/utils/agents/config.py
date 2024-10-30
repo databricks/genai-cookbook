@@ -78,9 +78,10 @@ class RetrieverParametersConfig(BaseModel):
     query_type: Literal["ann", "hybrid"]
 
 
-class RetrieverToolConfig(ToolConfig):
+class RetrieverConfig(ToolConfig):
     """
-    Configuration for the retriever tool.
+    Configuration for a retriever, which can be used either deterministically in a fixed RAG chain or
+    as a tool.
 
     Attributes:
         vector_search_index (str): Vector Search index that is created by the data pipeline.
@@ -150,7 +151,7 @@ class LLMParametersConfig(BaseModel):
     max_tokens: int = None
 
 
-class FunctionCallingLLMConfig(BaseModel):
+class LLMConfig(BaseModel):
     """
     Configuration for the function-calling LLM.
 
@@ -176,7 +177,7 @@ class FunctionCallingLLMConfig(BaseModel):
     # Parameters that control how the LLM responds.
     llm_parameters: LLMParametersConfig
 
-    tools: List[Any]
+    tools: List[Any] = []
 
 
 class AgentConfig(BaseModel):
@@ -184,11 +185,11 @@ class AgentConfig(BaseModel):
     Configuration for the agent with MLflow input example.
 
     Attributes:
-        llm_config (FunctionCallingLLMConfig): Configuration for the function-calling LLM.
+        llm_config (LLMConfig): Configuration for the function-calling LLM.
         input_example (Any): Used by MLflow to set the Agent's input schema.
     """
 
-    llm_config: FunctionCallingLLMConfig
+    llm_config: LLMConfig
 
     # Used by MLflow to set the Agent's input schema
     input_example: Any

@@ -137,9 +137,9 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # Import Pydantic models
 from utils.agents.config import (
     AgentConfig,
-    FunctionCallingLLMConfig,
+    LLMConfig,
     LLMParametersConfig,
-    RetrieverToolConfig,
+    RetrieverConfig,
     RetrieverParametersConfig,
     RetrieverSchemaConfig,
 )
@@ -149,12 +149,12 @@ import yaml
 
 # # View Retriever config documentation by inspecting the docstrings
 #
-# help(RetrieverToolConfig)
+# help(RetrieverConfig)
 # help(RetrieverSchemaConfig)
 #
 # # View documentation for the parameters by inspecting the docstring
 #
-# help(FunctionCallingLLMConfig)
+# help(LLMConfig)
 # help(LLMParametersConfig)
 # help(AgentConfig)
 
@@ -179,7 +179,7 @@ datapipeline_output_config = UnstructuredDataPipelineStorageConfig.from_yaml_fil
 # #### ✅✏️ Retriever tool that connects to the Vector Search index
 ########################
 
-retriever_config = RetrieverToolConfig(
+retriever_config = RetrieverConfig(
     vector_search_index=datapipeline_output_config.vector_index,  # UC Vector Search index
     # Retriever schema, this is required by Agent Evaluation to:
     # 1. Enable the Review App to properly display retrieved chunks
@@ -199,7 +199,8 @@ retriever_config = RetrieverToolConfig(
     vector_search_threshold=0.0,  # 0 to 1, similarity threshold cut off for retrieved docs.  Increase if the retriever is returning irrelevant content.
     chunk_template="Passage text: {chunk_text}\nPassage metadata: {metadata}\n\n",  # Prompt template used to format the retrieved information into {context} in `prompt_template`
     prompt_template="""Use the following pieces of retrieved context to answer the question.\nOnly use the passages from context that are relevant to the query to answer the question, ignore the irrelevant passages.  When responding, cite your source, referring to the passage by the columns in the passage's metadata.\n\nContext: {context}""",  # Prompt used to present the retrieved information to the LLM
-    
+
+    # TODO: can this become part of a to_tool method?
     # Retriever prompts: Tune these prompts if the Agent uses the retriever incorrectly e.g., doesn't call the retriever tool for the right queries or translates the user's intent to a query incorrectly.
     retriever_query_parameter_prompt= "query to look up in retriever", # the prompt used to describe what inputs should go in the 'query' parameter which is used by the vector index to search for relevant documents
     tool_description_prompt="Search for documents that are relevant to a user's query about the [REPLACE WITH DESCRIPTION OF YOUR DOCS].",  # the prompt used to describe when the tool so the LLM can decide when it is relevant to call.
@@ -213,7 +214,7 @@ retriever_config = RetrieverToolConfig(
 #### ✅✏️ LLM configuration
 ########################
 
-llm_config = FunctionCallingLLMConfig(
+llm_config = LLMConfig(
     llm_endpoint_name="databricks-meta-llama-3-1-405b-instruct",  # Model serving endpoint
     llm_system_prompt_template=(
         """You are a helpful assistant that answers questions by calling tools.  Provide responses ONLY based on the outputs from tools.  If you do not have a relevant tool for a question, respond with 'Sorry, I'm not trained to answer that question'."""

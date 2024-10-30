@@ -120,6 +120,7 @@ class VectorSearchRetriever:
                 **self.config.get("vector_search_parameters"),
             )
 
+        # We turn the config into a dict and pass it here
         vector_search_threshold = self.config.get("vector_search_threshold")
         documents = self.convert_vector_search_to_documents(
             results, vector_search_threshold

@@ -97,7 +97,6 @@ from utils.evaluation.evaluation_set import create_potential_evaluation_set, _de
 from utils.get_inference_tables import get_inference_tables
 
 inference_table_locations = get_inference_tables(cookbook_shared_config.uc_model)
-inference_table_locations = get_inference_tables("main.eric_peter_agents.agent_app_name_model1")
 
 # Get the table names
 assessment_log_table_name = f"{inference_table_locations['uc_catalog_name']}.{inference_table_locations['uc_schema_name']}.`{inference_table_locations['table_names']['assessment_logs']}`"

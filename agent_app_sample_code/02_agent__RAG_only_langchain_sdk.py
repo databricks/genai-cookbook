@@ -60,8 +60,6 @@ dbutils.library.restartPython()
 
 # Shared imports
 from datetime import datetime
-from databricks.vector_search.client import VectorSearchClient
-import mlflow
 from IPython.display import display_markdown
 
 # COMMAND ----------
@@ -142,7 +140,7 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # COMMAND ----------
 
 # Import Pydantic models
-from agents.rag_only_agent.config import (
+from utils.agents.config import (
     AgentConfig,
     LLMConfig,
     LLMParametersConfig,

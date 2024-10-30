@@ -13,9 +13,9 @@ from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest
 from databricks.vector_search.client import VectorSearchClient
 from utils.agents.config import (
     AgentConfig,
-    FunctionCallingLLMConfig,
+    LLMConfig,
     LLMParametersConfig,
-    RetrieverToolConfig,
+    RetrieverConfig,
     RetrieverParametersConfig,
     RetrieverSchemaConfig,
 )
@@ -115,7 +115,7 @@ def log_agent_to_mlflow(agent_config, retriever_config):
 
     # Add the Databricks resources for the retriever's vector indexes
     for tool in agent_config.llm_config.tools:
-        if type(tool) == RetrieverToolConfig:
+        if type(tool) == RetrieverConfig:
             databricks_resources.append(
                 DatabricksVectorSearchIndex(index_name=tool.vector_search_index)
             )
