@@ -30,7 +30,10 @@ from langchain_core.prompts import (
 )
 from langchain_core.runnables import RunnablePassthrough, RunnableBranch
 from langchain_core.messages import HumanMessage, AIMessage
-
+from utils.agents.chat import get_messages_array, extract_user_query_string, extract_chat_history
+from utils.agents.config import RagConfig
+from utils.agents.vector_search import VectorSearchRetrieverConfig
+from utils.agents.llm import LLMConfig
 
 # COMMAND ----------
 
@@ -42,19 +45,6 @@ from langchain_core.messages import HumanMessage, AIMessage
 ## Enable MLflow Tracing
 mlflow.langchain.autolog()
 
-
-############
-# Helper functions
-############
-# Return the string contents of the most recent message from the user
-def extract_user_query_string(chat_messages_array):
-    return chat_messages_array[-1]["content"]
-
-
-# Return the chat history, which is is everything before the last question
-def extract_chat_history(chat_messages_array):
-    return chat_messages_array[:-1]
-
 # Load the chain's configuration
 # This logic allows the code to run from this notebook OR the 02_agent notebook.
 try:
@@ -62,8 +52,10 @@ try:
 except Exception as e:
     model_config = mlflow.models.ModelConfig(development_config="./configs/agent_model_config.yaml")
 
-retriever_config = model_config.get("retriever_config")
-llm_config = model_config.get("llm_config")
+rag_config = RagConfig.parse_obj(model_config.get("rag_config"))
+
+retriever_config = VectorSearchRetrieverConfig.parse_obj(model_config.get("retriever_config"))
+llm_config = LlmConfig.parse_obj("llm_config")
 
 ############
 # Connect to the Vector Search Index

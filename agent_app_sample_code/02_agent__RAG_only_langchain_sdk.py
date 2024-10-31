@@ -129,12 +129,13 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # MAGIC
 # MAGIC Here, we use the MLflow [ModelConfig](https://docs.databricks.com/en/generative-ai/create-log-agent.html#use-parameters-to-configure-the-agent) primitive to parameterize your Agent's code with common settings you will tune to improve quality, such as prompts.
 # MAGIC
+# MAGIC # TODO(smurching) update this
 # MAGIC > *Note: Our template Agents use [Pydantic](https://docs.pydantic.dev/latest/) models, which are thin wrappers around Python dictionaries.  Pydantic allows us to define the initial parameters Databricks suggests for tuning quality and allows this notebook to validate parameters changes you make.*
 # MAGIC > 
 # MAGIC > *If you prefer, you can switch to using a native Python dictionary for parameterization.  Since MLflow ModelConfig only accepts YAML files or dictionaries, we dump the Pydantic model to a YAML file before passing it to MLflow ModelConfig.*
 # MAGIC
 # MAGIC You can (and often will need to) add or adjust the parameters in our template.  To add/modify/delete a parameter, you can either:
-# MAGIC 1. Modify the Pydantic classes in `agent_code_templates`
+# MAGIC 1. Modify the Pydantic classes in `utils.agents.config`
 # MAGIC 2. Create a Python dictionary in this notebook to replace the Pydantic class
 
 # COMMAND ----------
@@ -144,9 +145,9 @@ from utils.agents.config import (
     AgentConfig,
     LLMConfig,
     LLMParametersConfig,
-    RetrieverConfig,
-    RetrieverParametersConfig,
-    RetrieverSchemaConfig,
+    VectorSearchRetrieverConfig,
+    RetrieverInputSchema,
+    RetrieverOutputSchema,
 )
 from pydantic import Field, BaseModel
 import json
@@ -154,8 +155,8 @@ import yaml
 
 ## View Retriever config documentation by inspecting the docstrings
 # 
-# print(RetrieverConfig.__doc__)
-# print(RetrieverSchemaConfig.__doc__)
+# print(VectorSearchRetrieverConfig.__doc__)
+# print(RetrieverOutputSchema.__doc__)
 
 ## View documentation for the parameters by inspecting the docstring
 # 
@@ -181,20 +182,20 @@ datapipeline_output_config = UnstructuredDataPipelineStorageConfig.from_yaml_fil
 #### ✅✏️ Retriever tool configuration
 ########################
 
-retriever_config = RetrieverConfig(
+retriever_config = VectorSearchRetrieverConfig(
     vector_search_index=datapipeline_output_config.vector_index,  # UC Vector Search index
     # Retriever schema, this is required by Agent Evaluation to:
     # 1. Enable the Review App to properly display retrieved chunks
     # 2. Enable metrics / LLM judges to understand which fields to use to measure the retriever
     # Each is a column name within the `vector_search_index`
-    vector_search_schema=RetrieverSchemaConfig(
+    vector_search_schema=RetrieverOutputSchema(
         primary_key="chunk_id",  # The column name in the retriever's response referred to the unique key
         chunk_text="content_chunked",  # The column name in the retriever's response that contains the returned chunk
         document_uri="doc_uri",  # The URI of the chunk - displayed as the document ID in the Review App
         additional_metadata_columns=[],  # Additional columns to return from the vector database and present to the LLM
     ),
     # Parameters defined by Vector Search docs: https://docs.databricks.com/en/generative-ai/create-query-vector-search.html#query-a-vector-search-endpoint
-    vector_search_parameters=RetrieverParametersConfig(
+    vector_search_parameters=RetrieverInputSchema(
         num_results=5,  # Number of search results that the retriever returns
         query_type="ann",  # Type of search: ann or hybrid
     ),
@@ -300,7 +301,7 @@ import yaml
 from databricks import agents
 from databricks import vector_search
 
-from utils.agents.agent_utils import log_agent_to_mlflow
+from utils.agents import log_agent_to_mlflow
 
 
 # COMMAND ----------

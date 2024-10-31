@@ -22,6 +22,8 @@ from mlflow.models import set_model, ModelConfig
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, ChatCompletionResponse, ChainCompletionChoice, Message
 from mlflow.deployments import get_deploy_client
 
+from utils.agents.vector_search import VectorSearchRetriever
+
 # COMMAND ----------
 
 # MAGIC %md
@@ -31,139 +33,6 @@ from mlflow.deployments import get_deploy_client
 
 from databricks.vector_search.client import VectorSearchClient
 
-
-@dataclass
-class Document:
-    page_content: str
-    metadata: Dict[str, str]
-    type: str
-
-
-class VectorSearchRetriever:
-    """
-    Class using Databricks Vector Search to retrieve relevant documents.
-    """
-
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
-        # print(self.config)
-        self.vector_search_client = VectorSearchClient(disable_notice=True)
-        self.vector_search_index = self.vector_search_client.get_index(
-            index_name=self.config.get("vector_search_index")
-        )
-
-        vector_search_schema = self.config.get("vector_search_schema")
-        mlflow.models.set_retriever_schema(
-            primary_key=vector_search_schema.get("primary_key"),
-            text_column=vector_search_schema.get("chunk_text"),
-            doc_uri=vector_search_schema.get("document_uri"),
-        )
-
-    @mlflow.trace(span_type="TOOL", name="VectorSearchRetriever")
-    def __call__(self, query: str) -> str:
-        results = self.similarity_search(query)
-
-        context = ""
-        for result in results:
-            formatted_chunk = self.config.get("chunk_template").format(
-                chunk_text=result.get("page_content"),
-                metadata=json.dumps(result.get("metadata")),
-            )
-            context += formatted_chunk
-
-        return context.strip()
-
-    @mlflow.trace(span_type="RETRIEVER")
-    def similarity_search(
-        self, query: str, filters: Dict[Any, Any] = None
-    ) -> List[Document]:
-        """
-        Performs vector search to retrieve relevant chunks.
-
-        Args:
-            query: Search query.
-            filters: Optional filters to apply to the search, must follow the Databricks Vector Search filter spec (https://docs.databricks.com/en/generative-ai/create-query-vector-search.html#use-filters-on-queries)
-
-        Returns:
-            List of retrieved Documents.
-        """
-
-        traced_search = mlflow.trace(
-            self.vector_search_index.similarity_search,
-            name="vector_search.similarity_search",
-        )
-
-        vector_search_schema = self.config.get("vector_search_schema")
-        additional_metadata_columns = (
-            vector_search_schema.get("additional_metadata_columns") or []
-        )
-
-        columns = [
-            vector_search_schema.get("primary_key"),
-            vector_search_schema.get("chunk_text"),
-            vector_search_schema.get("document_uri"),
-        ] + additional_metadata_columns
-
-        # de-duplicate
-        columns = list(set(columns))
-
-
-        if filters is None:
-            results = traced_search(
-                query_text=query,
-                columns=columns,
-                **self.config.get("vector_search_parameters"),
-            )
-        else:
-            results = traced_search(
-                query_text=query,
-                filters=filters,
-                columns=columns,
-                **self.config.get("vector_search_parameters"),
-            )
-
-        vector_search_threshold = self.config.get("vector_search_threshold")
-        documents = self.convert_vector_search_to_documents(
-            results, vector_search_threshold
-        )
-
-        return [asdict(doc) for doc in documents]
-
-    @mlflow.trace(span_type="PARSER")
-    def convert_vector_search_to_documents(
-        self, vs_results, vector_search_threshold
-    ) -> List[Document]:
-        column_names = []
-        for column in vs_results["manifest"]["columns"]:
-            column_names.append(column)
-
-        docs = []
-        if vs_results["result"]["row_count"] > 0:
-            for item in vs_results["result"]["data_array"]:
-                metadata = {}
-                score = item[-1]
-                if score >= vector_search_threshold:
-                    metadata["similarity_score"] = score
-                    # print(score)
-                    i = 0
-                    for field in item[0:-1]:
-                        # print(field + "--")
-                        metadata[column_names[i]["name"]] = field
-                        i = i + 1
-                    # put contents of the chunk into page_content
-                    page_content = metadata[
-                        self.config.get("vector_search_schema").get("chunk_text")
-                    ]
-                    del metadata[
-                        self.config.get("vector_search_schema").get("chunk_text")
-                    ]
-
-                    doc = Document(
-                        page_content=page_content, metadata=metadata, type="Document"
-                    )
-                    docs.append(doc)
-
-        return docs
 
 # COMMAND ----------
 
@@ -175,6 +44,8 @@ class VectorSearchRetriever:
 class RAGAgent(mlflow.pyfunc.PythonModel):
     """
     Class representing an Agent that only includes an LLM
+
+    If no explicit configuration is provided, the Agent will attempt to load the configuration from the following locations:
     """
     def __init__(self, agent_config: dict = None):
         self.__agent_config = agent_config
