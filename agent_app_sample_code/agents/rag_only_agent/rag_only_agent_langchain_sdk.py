@@ -31,9 +31,11 @@ from langchain_core.prompts import (
 from langchain_core.runnables import RunnablePassthrough, RunnableBranch
 from langchain_core.messages import HumanMessage, AIMessage
 from utils.agents.chat import get_messages_array, extract_user_query_string, extract_chat_history
-from utils.agents.config import RagConfig
+from utils.agents.config import RAGConfig
 from utils.agents.vector_search import VectorSearchRetrieverConfig
 from utils.agents.llm import LLMConfig
+from utils.agents.config import load_first_yaml_file
+import yaml
 
 # COMMAND ----------
 
@@ -47,38 +49,37 @@ mlflow.langchain.autolog()
 
 # Load the chain's configuration
 # This logic allows the code to run from this notebook OR the 02_agent notebook.
-try:
-    model_config = mlflow.models.ModelConfig(development_config="../../configs/agent_model_config.yaml")
-except Exception as e:
-    model_config = mlflow.models.ModelConfig(development_config="./configs/agent_model_config.yaml")
+config_paths = [
+    "../../configs/agent_model_config.yaml",
+    "./configs/agent_model_config.yaml",
+]
+rag_config_yml = load_first_yaml_file(config_paths)
+rag_config = RAGConfig.parse_obj(yaml.safe_load(rag_config_yml))
 
-rag_config = RagConfig.parse_obj(model_config.get("rag_config"))
-
-retriever_config = VectorSearchRetrieverConfig.parse_obj(model_config.get("retriever_config"))
-llm_config = LlmConfig.parse_obj("llm_config")
+retriever_config = rag_config.vector_search_retriever_config
+llm_config = rag_config.llm_config
 
 ############
 # Connect to the Vector Search Index
 ############
 vs_client = VectorSearchClient(disable_notice=True)
 vs_index = vs_client.get_index(
-    # endpoint_name=databricks_resources.get("vector_search_endpoint_name"),
-    index_name=retriever_config.get("vector_search_index"),
+    index_name=retriever_config.vector_search_index
 )
-vector_search_schema = retriever_config.get("vector_search_schema")
+vector_search_schema = retriever_config.vector_search_schema
 
 ############
 # Turn the Vector Search index into a LangChain retriever
 ############
 vector_search_as_retriever = DatabricksVectorSearch(
     vs_index,
-    text_column=vector_search_schema.get("chunk_text"),
+    text_column=vector_search_schema.chunk_text,
     columns=[
-        vector_search_schema.get("primary_key"),
-        vector_search_schema.get("chunk_text"),
-        vector_search_schema.get("document_uri"),
+        vector_search_schema.primary_key,
+        vector_search_schema.chunk_text,
+        vector_search_schema.document_uri,
     ],
-).as_retriever(search_kwargs=retriever_config.get("vector_search_parameters"))
+).as_retriever(search_kwargs=retriever_config.vector_search_parameters)
 
 ############
 # Required to:
@@ -87,11 +88,9 @@ vector_search_as_retriever = DatabricksVectorSearch(
 ############
 
 mlflow.models.set_retriever_schema(
-    primary_key=vector_search_schema.get("primary_key"),
-    text_column=vector_search_schema.get("chunk_text"),
-    doc_uri=vector_search_schema.get(
-        "document_uri"
-    ),  # Review App uses `doc_uri` to display chunks from the same document in a single view
+    primary_key=vector_search_schema.primary_key,
+    text_column=vector_search_schema.chunk_text,
+    doc_uri=vector_search_schema.document_uri,  # Review App uses `doc_uri` to display chunks from the same document in a single view
 )
 
 
@@ -99,7 +98,7 @@ mlflow.models.set_retriever_schema(
 # Method to format the docs returned by the retriever into the prompt
 ############
 def format_context(docs):
-    chunk_template = retriever_config.get("chunk_template")
+    chunk_template = retriever_config.chunk_template
     chunk_contents = [
         # Change the params here if you adjust the `chunk_template`
         chunk_template.format(
@@ -118,7 +117,7 @@ prompt = ChatPromptTemplate.from_messages(
     [
         (  # System prompt contains the instructions
             "system",
-            llm_config.get("llm_system_prompt_template"),
+            llm_config.llm_system_prompt_template,
         ),
         # If there is history, provide it.
         # Note: This chain does not compress the history, so very long converastions can overflow the context window.
@@ -165,8 +164,8 @@ query_rewrite_prompt = PromptTemplate(
 # FM for generation
 ############
 model = ChatDatabricks(
-    endpoint=llm_config.get("llm_endpoint_name"),
-    extra_params=llm_config.get("llm_parameters"),
+    endpoint=llm_config.llm_endpoint_name,
+    extra_params=llm_config.llm_parameters,
 )
 
 ############

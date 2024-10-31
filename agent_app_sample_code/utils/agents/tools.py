@@ -1,11 +1,10 @@
 import mlflow
 from pydantic import computed_field, Field, BaseModel
-from utils.agents.pydantic_utils import SerializableModel
-@mlflow.trace(span_type="FUNCTION")
-def execute_function(tool_functions, function_name, args):
-    the_function = tool_functions[function_name]
+from utils.pydantic_utils import SerializableModel
 
-    result = the_function(**args)
+@mlflow.trace(span_type="FUNCTION")
+def execute_function(tool, args):
+    result = tool(**args)
     return result
 
 

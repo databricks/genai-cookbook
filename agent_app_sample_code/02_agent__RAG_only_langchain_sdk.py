@@ -141,15 +141,9 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # COMMAND ----------
 
 # Import Pydantic models
-from utils.agents.config import (
-    AgentConfig,
-    LLMConfig,
-    LLMParametersConfig,
-    VectorSearchRetrieverConfig,
-    RetrieverInputSchema,
-    RetrieverOutputSchema,
-)
-from pydantic import Field, BaseModel
+from utils.agents.config import RAGConfig
+from utils.agents.llm import LLMConfig, LLMParametersConfig
+from utils.agents.vector_search import VectorSearchRetrieverConfig, VectorSearchRetrieverInputSchema, RetrieverOutputSchema
 import json
 import yaml
 
@@ -195,7 +189,7 @@ retriever_config = VectorSearchRetrieverConfig(
         additional_metadata_columns=[],  # Additional columns to return from the vector database and present to the LLM
     ),
     # Parameters defined by Vector Search docs: https://docs.databricks.com/en/generative-ai/create-query-vector-search.html#query-a-vector-search-endpoint
-    vector_search_parameters=RetrieverInputSchema(
+    vector_search_parameters=VectorSearchRetrieverInputSchema(
         num_results=5,  # Number of search results that the retriever returns
         query_type="ann",  # Type of search: ann or hybrid
     ),
@@ -218,8 +212,8 @@ llm_config = LLMConfig(
     ),  # LLM parameters
 )
 
-agent_config = AgentConfig(
-    retriever_config=retriever_config,
+agent_config = RAGConfig(
+    vector_search_retriever_config=retriever_config,
     llm_config=llm_config,
     input_example={
         "messages": [
@@ -235,7 +229,7 @@ agent_config = AgentConfig(
 ##### 🚫✏️ Dump the configuration to a YAML
 ########################
 
-# We dump the dump the Pydantic model to a YAML file because:
+# We dump the Pydantic model to a YAML file because:
 # 1. MLflow ModelConfig only accepts YAML files or dictionaries
 # 2. When importing the Agent's code, it needs to read this configuration
 def write_dict_to_yaml(data, file_path):

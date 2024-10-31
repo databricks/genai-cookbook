@@ -7,7 +7,8 @@ from typing import Literal, Optional, Any, Callable, Dict, List
 from databricks.vector_search.client import VectorSearchClient
 
 from pydantic import BaseModel
-from utils.agents.pydantic_utils import BaseToolModel, SerializableModel
+from utils.agents.tools import BaseToolModel
+
 class RetrieverOutputSchema(BaseModel):
     """
     Configuration for the schema used in the retriever's response.
@@ -101,14 +102,10 @@ class Document:
     metadata: Dict[str, str]
     type: str
 
-class VectorSearchRetriever(SerializableModel):
+class VectorSearchRetriever():
     """
     Class using Databricks Vector Search to retrieve relevant documents.
     """
-
-    # Define fields that should be serialized when this object is serialized
-    config: VectorSearchRetrieverConfig
-
     def __init__(self, config: VectorSearchRetrieverConfig):
         super().__init__()
         self.config = config
@@ -228,12 +225,12 @@ class VectorSearchRetriever(SerializableModel):
 
 class VectorSearchRetrieverTool(BaseToolModel):
 
-    vector_search_retriever: VectorSearchRetriever
-    def __init__(self, vector_search_retriever: VectorSearchRetriever, tool_description_prompt: str, tool_name: str):
+    def __init__(self, vector_search_retriever: VectorSearchRetriever, tool_description_prompt: str, tool_name: str, retriever_query_parameter_prompt: str):
         super().__init__()
         self.vector_search_retriever = vector_search_retriever
         self.tool_description_prompt = tool_description_prompt
         self.tool_name = tool_name
+        self.retriever_query_parameter_prompt = retriever_query_parameter_prompt
 
     @property
     def tool_input_schema(self) -> dict:

@@ -1,8 +1,4 @@
-from pydantic import computed_field, Field, BaseModel
-from typing import Literal, List, Any
-
 from pydantic import BaseModel
-from typing import Type
 import yaml
 import importlib
 
@@ -10,10 +6,12 @@ _CLASS_PATH_KEY = "class_path"
 
 class SerializableModel(BaseModel):
     def to_yaml(self) -> str:
-        # Add class_path metadata automatically
-        data = self.dict()
-        data[_CLASS_PATH_KEY] = f"{self.__module__}.{self.__class__.__name__}"
-        return yaml.dump(data)
+        return obj_to_yaml(self)
+
+def obj_to_yaml(obj: BaseModel) -> str:
+    data = obj.dict()
+    data[_CLASS_PATH_KEY] = f"{obj.__module__}.{obj.__class__.__name__}"
+    return yaml.dump(data)
 
 def load_obj_from_yaml(yaml_str: str) -> SerializableModel:
     data = yaml.safe_load(yaml_str)

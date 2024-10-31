@@ -128,6 +128,9 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # MAGIC > 
 # MAGIC > *If you prefer, you can switch to using a native Python dictionary for parameterization.  Since MLflow ModelConfig only accepts YAML files or dictionaries, we dump the Pydantic model to a YAML file before passing it to MLflow ModelConfig.*
 # MAGIC
+# MAGIC We use Pydantic to define tools and support automatically serializing their classnames and configs to YAML that can be
+# MAGIC loaded back. TODO(smurching) explain this better
+# MAGIC
 # MAGIC You can (and often will need to) add or adjust the parameters in our template.  To add/modify/delete a parameter, you can either:
 # MAGIC 1. Modify the Pydantic classes in `utils.agents.config`
 # MAGIC 2. Create a Python dictionary in this notebook to replace the Pydantic class
@@ -137,12 +140,9 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # Import Pydantic models
 from utils.agents.config import (
     AgentConfig,
-    LLMConfig,
-    LLMParametersConfig,
-    VectorSearchRetrieverToolConfig,
-    RetrieverInputSchema,
-    RetrieverOutputSchema,
 )
+from utils.agents.llm import LLMConfig, LLMParametersConfig
+from utils.agents.vector_search import VectorSearchRetriever, VectorSearchRetrieverTool, VectorSearchRetrieverConfig, VectorSearchRetrieverInputSchema, RetrieverOutputSchema,
 from utils.agents import log_agent_to_mlflow
 import json
 import yaml
@@ -179,7 +179,7 @@ datapipeline_output_config = UnstructuredDataPipelineStorageConfig.from_yaml_fil
 # #### ✅✏️ Retriever tool that connects to the Vector Search index
 ########################
 
-retriever_config = VectorSearchRetrieverToolConfig(
+retriever_config = VectorSearchRetrieverConfig(
     vector_search_index=datapipeline_output_config.vector_index,  # UC Vector Search index
     # Retriever schema, this is required by Agent Evaluation to:
     # 1. Enable the Review App to properly display retrieved chunks
@@ -192,23 +192,13 @@ retriever_config = VectorSearchRetrieverToolConfig(
         additional_metadata_columns=[],  # Additional columns to return from the vector database and present to the LLM
     ),
     # Parameters defined by Vector Search docs: https://docs.databricks.com/en/generative-ai/create-query-vector-search.html#query-a-vector-search-endpoint
-    vector_search_parameters=RetrieverInputSchema(
+    vector_search_parameters=VectorSearchRetrieverInputSchema(
         num_results=5,  # Number of search results that the retriever returns
         query_type="ann",  # Type of search: ann or hybrid
     ),
     vector_search_threshold=0.0,  # 0 to 1, similarity threshold cut off for retrieved docs.  Increase if the retriever is returning irrelevant content.
     chunk_template="Passage text: {chunk_text}\nPassage metadata: {metadata}\n\n",  # Prompt template used to format the retrieved information into {context} in `prompt_template`
     prompt_template="""Use the following pieces of retrieved context to answer the question.\nOnly use the passages from context that are relevant to the query to answer the question, ignore the irrelevant passages.  When responding, cite your source, referring to the passage by the columns in the passage's metadata.\n\nContext: {context}""",  # Prompt used to present the retrieved information to the LLM
-
-    # TODO: can this become part of a to_tool method?
-    # Retriever prompts: Tune these prompts if the Agent uses the retriever incorrectly e.g., doesn't call the retriever tool for the right queries or translates the user's intent to a query incorrectly.
-    retriever_query_parameter_prompt= "query to look up in retriever", # the prompt used to describe what inputs should go in the 'query' parameter which is used by the vector index to search for relevant documents
-    tool_description_prompt="Search for documents that are relevant to a user's query about the [REPLACE WITH DESCRIPTION OF YOUR DOCS].",  # the prompt used to describe when the tool so the LLM can decide when it is relevant to call.
-    tool_name="retrieve_documents",  # the prompt that describes the tool's name.  Used in combination with `tool_description_prompt` to describe when the tool so the LLM can decide when it is relevant to call.
-
-    # TODO: Do we have to pass class name here?
-    # Retriever internals
-    tool_class_name="VectorSearchRetriever",  # Implementation detail, this is the name of the class inside the Agent's code that contains the retriever implementation.  When loading this tool, this class will be initialized.
 )
 
 ########################
@@ -223,11 +213,19 @@ llm_config = LLMConfig(
     llm_parameters=LLMParametersConfig(
         temperature=0.01, max_tokens=1500
     ),  # LLM parameters
-    tools=[retriever_config],
 )
 
 agent_config = AgentConfig(
     llm_config=llm_config,
+    tools=[VectorSearchRetrieverTool(
+        vector_search_retriever=VectorSearchRetriever(retriever_config),
+        # the prompt used to describe when the tool so the LLM can decide when it is relevant to call.
+        tool_description_prompt="Search for documents that are relevant to a user's query about the [REPLACE WITH DESCRIPTION OF YOUR DOCS].",
+        # the prompt that describes the tool's name.  Used in combination with `tool_description_prompt` to describe when the tool so the LLM can decide when it is relevant to call.
+        tool_name="retrieve_documents",
+        # Retriever prompts: Tune these prompts if the Agent uses the retriever incorrectly e.g., doesn't call the retriever tool for the right queries or translates the user's intent to a query incorrectly.
+        retriever_query_parameter_prompt="The query to find documents for.", # the prompt used to describe what inputs should go in the 'query' parameter which is used by the vector index to search for relevant documents
+    )],
     input_example={
         "messages": [
             {

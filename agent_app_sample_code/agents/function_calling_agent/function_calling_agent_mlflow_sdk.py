@@ -15,21 +15,14 @@
 import json
 from typing import Any, Callable, Dict, List, Optional, Union
 import mlflow
-from dataclasses import asdict, dataclass
 import pandas as pd
 from mlflow.models import set_model, ModelConfig
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
 from mlflow.deployments import get_deploy_client
 import os
 from utils.agents.chat import get_messages_array, extract_user_query_string, extract_chat_history
-
-# COMMAND ----------
-
-# MAGIC %md ##### Retriever tool
-
-# COMMAND ----------
-
-from databricks.vector_search.client import VectorSearchClient
+from utils.agents.config import AgentConfig, load_first_yaml_file
+from utils.agents.tools import execute_function
 
 # COMMAND ----------
 
@@ -42,34 +35,24 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
     """
     Class representing an Agent that does function-calling with tools
     """
-    def __init__(self, agent_config: dict = None):
-        self.__agent_config = agent_config
-        try:
-          self.config = mlflow.models.ModelConfig(development_config=self.__agent_config)
-        except Exception as e:
-            self.config = None
-        if self.config is None:
-            try:
-                self.config = mlflow.models.ModelConfig(development_config="../../configs/agent_model_config.yaml")
-            except Exception as e:
-                self.config = None
-        if self.config is None:
-            self.config = mlflow.models.ModelConfig(development_config="./configs/agent_model_config.yaml")
+    def __init__(self, agent_config: Optional[AgentConfig] = None):
+        if agent_config is None:
+            config_paths = [
+                "../../configs/agent_model_config.yaml",
+                "./configs/agent_model_config.yaml",
+            ]
+            self.agent_config = AgentConfig.from_yaml(load_first_yaml_file(config_paths))
+        else:
+            self.agent_config = agent_config
             
         self.model_serving_client = get_deploy_client("databricks")
 
         # Initialize the tools
         self.tool_functions = {}
         self.tool_json_schemas =[]
-        for tool in self.config.get("llm_config").get("tools"):
-            # 1 Instantiate the tool's class w/ by passing the tool's config to it
-            # 2 Store the instantiated tool to use later
-            # Should change this pattern to not use a global. But the reason we do it is because we need
-            # to JSON-serialize the configs. The goal is to have a JSON-serialized thing of tool configs
-            # and have our code be able to read it back and instantiate the tool
-            #
-            self.tool_functions[tool.get("tool_name")] = globals()[tool.get("tool_class_name")](config=tool)
-            self.tool_json_schemas.append(tool.get("tool_input_json_schema"))
+        for tool in self.agent_config.llm_config.tools:
+            self.tool_functions[tool.tool_name] = tool
+            self.tool_json_schemas.append(tool.tool_input_json_schema)
 
         self.chat_history = []
 
@@ -100,7 +83,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
 
         # messages to send the model
         # For models with shorter context length, you will need to trim this to ensure it fits within the model's context length
-        system_prompt = self.config.get("llm_config").get("llm_system_prompt_template")
+        system_prompt = self.agent_config.llm_config.llm_system_prompt_template
         messages = (
             [{"role": "system", "content": system_prompt}]
             + self.chat_history  # append chat history for multi turn
@@ -142,7 +125,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             for tool_call in tool_calls:
                 function = tool_call['function']
                 args = json.loads(function['arguments'])
-                result = self.execute_function(function['name'], args)
+                result = execute_function(self.tool_functions[function['name']], args)
                 tool_message = {
                     "role": "tool",
                     "tool_call_id": tool_call['id'],
@@ -160,15 +143,9 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             )
         raise "ERROR: max iter reached"
 
-    @mlflow.trace(span_type="FUNCTION")
-    def execute_function(self, function_name, args):
-        the_function = self.tool_functions[function_name]
-        result = the_function(**args)
-        return result
-
     def chat_completion(self, messages: List[Dict[str, str]]):
-        endpoint_name = self.config.get("llm_config").get("llm_endpoint_name")
-        llm_options = self.config.get("llm_config").get("llm_parameters")
+        endpoint_name = self.agent_config.llm_config.llm_endpoint_name
+        llm_options = self.agent_config.llm_config.llm_parameters
 
         # Trace the call to Model Serving - mlflow version
         traced_create = mlflow.trace(

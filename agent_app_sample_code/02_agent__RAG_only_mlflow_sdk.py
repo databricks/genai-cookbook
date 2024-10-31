@@ -230,7 +230,7 @@ agent_config = AgentConfig(
 ##### 🚫✏️ Dump the configuration to a YAML
 ########################
 
-# We dump the dump the Pydantic model to a YAML file because:
+# We dump the Pydantic model to a YAML file because:
 # 1. MLflow ModelConfig only accepts YAML files or dictionaries
 # 2. When importing the Agent's code, it needs to read this configuration
 def write_dict_to_yaml(data, file_path):

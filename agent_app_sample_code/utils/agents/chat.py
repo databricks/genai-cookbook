@@ -1,24 +1,8 @@
-import os
 import mlflow
 from typing import Any, Callable, Dict, List, Optional, Union
 from dataclasses import asdict, dataclass
 import pandas as pd
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
-from mlflow.models.resources import (
-    DatabricksVectorSearchIndex,
-    DatabricksServingEndpoint,
-)
-from mlflow.models.signature import ModelSignature
-from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest
-from databricks.vector_search.client import VectorSearchClient
-from utils.agents.config import (
-    AgentConfig,
-    LLMConfig,
-    LLMParametersConfig,
-    VectorSearchRetrieverConfig,
-    RetrieverInputSchema,
-    RetrieverOutputSchema,
-)
 
 def chat_completion(model_serving_client, llm_endpoint_name, llm_parameters, messages: List[Dict[str, str]]):
     traced_create = mlflow.trace(
