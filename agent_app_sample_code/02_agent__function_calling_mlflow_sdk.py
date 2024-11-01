@@ -122,18 +122,14 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # MAGIC %md
 # MAGIC #### ✅✏️ ⚙️ Adjust the Agent's configuration
 # MAGIC
-# MAGIC Here, we use the MLflow [ModelConfig](https://docs.databricks.com/en/generative-ai/create-log-agent.html#use-parameters-to-configure-the-agent) primitive to parameterize your Agent's code with common settings you will tune to improve quality, such as prompts.
+# MAGIC Here, we parameterize your Agent's code with common settings you will tune to improve quality, such as prompts.
 # MAGIC
-# MAGIC > *Note: Our template Agents use [Pydantic](https://docs.pydantic.dev/latest/) models, which are thin wrappers around Python dictionaries.  Pydantic allows us to define the initial parameters Databricks suggests for tuning quality and allows this notebook to validate parameters changes you make.*
-# MAGIC > 
-# MAGIC > *If you prefer, you can switch to using a native Python dictionary for parameterization.  Since MLflow ModelConfig only accepts YAML files or dictionaries, we dump the Pydantic model to a YAML file before passing it to MLflow ModelConfig.*
+# MAGIC > *Note: Our template Agents use [Pydantic](https://docs.pydantic.dev/latest/) models, which are thin wrappers around Python dictionaries.  Pydantic allows us to define the initial parameters Databricks suggests for tuning quality and allows this notebook to validate parameters changes you make. It also provides type-checking for config objects and IDE-friendly property name references.*
 # MAGIC
 # MAGIC We use Pydantic to define tools and support automatically serializing their classnames and configs to YAML that can be
-# MAGIC loaded back.
+# MAGIC loaded back. To implement new tools, implement a new subclass of `utils.agents.tools.BaseTool` and pass it to `AgentConfig` below.
 # MAGIC
-# MAGIC You can (and often will need to) add or adjust the parameters in our template.  To add/modify/delete a parameter, you can either:
-# MAGIC 1. Modify the Pydantic classes in `utils.agents.config`
-# MAGIC 2. Create a Python dictionary in this notebook to replace the Pydantic class
+# MAGIC You can (and often will need to) add or adjust the parameters in our template.  To add/modify/delete a parameter, you can modify the Pydantic classes in modules under `utils.agents`
 
 # COMMAND ----------
 
