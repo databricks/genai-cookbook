@@ -11,6 +11,9 @@
 # dbutils.library.restartPython()
 
 # COMMAND ----------
+import sys
+# Add the parent directory to the path so we can import the `utils` modules
+sys.path.append("../..")
 
 import json
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -50,9 +53,9 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         # Initialize the tools
         self.tool_functions = {}
         self.tool_json_schemas =[]
-        for tool in self.agent_config.llm_config.tools:
+        for tool in self.agent_config.tools:
             self.tool_functions[tool.tool_name] = tool
-            self.tool_json_schemas.append(tool.tool_input_json_schema)
+            self.tool_json_schemas.append(tool.tool_input_json_schema())
 
         self.chat_history = []
 

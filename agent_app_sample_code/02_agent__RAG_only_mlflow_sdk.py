@@ -138,15 +138,13 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 
 # Import Pydantic models
 from utils.agents.config import (
-    AgentConfig,
-    LLMConfig,
-    LLMParametersConfig,
-    VectorSearchRetrieverConfig,
-    RetrieverInputSchema,
-    RetrieverOutputSchema,
+    RAGConfig,
 )
+from utils.agents.llm import LLMConfig, LLMParametersConfig
+from utils.agents.vector_search import VectorSearchRetrieverConfig, VectorSearchRetrieverInputSchema, RetrieverOutputSchema
+
+
 import json
-from utils.agents import log_agent_to_mlflow
 
 # View Retriever config documentation by inspecting the docstrings
 # 
@@ -190,7 +188,7 @@ retriever_config = VectorSearchRetrieverConfig(
         additional_metadata_columns=[],  # Additional columns to return from the vector database and present to the LLM
     ),
     # Parameters defined by Vector Search docs: https://docs.databricks.com/en/generative-ai/create-query-vector-search.html#query-a-vector-search-endpoint
-    vector_search_parameters=RetrieverInputSchema(
+    vector_search_parameters=VectorSearchRetrieverInputSchema(
         num_results=5,  # Number of search results that the retriever returns
         query_type="ann",  # Type of search: ann or hybrid
     ),
@@ -213,8 +211,8 @@ llm_config = LLMConfig(
     ),  # LLM parameters
 )
 
-agent_config = AgentConfig(
-    retriever_config=retriever_config,
+rag_config = RAGConfig(
+    vector_search_retriever_config=retriever_config,
     llm_config=llm_config,
     input_example={
         "messages": [
@@ -226,9 +224,18 @@ agent_config = AgentConfig(
     },
 )
 
+from utils.agents import get_rag_dependencies, log_pyfunc_agent
+
+_RAG_FILE_PATH = "agents/rag_only_agent/rag_only_agent_langchain_sdk"
+def log_agent_to_mlflow():
+    resource_dependencies = get_rag_dependencies(rag_config=rag_config)
+    return log_pyfunc_agent(resource_dependencies=resource_dependencies, agent_definition_file_path=_RAG_FILE_PATH, input_example=rag_config.input_example)
+
+
 ########################
 ##### 🚫✏️ Dump the configuration to a YAML
 ########################
+import yaml
 
 # We dump the Pydantic model to a YAML file because:
 # 1. MLflow ModelConfig only accepts YAML files or dictionaries
@@ -238,20 +245,12 @@ def write_dict_to_yaml(data, file_path):
         yaml.dump(data, file, default_flow_style=False)
 
 # exclude_none = True prevents unused parameters, such as additional LLM parameters, from being included in the config
-write_dict_to_yaml(agent_config.dict(exclude_none=True), "./configs/agent_model_config.yaml")
+write_dict_to_yaml(rag_config.dict(exclude_none=True), "./configs/agent_model_config.yaml")
 
 ########################
 #### Print resulting config to the console
 ########################
-print(json.dumps(agent_config.model_dump(), indent=4))
-
-# @SID what we're doing here is defining the config, 1) persisting it to a JSON model_config (why?)
-# 2) then running another notebook inline via %run (why?)
-
-# The reason we do 1) is to populate the config that's automatically loaded by step 2).
-# The reason we do 2) is to run the agent's code in the same notebook, so that we can evaluate the agent's quality, while still keeping
-# core agent logic in another notebook so that we can easily log it.
-
+print(json.dumps(rag_config.model_dump(), indent=4))
 
 # COMMAND ----------
 
@@ -297,9 +296,6 @@ print(json.dumps(agent_config.model_dump(), indent=4))
 # MAGIC This helper function wraps the code required to log a version of the Agent's code & config to MLflow.  It is used by all 3 modes.
 
 # COMMAND ----------
-import yaml
-
-# COMMAND ----------
 
 # MAGIC %md
 # MAGIC #### ✅✏️ 🅰 Vibe check the Agent for a single query
@@ -318,10 +314,10 @@ vibe_check_query = {
 # `run_name` provides a human-readable name for this vibe check in the MLflow experiment
 with mlflow.start_run(run_name="vibe-check__"+datetime.now().strftime("%Y-%m-%d_%I:%M:%S_%p")):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
+    logged_agent_info = log_agent_to_mlflow()
 
     # Excute the Agent
-    agent = RAGAgent(agent_config = agent_config)
+    agent = RAGAgent(rag_config = rag_config)
 
     # Run the agent for this query
     response = agent.predict(model_input=vibe_check_query)
@@ -361,7 +357,7 @@ evaluation_set = [
 # `run_name` provides a human-readable name for this vibe check in the MLflow experiment
 with mlflow.start_run(run_name="vibe-check__"+datetime.now().strftime("%Y-%m-%d_%I:%M:%S_%p")):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
+    logged_agent_info = log_agent_to_mlflow()
 
     # Run the agent for these queries, using Agent evaluation to parallelize the calls
     eval_results = mlflow.evaluate(
@@ -390,7 +386,7 @@ evaluation_set = spark.table(cookbook_shared_config.evaluation_set_table).toPand
 # `run_name` provides a human-readable name for this vibe check in the MLflow experiment
 with mlflow.start_run(run_name="evaluation__"+datetime.now().strftime("%Y-%m-%d_%I:%M:%S_%p")):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
+    logged_agent_info = log_agent_to_mlflow()
 
     # Run the agent for these queries, using Agent evaluation to parallelize the calls
     eval_results = mlflow.evaluate(
@@ -463,7 +459,7 @@ agent_version_short_name = "friendly-name-to-identify-this-version" # set to Non
 
 with mlflow.start_run(run_name=agent_version_short_name):
     # Log the current Agent code/config to MLflow
-    logged_agent_info = log_agent_to_mlflow(agent_config, retriever_config)
+    logged_agent_info = log_agent_to_mlflow()
 
     # Use Unity Catalog as the model registry
     mlflow.set_registry_uri("databricks-uc")

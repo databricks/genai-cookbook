@@ -7,10 +7,13 @@
 # COMMAND ----------
 
 # # # If running this notebook by itself, uncomment these.
-# %pip install -U -qqqq databricks-agents mlflow mlflow-skinny databricks-vectorsearch langchain==0.2.11 langchain_core==0.2.23 langchain_community==0.2.10 
+# %pip install -U -qqqq databricks-agents mlflow mlflow-skinny databricks-vectorsearch langchain==0.2.11 langchain_core==0.2.23 langchain_community==0.2.10 pydantic
 # dbutils.library.restartPython()
 
 # COMMAND ----------
+import sys
+# Add the parent directory to the path so we can import the `utils` modules
+sys.path.append("../..")
 
 from operator import itemgetter
 import mlflow

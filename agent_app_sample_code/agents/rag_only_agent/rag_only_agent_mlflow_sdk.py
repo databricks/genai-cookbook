@@ -11,6 +11,10 @@
 # dbutils.library.restartPython()
 
 # COMMAND ----------
+import sys
+# Add the parent directory to the path so we can import the `utils` modules
+sys.path.append("../..")
+
 
 import json
 import os
@@ -22,7 +26,7 @@ from mlflow.models import set_model, ModelConfig
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, ChatCompletionResponse, ChainCompletionChoice, Message
 from mlflow.deployments import get_deploy_client
 
-from utils.agents.vector_search import VectorSearchRetriever
+from utils.agents.vector_search import VectorSearchRetriever, VectorSearchRetrieverConfig
 
 # COMMAND ----------
 
@@ -60,12 +64,12 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
                 self.config = None
         if self.config is None:
             self.config = mlflow.models.ModelConfig(development_config="./configs/agent_model_config.yaml")
-
+        retriever_config = VectorSearchRetrieverConfig.parse_obj(self.config.get("vector_search_retriever_config"))
         self.model_serving_client = get_deploy_client("databricks")
 
         # Load the retriever
         self.retriever = VectorSearchRetriever(
-            self.config.get("retriever_config")
+            config=retriever_config
         )
 
     @mlflow.trace(name="chain", span_type="CHAIN")

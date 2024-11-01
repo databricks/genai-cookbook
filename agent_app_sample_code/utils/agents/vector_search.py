@@ -1,13 +1,18 @@
 from dataclasses import dataclass, field, asdict
 
 import mlflow
+from mlflow.models.resources import (
+    DatabricksVectorSearchIndex,
+    DatabricksServingEndpoint,
+)
+
 import json
 
 from typing import Literal, Optional, Any, Callable, Dict, List
 from databricks.vector_search.client import VectorSearchClient
 
 from pydantic import BaseModel
-from utils.agents.tools import BaseToolModel
+from utils.agents.tools import BaseTool
 
 class RetrieverOutputSchema(BaseModel):
     """
@@ -102,18 +107,14 @@ class Document:
     metadata: Dict[str, str]
     type: str
 
-class VectorSearchRetriever():
+class VectorSearchRetriever(BaseModel):
     """
     Class using Databricks Vector Search to retrieve relevant documents.
     """
-    def __init__(self, config: VectorSearchRetrieverConfig):
-        super().__init__()
-        self.config = config
-        self.vector_search_client = VectorSearchClient(disable_notice=True)
-        self.vector_search_index = self.vector_search_client.get_index(
-            index_name=self.config.vector_search_index
-        )
+    config: VectorSearchRetrieverConfig
 
+    def __init__(self, config: VectorSearchRetrieverConfig):
+        super().__init__(config=config)
         vector_search_schema = self.config.vector_search_schema
         mlflow.models.set_retriever_schema(
             primary_key=vector_search_schema.primary_key,
@@ -150,8 +151,13 @@ class VectorSearchRetriever():
             List of retrieved Documents.
         """
 
+        vector_search_client = VectorSearchClient(disable_notice=True)
+        vector_search_index = vector_search_client.get_index(
+            index_name=self.config.vector_search_index
+        )
+
         traced_search = mlflow.trace(
-            self.vector_search_index.similarity_search,
+            vector_search_index.similarity_search,
             name="vector_search.similarity_search",
         )
 
@@ -223,14 +229,15 @@ class VectorSearchRetriever():
 
         return docs
 
-class VectorSearchRetrieverTool(BaseToolModel):
+class VectorSearchRetrieverTool(BaseTool):
+
+    vector_search_retriever: VectorSearchRetriever
+    retriever_query_parameter_prompt: str
 
     def __init__(self, vector_search_retriever: VectorSearchRetriever, tool_description_prompt: str, tool_name: str, retriever_query_parameter_prompt: str):
-        super().__init__()
-        self.vector_search_retriever = vector_search_retriever
-        self.tool_description_prompt = tool_description_prompt
-        self.tool_name = tool_name
-        self.retriever_query_parameter_prompt = retriever_query_parameter_prompt
+        super().__init__(tool_description_prompt=tool_description_prompt, tool_name=tool_name, vector_search_retriever=vector_search_retriever, retriever_query_parameter_prompt=retriever_query_parameter_prompt)
+        # self.vector_search_retriever = vector_search_retriever
+        # self.retriever_query_parameter_prompt = retriever_query_parameter_prompt
 
     @property
     def tool_input_schema(self) -> dict:
@@ -244,3 +251,23 @@ class VectorSearchRetrieverTool(BaseToolModel):
             },
             "type": "object",
         }
+
+    def get_resource_dependencies(self):
+        retriever_config = self.vector_search_retriever.config
+        dependencies = [DatabricksVectorSearchIndex(index_name=retriever_config.vector_search_index)]
+
+        index_embedding_model = (
+            VectorSearchClient(disable_notice=True)
+            .get_index(index_name=retriever_config.vector_search_index)
+            .describe()
+            .get("delta_sync_index_spec")
+            .get("embedding_source_columns")[0]
+            .get("embedding_model_endpoint_name")
+        )
+        if index_embedding_model is not None:
+            dependencies.append(
+                DatabricksServingEndpoint(endpoint_name=index_embedding_model),
+            )
+        else:
+            raise Exception(f"Could not identify the embedding model endpoint resource for {retriever_config.vector_search_index}.  Please manually add the embedding model endpoint to `databricks_resources`.")
+        return dependencies
