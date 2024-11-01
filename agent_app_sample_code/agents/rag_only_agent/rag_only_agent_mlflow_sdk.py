@@ -137,8 +137,8 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
         return model_response.choices[0]["message"]["content"]
 
     def chat_completion(self, messages: List[Dict[str, str]]):
-        endpoint_name = self.config.get("llm_config").get("llm_endpoint_name")
-        llm_options = self.config.get("llm_config").get("llm_parameters")
+        endpoint_name = self.config.llm_config.llm_endpoint_name
+        llm_options = self.config.llm_config.llm_parameters.dict()
 
         # Trace the call to Model Serving
         traced_create = mlflow.trace(

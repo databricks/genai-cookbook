@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field, asdict
 
 import mlflow
+from mlflow.entities import Document
 from mlflow.models.resources import (
     DatabricksVectorSearchIndex,
     DatabricksServingEndpoint,
@@ -101,12 +102,6 @@ class VectorSearchRetrieverConfig(BaseModel):
 
     retriever_query_parameter_prompt: str = "The query to find documents for."
 
-@dataclass
-class Document:
-    page_content: str
-    metadata: Dict[str, str]
-    type: str
-
 class VectorSearchRetriever(BaseModel):
     """
     Class using Databricks Vector Search to retrieve relevant documents.
@@ -191,11 +186,9 @@ class VectorSearchRetriever(BaseModel):
 
         # We turn the config into a dict and pass it here
         vector_search_threshold = self.config.vector_search_threshold
-        documents = self.convert_vector_search_to_documents(
+        return self.convert_vector_search_to_documents(
             results, vector_search_threshold
         )
-
-        return [asdict(doc) for doc in documents]
 
     @mlflow.trace(span_type="PARSER")
     def convert_vector_search_to_documents(
@@ -223,7 +216,7 @@ class VectorSearchRetriever(BaseModel):
                     ]
 
                     doc = Document(
-                        page_content=page_content, metadata=metadata, type="Document"
+                        page_content=page_content, metadata=metadata
                     )
                     docs.append(doc)
 
