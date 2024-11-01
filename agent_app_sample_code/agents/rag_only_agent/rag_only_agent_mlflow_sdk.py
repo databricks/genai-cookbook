@@ -27,6 +27,9 @@ from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, 
 from mlflow.deployments import get_deploy_client
 
 from utils.agents.vector_search import VectorSearchRetriever, VectorSearchRetrieverConfig
+from utils.agents.config import load_first_yaml_file
+from utils.agents.config import RAGConfig
+import yaml
 
 # COMMAND ----------
 
@@ -51,20 +54,14 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
 
     If no explicit configuration is provided, the Agent will attempt to load the configuration from the following locations:
     """
-    def __init__(self, agent_config: dict = None):
-        self.__agent_config = agent_config
-        try:
-          self.config = mlflow.models.ModelConfig(development_config=self.__agent_config)
-        except Exception as e:
-            self.config = None
-        if self.config is None:
-            try:
-                self.config = mlflow.models.ModelConfig(development_config="../../configs/agent_model_config.yaml")
-            except Exception as e:
-                self.config = None
-        if self.config is None:
-            self.config = mlflow.models.ModelConfig(development_config="./configs/agent_model_config.yaml")
-        retriever_config = VectorSearchRetrieverConfig.parse_obj(self.config.get("vector_search_retriever_config"))
+    def __init__(self):
+        config_paths = [
+            "../../configs/agent_model_config.yaml",
+            "./configs/agent_model_config.yaml",
+        ]
+        rag_config_yml = load_first_yaml_file(config_paths)
+        self.config = RAGConfig.parse_obj(yaml.safe_load(rag_config_yml))
+        retriever_config = VectorSearchRetrieverConfig.parse_obj(self.config.vector_search_retriever_config)
         self.model_serving_client = get_deploy_client("databricks")
 
         # Load the retriever
@@ -107,7 +104,7 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
         
         ##############################################################################
         # Generate Answer
-        system_prompt = self.config.get("llm_config").get("llm_system_prompt_template")
+        system_prompt = self.config.llm_config.llm_system_prompt_template
         response = self.chat_completion(
             messages=[
                 {"role": "system", "content": system_prompt.format(context=context)},

@@ -21,6 +21,14 @@ from mlflow.models.resources import (
 )
 
 
+def get_model_config_from_paths(paths):
+    for path in paths:
+        if os.path.exists(path):
+            return mlflow.models.ModelConfig(development_config=path)
+    raise Exception(f"No ModelConfig YAML file found in any of the following "
+                    f"paths {paths}. Please ensure a valid YAML config for the "
+                    f"agent exists at one of the above paths.")
+
 def get_agent_dependencies(agent_config):
     dependencies = [
         DatabricksServingEndpoint(

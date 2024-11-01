@@ -19,7 +19,7 @@ import json
 from typing import Any, Callable, Dict, List, Optional, Union
 import mlflow
 import pandas as pd
-from mlflow.models import set_model, ModelConfig
+from mlflow.models import set_model
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
 from mlflow.deployments import get_deploy_client
 import os

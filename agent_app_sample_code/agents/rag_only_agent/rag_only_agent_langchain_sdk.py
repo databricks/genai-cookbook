@@ -35,8 +35,6 @@ from langchain_core.runnables import RunnablePassthrough, RunnableBranch
 from langchain_core.messages import HumanMessage, AIMessage
 from utils.agents.chat import get_messages_array, extract_user_query_string, extract_chat_history
 from utils.agents.config import RAGConfig
-from utils.agents.vector_search import VectorSearchRetrieverConfig
-from utils.agents.llm import LLMConfig
 from utils.agents.config import load_first_yaml_file
 import yaml
 
