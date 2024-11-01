@@ -145,14 +145,14 @@ import yaml
 
 # # View Retriever config documentation by inspecting the docstrings
 #
-# help(VectorSearchRetrieverConfig)
-# help(RetrieverOutputSchema)
+# print(VectorSearchRetrieverConfig.__doc__)
+# print(RetrieverOutputSchema.__doc__)
 #
 # # View documentation for the parameters by inspecting the docstring
 #
-# help(LLMConfig)
-# help(LLMParametersConfig)
-# help(AgentConfig)
+# print(LLMConfig.__doc__)
+# print(LLMParametersConfig.__doc__)
+# print(AgentConfig.__doc__)
 
 # COMMAND ----------
 
