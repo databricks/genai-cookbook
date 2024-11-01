@@ -148,7 +148,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
 
     def chat_completion(self, messages: List[Dict[str, str]]):
         endpoint_name = self.agent_config.llm_config.llm_endpoint_name
-        llm_options = self.agent_config.llm_config.llm_parameters
+        llm_options = self.agent_config.llm_config.llm_parameters.dict()
 
         # Trace the call to Model Serving - mlflow version
         traced_create = mlflow.trace(

@@ -45,7 +45,7 @@ class AgentConfig(BaseModel):
         # Deserialize tools, dynamically reconstructing each tool
         tools = []
         for tool_dict in agent_config_dict['tools']:
-            tool_yml = yaml.dumps(tool_dict)
+            tool_yml = yaml.dump(tool_dict)
             tools.append(load_obj_from_yaml(tool_yml))
 
         # Replace tools with deserialized instances
