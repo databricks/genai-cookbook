@@ -129,7 +129,6 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # MAGIC
 # MAGIC Here, we use the MLflow [ModelConfig](https://docs.databricks.com/en/generative-ai/create-log-agent.html#use-parameters-to-configure-the-agent) primitive to parameterize your Agent's code with common settings you will tune to improve quality, such as prompts.
 # MAGIC
-# MAGIC # TODO(smurching) update this
 # MAGIC > *Note: Our template Agents use [Pydantic](https://docs.pydantic.dev/latest/) models, which are thin wrappers around Python dictionaries.  Pydantic allows us to define the initial parameters Databricks suggests for tuning quality and allows this notebook to validate parameters changes you make.*
 # MAGIC > 
 # MAGIC > *If you prefer, you can switch to using a native Python dictionary for parameterization.  Since MLflow ModelConfig only accepts YAML files or dictionaries, we dump the Pydantic model to a YAML file before passing it to MLflow ModelConfig.*

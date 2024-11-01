@@ -129,7 +129,7 @@ experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment
 # MAGIC > *If you prefer, you can switch to using a native Python dictionary for parameterization.  Since MLflow ModelConfig only accepts YAML files or dictionaries, we dump the Pydantic model to a YAML file before passing it to MLflow ModelConfig.*
 # MAGIC
 # MAGIC We use Pydantic to define tools and support automatically serializing their classnames and configs to YAML that can be
-# MAGIC loaded back. TODO(smurching) explain this better
+# MAGIC loaded back.
 # MAGIC
 # MAGIC You can (and often will need to) add or adjust the parameters in our template.  To add/modify/delete a parameter, you can either:
 # MAGIC 1. Modify the Pydantic classes in `utils.agents.config`

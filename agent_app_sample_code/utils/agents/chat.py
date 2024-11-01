@@ -22,7 +22,6 @@ def chat_completion(model_serving_client, llm_endpoint_name, llm_parameters, mes
         inputs=inputs,
     )
 
-@mlflow.trace(span_type="PARSER")
 def get_messages_array(model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame]) -> List[Dict[str, str]]:
     if type(model_input) == ChatCompletionRequest:
         return model_input.messages
@@ -31,7 +30,6 @@ def get_messages_array(model_input: Union[ChatCompletionRequest, Dict, pd.DataFr
     elif type(model_input) == pd.DataFrame:
         return model_input.iloc[0].to_dict().get("messages")
 
-@mlflow.trace(span_type="PARSER")
 def extract_user_query_string(chat_messages_array: List[Dict[str, str]]) -> str:
     """
     Extracts user query string from the chat messages array.
@@ -53,7 +51,6 @@ def extract_user_query_string(chat_messages_array: List[Dict[str, str]]) -> str:
     else:
         return chat_messages_array[-1]
 
-@mlflow.trace(span_type="PARSER")
 def extract_chat_history(chat_messages_array: List[Dict[str, str]]) -> List[Dict[str, str]]:
     """
     Extracts the chat history from the chat messages array.

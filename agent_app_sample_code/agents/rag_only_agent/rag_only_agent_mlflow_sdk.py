@@ -15,9 +15,6 @@ import sys
 # Add the parent directory to the path so we can import the `utils` modules
 sys.path.append("../..")
 
-
-import json
-import os
 from typing import Any, Callable, Dict, List, Optional, Union
 from dataclasses import asdict, dataclass
 import mlflow
@@ -29,6 +26,7 @@ from mlflow.deployments import get_deploy_client
 from utils.agents.vector_search import VectorSearchRetriever, VectorSearchRetrieverConfig
 from utils.agents.config import load_first_yaml_file
 from utils.agents.config import RAGConfig
+from utils.agents.chat import chat_completion, get_messages_array, extract_user_query_string, extract_chat_history
 import yaml
 
 # COMMAND ----------
@@ -133,37 +131,22 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
         prompt = query_rewrite_template.format(question=query, chat_history=chat_history_formatted)
 
         model_response = self.chat_completion(messages=[{"role": "user", "content": prompt}])
-        
+
         return model_response.choices[0]["message"]["content"]
 
     def chat_completion(self, messages: List[Dict[str, str]]):
-        endpoint_name = self.config.llm_config.llm_endpoint_name
-        llm_options = self.config.llm_config.llm_parameters.dict()
-
-        # Trace the call to Model Serving
-        traced_create = mlflow.trace(
-            self.model_serving_client.predict,
-            name="chat_completions_api",
-            span_type="CHAT_MODEL",
+        return chat_completion(
+            model_serving_client=self.model_serving_client,
+            llm_endpoint_name=self.config.llm_config.llm_endpoint_name,
+            llm_parameters=self.config.llm_config.llm_parameters.dict(),
+            messages=messages
         )
-
-        # Call LLM 
-        inputs = {
-            "messages": messages,
-            **llm_options
-        }
-        return traced_create(endpoint=endpoint_name, inputs=inputs)
 
     @mlflow.trace(span_type="PARSER")
     def get_messages_array(
         self, model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame]
     ) -> List[Dict[str, str]]:
-        if type(model_input) == ChatCompletionRequest:
-            return model_input.messages
-        elif type(model_input) == dict:
-            return model_input.get("messages")
-        elif type(model_input) == pd.DataFrame:
-            return model_input.iloc[0].to_dict().get("messages")
+        return get_messages_array(model_input)
         
     @mlflow.trace(span_type="PARSER")
     def extract_user_query_string(
@@ -178,16 +161,7 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
         Returns:
             User query string.
         """
-
-        if isinstance(chat_messages_array, pd.Series):
-            chat_messages_array = chat_messages_array.tolist()
-
-        if isinstance(chat_messages_array[-1], dict):
-            return chat_messages_array[-1]["content"]
-        elif isinstance(chat_messages_array[-1], Message):
-            return chat_messages_array[-1].content
-        else:
-            return chat_messages_array[-1]
+        return extract_user_query_string(chat_messages_array=chat_messages_array)
 
     @mlflow.trace(span_type="PARSER")
     def extract_chat_history(
@@ -202,23 +176,7 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
         Returns:
             The chat history.
         """
-        # Convert DataFrame to dict
-        if isinstance(chat_messages_array, pd.Series):
-            chat_messages_array = chat_messages_array.tolist()
-
-        # Dictionary, return as is
-        if isinstance(chat_messages_array[0], dict):
-            return chat_messages_array[:-1]  # return all messages except the last one
-        # MLflow Message, convert to Dictionary
-        elif isinstance(chat_messages_array[0], Message):
-            new_array = []
-            for message in chat_messages_array[:-1]:
-                new_array.append(asdict(message))
-            return new_array
-        else:
-            raise ValueError(
-                "chat_messages_array is not an Array of Dictionary, Pandas DataFrame, or array of MLflow Message."
-            )
+        return extract_chat_history(chat_messages_array)
 
     @mlflow.trace(span_type="PARSER")
     def format_chat_history(self, chat_history: List[Dict[str, str]]) -> str:
