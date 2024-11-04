@@ -1,7 +1,6 @@
 pydantic>=2.9.2
 databricks-agents
 mlflow
-mlflow-skinny
-databricks-sdk
+databricks-sdk[openai]
 databricks-vectorsearch
 pyyaml

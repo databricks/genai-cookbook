@@ -1,6 +1,13 @@
-from databricks.vector_search.client import VectorSearchClient
-
-
+from databricks.sdk.service.vectorsearch import (
+    VectorSearchIndexesAPI,
+    DeltaSyncVectorIndexSpecRequest,
+    EmbeddingSourceColumn,
+    PipelineType,
+    VectorIndexType,
+)
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.errors.platform import ResourceDoesNotExist, BadRequest
+import time
 
 # %md
 # ##### `build_retriever_index`
@@ -17,66 +24,97 @@ from databricks.vector_search.client import VectorSearchClient
 # - `force_delete_vector_search_endpoint`: Setting this to true will rebuild the vector search endpoint.
 
 
-
 def build_retriever_index(
-    primary_key: str,
-    embedding_source_column: str,
     vector_search_endpoint: str,
     chunked_docs_table_name: str,
     vector_search_index_name: str,
     embedding_endpoint_name: str,
     force_delete_index_before_create=False,
-):
-
-    # Get the vector search index
-    vsc = VectorSearchClient(disable_notice=True)
+    primary_key: str = "chunk_id",  # hard coded in the apply_chunking_fn
+    embedding_source_column: str = "content_chunked",  # hard coded in the apply_chunking_fn
+) -> tuple[bool, str]:
+    # Initialize workspace client and vector search API
+    w = WorkspaceClient()
+    vsc = w.vector_search_indexes
 
     def find_index(index_name):
         try:
-            vsc.get_index(index_name=index_name)
-            return True
-        except Exception as e:
-            return False
+            return vsc.get_index(index_name=index_name)
+        except ResourceDoesNotExist:
+            return None
 
-
-    if find_index(
-        index_name=vector_search_index_name
-    ):
-        if force_delete_index_before_create:
-            vsc.delete_index(
-                 index_name=vector_search_index_name
+    def wait_for_index_to_be_ready(index):
+        while not index.status.ready:
+            print(
+                f"Index {vector_search_index_name} exists, but is not ready, waiting 30 seconds..."
             )
+            time.sleep(30)
+            index = find_index(index_name=vector_search_index_name)
+
+    def wait_for_index_to_be_deleted(index):
+        while index:
+            print(
+                f"Waiting for index {vector_search_index_name} to be deleted, waiting 30 seconds..."
+            )
+            time.sleep(30)
+            index = find_index(index_name=vector_search_index_name)
+
+    existing_index = find_index(index_name=vector_search_index_name)
+    if existing_index:
+        if force_delete_index_before_create:
+            print(f"Deleting index {vector_search_index_name}...")
+            vsc.delete_index(index_name=vector_search_index_name)
+            wait_for_index_to_be_deleted(existing_index)
             create_index = True
         else:
+            wait_for_index_to_be_ready(existing_index)
             create_index = False
             print(
-                f"Syncing index {vector_search_index_name}, this can take 15 minutes or much longer if you have a larger number of documents..."
+                f"Starting the sync of index {vector_search_index_name}, this can take 15 minutes or much longer if you have a larger number of documents."
             )
-
-            vsc.get_index(index_name=vector_search_index_name).sync()
-
+            # print(existing_index)
+            try:
+                vsc.sync_index(index_name=vector_search_index_name)
+                msg = f"Kicked off index sync for {vector_search_index_name}."
+                return (False, msg)
+            except BadRequest as e:
+                msg = f"Failed to kick off index sync for {vector_search_index_name}.  Please try again in 5 minutes."
+                return (True, msg)
     else:
         print(
-            f'Creating non-existent vector search index for endpoint "{vector_search_endpoint}" and index "{vector_search_index_name}"'
+            f'Creating new vector search index "{vector_search_index_name}" on endpoint "{vector_search_endpoint}"'
         )
         create_index = True
 
     if create_index:
         print(
-            f"Computing document embeddings and Vector Search Index. This can take 15 minutes or much longer if you have a larger number of documents."
+            "Computing document embeddings and Vector Search Index. This can take 15 minutes or much longer if you have a larger number of documents."
         )
         try:
-            vsc.create_delta_sync_index_and_wait(
-                endpoint_name=vector_search_endpoint,
-                index_name=vector_search_index_name,
-                primary_key=primary_key,
-                source_table_name=chunked_docs_table_name,
-                pipeline_type="TRIGGERED",
-                embedding_source_column=embedding_source_column,
-                embedding_model_endpoint_name=embedding_endpoint_name,
+            # Create delta sync index spec using the proper class
+            delta_sync_spec = DeltaSyncVectorIndexSpecRequest(
+                source_table=chunked_docs_table_name,
+                pipeline_type=PipelineType.TRIGGERED,
+                embedding_source_columns=[
+                    EmbeddingSourceColumn(
+                        name=embedding_source_column,
+                        embedding_model_endpoint_name=embedding_endpoint_name,
+                    )
+                ],
             )
-            print("SUCCESS: Vector search index created.")
-        except Exception as e:
-            raise Exception("ERROR: Vector search index creation failed. Wait 5 minutes and try running this cell again.") from e
 
-        
+            vsc.create_index(
+                name=vector_search_index_name,
+                endpoint_name=vector_search_endpoint,
+                primary_key=primary_key,
+                index_type=VectorIndexType.DELTA_SYNC,
+                delta_sync_index_spec=delta_sync_spec,
+            )
+            msg = (
+                f"Successfully created vector search index {vector_search_index_name}."
+            )
+            print(msg)
+            return (False, msg)
+        except Exception as e:
+            msg = f"Vector search index creation failed. Wait 5 minutes and try running this cell again."
+            return (True, msg)

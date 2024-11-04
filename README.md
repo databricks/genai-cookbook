@@ -1,3 +1,16 @@
+
+
+
+# How to use locally
+
+TODO
+
+- install poetry env
+- build utils wheel
+- start databricks sync job
+- install utils wheel in cluster
+- profit!!!
+
 # Retrieval Augmented Generation
 
 Please visit http://ai-cookbook.io for the accompanying documentation for this repo.

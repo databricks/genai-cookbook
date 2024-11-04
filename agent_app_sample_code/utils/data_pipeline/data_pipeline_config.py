@@ -1,30 +1,16 @@
-from dataclasses import dataclass, field, asdict
-from utils.cookbook.config_dataclass import CookbookConfig
+from pydantic import BaseModel, Field, computed_field
+from typing import Optional
 from databricks.sdk import WorkspaceClient
-import os
 from databricks.sdk.service.catalog import VolumeType
 from databricks.sdk.errors.platform import ResourceAlreadyExists, ResourceDoesNotExist
-from databricks.sdk.service.vectorsearch import EndpointStatusState, EndpointType
-from databricks.sdk.service.serving import EndpointCoreConfigInput, EndpointStateReady
+from databricks.sdk.service.vectorsearch import EndpointType
+from databricks.sdk.errors import NotFound
+from utils.cookbook.databricks_utils import get_volume_url
+import yaml
+from utils.data_pipeline.recursive_character_text_splitter import ChunkingConfig
 
 
-from mlflow.utils import databricks_utils as du
-
-from .recursive_character_text_splitter import (
-    detect_fmapi_embedding_model_type,
-    validate_chunk_size,
-)
-
-# Helper function for display Delta Table URLs
-def get_table_url(table_fqdn):
-    table_fqdn = table_fqdn.replace("`", "")
-    catalog, schema, table = table_fqdn.split(".")
-    browser_url = du.get_browser_hostname()
-    url = f"https://{browser_url}/explore/data/{catalog}/{schema}/{table}"
-    return url
-
-@dataclass
-class UnstructuredDataPipelineSourceConfig(CookbookConfig):
+class UCVolumeSourceConfig(BaseModel):
     """
     Source data configuration for the Unstructured Data Pipeline. You can modify this class to add additional configuration settings.
 
@@ -37,21 +23,26 @@ class UnstructuredDataPipelineSourceConfig(CookbookConfig):
         Required. Name of the Unity Catalog volume.
     """
 
-    uc_catalog_name: str
-    uc_schema_name: str
-    uc_volume_name: str
+    uc_catalog_name: str = Field(..., min_length=1)
+    uc_schema_name: str = Field(..., min_length=1)
+    uc_volume_name: str = Field(..., min_length=1)
 
-    @property
+    @computed_field
     def volume_path(self) -> str:
         return f"/Volumes/{self.uc_catalog_name}/{self.uc_schema_name}/{self.uc_volume_name}"
 
-    @property
+    @computed_field
     def volume_uc_fqn(self) -> str:
         return f"{self.uc_catalog_name}.{self.uc_schema_name}.{self.uc_volume_name}"
 
-
     def check_if_volume_exists(self) -> bool:
-        return os.path.isdir(self.volume_path)
+        w = WorkspaceClient()
+        try:
+            # Use the computed field instead of reconstructing the FQN
+            w.volumes.read(name=self.volume_uc_fqn)
+            return True
+        except (ResourceDoesNotExist, NotFound):
+            return False
 
     def create_volume(self):
         try:
@@ -65,181 +56,137 @@ class UnstructuredDataPipelineSourceConfig(CookbookConfig):
         except ResourceAlreadyExists:
             pass
 
-    def create_or_check_volume(self):
-        if not self.check_if_volume_exists():
-            print(f"Volume {self.volume_path} does not exist. Creating...")
-            self.create_volume()
-
-
-@dataclass
-class ChunkingConfig(CookbookConfig):
-    """
-    Configuration for the Unstructured Data Pipeline.
-
-    Args:
-        embedding_model_endpoint (str):
-            Embedding model endpoint hosted on Model Serving.  Default is `databricks-gte-large`.  This can be an External Model, such as OpenAI or a Databricks hosted model on Foundational Model API. The list of Databricks hosted models can be found here: https://docs.databricks.com/en/machine-learning/foundation-models/index.html
-        chunk_size_tokens (int):
-            The size of each chunk of the document in tokens. Default is 2048.
-        chunk_overlap_tokens (int):
-            The overlap of tokens between chunks. Default is 512.
-    """
-
-    embedding_model_endpoint: str = "databricks-gte-large-en"
-    chunk_size_tokens: int = 2048
-    chunk_overlap_tokens: int = 256
-
-    def validate_embedding_endpoint(self):
-        task_type = "llm/v1/embeddings"
+    def check_if_catalog_exists(self) -> bool:
         w = WorkspaceClient()
-        browser_url = du.get_browser_hostname()
-        llm_endpoint = w.serving_endpoints.get(name=self.embedding_model_endpoint)
-        if llm_endpoint.state.ready != EndpointStateReady.READY:
-            raise ValueError(
-                f"\nFAIL: Model serving endpoint {self.embedding_model_endpoint} is not in a READY state.  Please visit the status page to debug: https://{browser_url}/ml/endpoints/{self.embedding_model_endpoint}"
-            )
-        if llm_endpoint.task != task_type:
-            raise ValueError(
-                f"\nFAIL: Model serving endpoint {self.embedding_model_endpoint} is online & ready, but does not support task type {task_type}.  Details at: https://{browser_url}/ml/endpoints/{self.embedding_model_endpoint}"
-            )
-
-    def validate_chunk_size_and_overlap(self):
-        embedding_model_name, chunk_spec = detect_fmapi_embedding_model_type(
-            self.embedding_model_endpoint
-        )
-        if chunk_spec is None or embedding_model_name is None:
-            raise ValueError(
-                f"\nFAIL: {self.embedding_model_endpoint} is not currently supported by the default chunking logic.  Please update `recursive_character_text_splitter.py` to add support."
-            )
-
-        chunk_spec["chunk_size_tokens"] = self.chunk_size_tokens
-        chunk_spec["chunk_overlap_tokens"] = self.chunk_overlap_tokens
-        validate_chunk_size(chunk_spec)
-
-
-@dataclass
-class UnstructuredDataPipelineStorageConfig(CookbookConfig):
-    """
-    Storage configuration for the Unstructured Data Pipeline.
-
-    Args:
-      uc_catalog (str):
-       Required.  Unity Catalog catalog name.
-
-      uc_schema (str):
-        Required. Unity Catalog schema name.
-
-      uc_asset_prefix (str):
-        Required if using default asset names. Prefix for the UC objects that will be created within the schema.  Typically a short name to identify the Agent e.g., "my_agent_app", used to generate the default names for `source_uc_volume`, `parsed_docs_table`, `chunked_docs_table`, and `vector_index_name`.
-
-      vector_search_endpoint (str):
-        Required. Vector Search endpoint where index is loaded.
-
-      parsed_docs_table (str):
-        Optional. UC location of the Delta Table to store parsed documents. Default is {uc_asset_prefix}_docs`
-
-      chunked_docs_table (str):
-        Optional. UC location of the Delta Table to store chunks of the parsed documents. Default is `{uc_asset_prefix}_docs_chunked`
-
-      vector_index_name (str):
-        Optional. UC location of the Vector Search index that is created from `chunked_docs_table`. Default is `{uc_asset_prefix}_docs_chunked_index`
-
-      tag (str):
-        Optional. A tag to append to the asset names.  Use to differentiate between versions when iterating on chunking/parsing/embedding configs.  If provided and does not start with "__", it will be prefixed with "__".
-    """
-
-    uc_catalog_name: str
-    uc_schema_name: str
-    vector_search_endpoint: str
-    tag: str = None
-    uc_asset_prefix: str = field(default=None)
-    parsed_docs_table: str = field(default=None)
-    chunked_docs_table: str = field(default=None)
-    vector_index: str = field(default=None)
-
-    def __post_init__(self):
-        """
-        Post-initialization to set default values for fields that are not provided by the user.
-        """
-        if self.are_any_uc_asset_names_empty() and self.uc_asset_prefix is None:
-            raise ValueError(
-                "Must provide `uc_asset_prefix` since you did not provide a value for 1+ of `parsed_docs_table`, `chunked_docs_table`, or `vector_index`.  `uc_asset_prefix` is used to compute the default values for these properties."
-            )
-
-        # add "_" to the tag if it doesn't exist
-        table_postfix = "" if self.tag is None else self.tag
-        table_postfix = (
-            f"__{table_postfix}"
-            if (table_postfix[:2] != "__" and len(table_postfix) > 0)
-            else table_postfix
-        )
-
-        # don't add tag if already set when loading from yaml dump
-        # TODO: robustify this logic to check all tags
-        if self.tag ==  self.parsed_docs_table[-len(self.tag):]:
-            table_postfix = ""
-
-        if self.parsed_docs_table is None:
-            self.parsed_docs_table = self.get_uc_fqn(f"docs{table_postfix}")
-        else:
-            # if not a fully qualified UC path with catalog & schema, add the catalog & schema
-            if self.parsed_docs_table.count(".") != 2:
-                self.parsed_docs_table = self.get_uc_fqn_for_asset_name(
-                    self.parsed_docs_table + table_postfix
-                )
-
-        if self.chunked_docs_table is None:
-            self.chunked_docs_table = self.get_uc_fqn(f"docs_chunked{table_postfix}")
-        else:
-            # if not a fully qualified UC path with catalog & schema, add the catalog & schema
-            if self.chunked_docs_table.count(".") != 2:
-                self.chunked_docs_table = self.get_uc_fqn_for_asset_name(
-                    self.chunked_docs_table + table_postfix
-                )
-
-        if self.vector_index is None:
-            self.vector_index = f"{self.uc_catalog_name}.{self.uc_schema_name}.{self.uc_asset_prefix}_docs_chunked_index{table_postfix}"
-        else:
-            # if not a fully qualified UC path with catalog & schema, add the catalog & schema
-            if self.vector_index.count(".") != 2:
-                self.vector_index = f"{self.uc_catalog_name}.{self.uc_schema_name}.{self.vector_index}{table_postfix}"
-
-    def are_any_uc_asset_names_empty(self) -> bool:
-        """
-        Check if any of the Unity Catalog asset names are empty.
-
-        Returns:
-            bool: True if any of the asset names (`parsed_docs_table`, `chunked_docs_table`, `vector_index`) are None, otherwise False.
-        """
-        if (
-            self.parsed_docs_table is None
-            or self.chunked_docs_table is None
-            or self.vector_index is None
-        ):
+        try:
+            w.catalogs.get(name=self.uc_catalog_name)
             return True
-        else:
+        except (ResourceDoesNotExist, NotFound):
             return False
 
-    def get_uc_fqn(self, asset_name: str) -> str:
-        """
-        Generate the fully qualified name (FQN) for a Unity Catalog asset.
+    def check_if_schema_exists(self) -> bool:
+        w = WorkspaceClient()
+        try:
+            full_name = f"{self.uc_catalog_name}.{self.uc_schema_name}"
+            w.schemas.get(full_name=full_name)
+            return True
+        except (ResourceDoesNotExist, NotFound):
+            return False
 
-        Args:
-            asset_name (str): The name of the asset to generate the FQN for.
+    def create_or_validate_volume(self) -> tuple[bool, str]:
+        """
+        Validates that the volume exists and creates it if it doesn't
+        Returns:
+            tuple[bool, str]: A tuple containing (success, error_message).
+            If validation passes, returns (True, success_message). If validation fails, returns (False, error_message).
+        """
+        if not self.check_if_catalog_exists():
+            msg = f"Catalog '{self.uc_catalog_name}' does not exist. Please create it first."
+            return (False, msg)
+
+        if not self.check_if_schema_exists():
+            msg = f"Schema '{self.uc_schema_name}' does not exist in catalog '{self.uc_catalog_name}'. Please create it first."
+            return (False, msg)
+
+        if not self.check_if_volume_exists():
+            print(f"Volume {self.volume_path} does not exist. Creating...")
+            try:
+                self.create_volume()
+            except Exception as e:
+                msg = f"Failed to create volume: {str(e)}"
+                return (False, msg)
+            msg = f"Successfully created volume {self.volume_path}. View here: {get_volume_url(self.volume_uc_fqn)}"
+            print(msg)
+            return (True, msg)
+
+        msg = f"Volume {self.volume_path} exists.  View here: {get_volume_url(self.volume_uc_fqn)}"
+        print(msg)
+        return (True, msg)
+
+    def list_files(self) -> list[str]:
+        """
+        Lists all files in the Unity Catalog volume using dbutils.fs.
 
         Returns:
-            str: The fully qualified name of the asset, with necessary escaping for special characters.
+            list[str]: A list of file paths in the volume
+
+        Raises:
+            Exception: If the volume doesn't exist or there's an error accessing it
         """
-        uc_fqn = f"{self.uc_catalog_name}.{self.uc_schema_name}.{self.uc_asset_prefix}_{asset_name}"
+        if not self.check_if_volume_exists():
+            raise Exception(f"Volume {self.volume_path} does not exist")
 
-        return self.escape_uc_fqn(uc_fqn)
+        w = WorkspaceClient()
+        try:
+            # List contents using dbutils.fs
+            files = w.dbutils.fs.ls(self.volume_path)
+            return [file.name for file in files]
+        except Exception as e:
+            raise Exception(f"Failed to list files in volume: {str(e)}")
 
-    def get_uc_fqn_for_asset_name(self, asset_name):
-        uc_fqn = f"{self.uc_catalog_name}.{self.uc_schema_name}.{asset_name}"
 
-        return self.escape_uc_fqn(uc_fqn)
+class DataPipelineOuputConfig(BaseModel):
+    """Configuration for managing output locations and naming conventions in the data pipeline.
 
-    def escape_uc_fqn(self, uc_fqn):
+    This class handles the configuration of table names and vector search endpoints for the data pipeline.
+    It follows a consistent naming pattern for all generated tables and provides version control capabilities.
+
+    Naming Convention:
+        {catalog}.{schema}.{base_table_name}_{table_postfix}__{version_suffix}
+
+    Generated Tables:
+        1. Parsed docs table: Stores the raw parsed documents
+        2. Chunked docs table: Stores the documents split into chunks
+        3. Vector index: Stores the vector embeddings for search
+
+    Args:
+        uc_catalog_name (str): Unity Catalog name where tables will be created
+        uc_schema_name (str): Schema name within the catalog
+        base_table_name (str): Core name used as prefix for all generated tables
+        docs_table_postfix (str, optional): Suffix for the parsed documents table. Defaults to "docs"
+        chunked_table_postfix (str, optional): Suffix for the chunked documents table. Defaults to "docs_chunked"
+        vector_index_postfix (str, optional): Suffix for the vector index. Defaults to "docs_chunked_index"
+        version_suffix (str, optional): Version identifier (e.g., 'v1', 'test') to maintain multiple pipeline versions
+        vector_search_endpoint (str): Name of the vector search endpoint to use
+
+    Examples:
+        With version_suffix="v1":
+            >>> config = DataPipelineOuputConfig(
+            ...     uc_catalog_name="my_catalog",
+            ...     uc_schema_name="my_schema",
+            ...     base_table_name="agent",
+            ...     version_suffix="v1"
+            ... )
+            # Generated tables:
+            # - my_catalog.my_schema.agent_docs__v1
+            # - my_catalog.my_schema.agent_docs_chunked__v1
+            # - my_catalog.my_schema.agent_docs_chunked_index__v1
+
+        Without version_suffix:
+            # - my_catalog.my_schema.agent_docs
+            # - my_catalog.my_schema.agent_docs_chunked
+            # - my_catalog.my_schema.agent_docs_chunked_index
+    """
+
+    uc_catalog_name: str = Field(..., min_length=1)
+    uc_schema_name: str = Field(..., min_length=1)
+
+    base_table_name: str = Field(..., min_length=1)  # e.g. "agent"
+
+    docs_table_postfix: str = "docs"
+    chunked_table_postfix: str = "docs_chunked"
+    vector_index_postfix: str = "docs_chunked_index"
+
+    version_suffix: Optional[str] = Field(
+        default=None,
+        description="Optional version identifier (e.g. 'v1', 'test') that will be appended to all table names. "
+        "Use this to maintain multiple versions of the pipeline output with the same base_table_name.",
+    )
+
+    vector_search_endpoint: str
+
+    @classmethod
+    def escape_uc_fqn(cls, uc_fqn: str) -> str:
         """
         Escape the fully qualified name (FQN) for a Unity Catalog asset if it contains special characters.
 
@@ -256,7 +203,35 @@ class UnstructuredDataPipelineStorageConfig(CookbookConfig):
         else:
             return uc_fqn
 
-    
+    def _build_table_name(self, postfix: str, escape: bool = True) -> str:
+        """Helper to build consistent table names
+
+        Args:
+            postfix: The table name postfix to append
+            escape: Whether to escape special characters in the table name. Defaults to True.
+
+        Returns:
+            The constructed table name, optionally escaped
+        """
+        suffix = f"__{self.version_suffix}" if self.version_suffix else ""
+        raw_name = f"{self.uc_catalog_name}.{self.uc_schema_name}.{self.base_table_name}_{postfix}{suffix}"
+        return self.escape_uc_fqn(raw_name) if escape else raw_name
+
+    @property
+    def parsed_docs_table(self) -> str:
+        """Returns fully qualified name for parsed docs table"""
+        return self._build_table_name(self.docs_table_postfix)
+
+    @property
+    def chunked_docs_table(self) -> str:
+        """Returns fully qualified name for chunked docs table"""
+        return self._build_table_name(self.chunked_table_postfix)
+
+    @property
+    def vector_index(self) -> str:
+        """Returns fully qualified name for vector index"""
+        return self._build_table_name(self.vector_index_postfix, escape=False)
+
     def check_if_vector_search_endpoint_exists(self):
         w = WorkspaceClient()
         vector_search_endpoints = w.vector_search_endpoints.list_endpoints()
@@ -286,7 +261,75 @@ class UnstructuredDataPipelineStorageConfig(CookbookConfig):
             self.vector_search_endpoint
         )
 
-    def create_or_check_vector_search_endpoint(self):
+    def create_or_validate_vector_search_endpoint(self):
         if not self.check_if_vector_search_endpoint_exists():
             self.create_vector_search_endpoint()
+        return self.validate_vector_search_endpoint()
 
+    def validate_vector_search_endpoint(self) -> tuple[bool, str]:
+        """
+        Validates that the specified Vector Search endpoint exists
+        Returns:
+            tuple[bool, str]: A tuple containing (success, error_message).
+            If validation passes, returns (True, success_message). If validation fails, returns (False, error_message).
+        """
+        if not self.check_if_vector_search_endpoint_exists():
+            msg = f"Vector Search endpoint '{self.vector_search_endpoint}' does not exist. Please either manually create it or call `output_config.create_or_validate_vector_search_endpoint()` to create it."
+            return (False, msg)
+
+        msg = f"Vector Search endpoint '{self.vector_search_endpoint}' exists."
+        print(msg)
+        return (True, msg)
+
+    def check_if_catalog_exists(self) -> bool:
+        w = WorkspaceClient()
+        try:
+            w.catalogs.get(name=self.uc_catalog_name)
+            return True
+        except (ResourceDoesNotExist, NotFound):
+            return False
+
+    def check_if_schema_exists(self) -> bool:
+        w = WorkspaceClient()
+        try:
+            full_name = f"{self.uc_catalog_name}.{self.uc_schema_name}"
+            w.schemas.get(full_name=full_name)
+            return True
+        except (ResourceDoesNotExist, NotFound):
+            return False
+
+    def validate_catalog_and_schema(self) -> tuple[bool, str]:
+        """
+        Validates that the specified catalog and schema exist
+        Returns:
+            tuple[bool, str]: A tuple containing (success, error_message).
+            If validation passes, returns (True, success_message). If validation fails, returns (False, error_message).
+        """
+        if not self.check_if_catalog_exists():
+            msg = f"Catalog '{self.uc_catalog_name}' does not exist. Please create it first."
+            return (False, msg)
+
+        if not self.check_if_schema_exists():
+            msg = f"Schema '{self.uc_schema_name}' does not exist in catalog '{self.uc_catalog_name}'. Please create it first."
+            return (False, msg)
+
+        msg = f"Catalog '{self.uc_catalog_name}' and schema '{self.uc_schema_name}' exist."
+        print(msg)
+        return (True, msg)
+
+
+class DataPipelineConfig(BaseModel):
+    source: UCVolumeSourceConfig
+    output: DataPipelineOuputConfig
+    chunking_config: ChunkingConfig
+
+    def to_yaml(self) -> str:
+        # exclude_none = True prevents unused parameters from being included in the config
+        data = self.dict(exclude_none=True)
+        return yaml.dump(data, default_flow_style=False)
+
+    @classmethod
+    def from_yaml(cls, yaml_str: str) -> "DataPipelineConfig":
+        # Load the data from YAML
+        config_dict = yaml.safe_load(yaml_str)
+        return cls(**config_dict)
