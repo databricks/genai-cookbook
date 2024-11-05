@@ -11,7 +11,7 @@ def apply_chunking_fn(
     parsed_docs_df: DataFrame,
     chunking_fn: Callable[[str], list[str]],
     propagate_columns: list[str],
-    doc_column: str = "doc_content",
+    doc_column: str = "content",
 ) -> DataFrame:
     # imports here to avoid requiring these libraries in all notebooks since the data pipeline config imports this package
     from langchain_text_splitters import RecursiveCharacterTextSplitter

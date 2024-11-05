@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, ConfigDict
 from typing import Optional
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.catalog import VolumeType
@@ -8,6 +8,7 @@ from databricks.sdk.errors import NotFound
 from utils.cookbook.databricks_utils import get_volume_url
 import yaml
 from utils.data_pipeline.recursive_character_text_splitter import ChunkingConfig
+import os
 
 
 class UCVolumeSourceConfig(BaseModel):
@@ -27,11 +28,11 @@ class UCVolumeSourceConfig(BaseModel):
     uc_schema_name: str = Field(..., min_length=1)
     uc_volume_name: str = Field(..., min_length=1)
 
-    @computed_field
+    @computed_field()
     def volume_path(self) -> str:
         return f"/Volumes/{self.uc_catalog_name}/{self.uc_schema_name}/{self.uc_volume_name}"
 
-    @computed_field
+    @computed_field()
     def volume_uc_fqn(self) -> str:
         return f"{self.uc_catalog_name}.{self.uc_schema_name}.{self.uc_volume_name}"
 
@@ -325,7 +326,9 @@ class DataPipelineConfig(BaseModel):
 
     def to_yaml(self) -> str:
         # exclude_none = True prevents unused parameters from being included in the config
-        data = self.dict(exclude_none=True)
+        data = self.model_dump(
+            exclude_none=True, exclude={"source": {"volume_path", "volume_uc_fqn"}}
+        )
         return yaml.dump(data, default_flow_style=False)
 
     @classmethod
@@ -333,3 +336,25 @@ class DataPipelineConfig(BaseModel):
         # Load the data from YAML
         config_dict = yaml.safe_load(yaml_str)
         return cls(**config_dict)
+
+    @classmethod
+    def from_yaml_file(cls, file_path: str) -> "DataPipelineConfig":
+        """
+        Load configuration from a YAML file.
+
+        Args:
+            file_path (str): Path to the YAML configuration file
+
+        Returns:
+            DataPipelineConfig: Configuration object loaded from the file
+
+        Raises:
+            FileNotFoundError: If the specified file doesn't exist
+            yaml.YAMLError: If the file contains invalid YAML
+        """
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Configuration file not found: {file_path}")
+
+        with open(file_path, "r") as f:
+            yaml_str = f.read()
+        return cls.from_yaml(yaml_str)

@@ -8,6 +8,8 @@ from databricks.sdk.service.vectorsearch import (
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors.platform import ResourceDoesNotExist, BadRequest
 import time
+from utils.cookbook.databricks_utils import get_table_url
+
 
 # %md
 # ##### `build_retriever_index`
@@ -61,6 +63,7 @@ def build_retriever_index(
 
     existing_index = find_index(index_name=vector_search_index_name)
     if existing_index:
+        print(f"Found existing index {get_table_url(vector_search_index_name)}...")
         if force_delete_index_before_create:
             print(f"Deleting index {vector_search_index_name}...")
             vsc.delete_index(index_name=vector_search_index_name)
@@ -78,7 +81,7 @@ def build_retriever_index(
                 msg = f"Kicked off index sync for {vector_search_index_name}."
                 return (False, msg)
             except BadRequest as e:
-                msg = f"Failed to kick off index sync for {vector_search_index_name}.  Please try again in 5 minutes."
+                msg = f"Index sync already in progress, so failed to kick off index sync for {vector_search_index_name}.  Please wait for the index to finish syncing and try again."
                 return (True, msg)
     else:
         print(

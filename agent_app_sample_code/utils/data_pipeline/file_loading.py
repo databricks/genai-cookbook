@@ -35,7 +35,7 @@ def _parse_and_extract(
         status = f"An error occurred: {e}\n{traceback.format_exc()}"
         warnings.warn(status)
         return {
-            "doc_content": "",
+            "content": "",
             "doc_uri": doc_path,
             "parser_status": status,
         }
@@ -144,7 +144,7 @@ def check_parsed_df_for_empty_parsed_files(parsed_files_df):
     # Check and warn on any errors
     num_empty_df = parsed_files_df.filter(
         func.col(f"parser_status") == "SUCCESS"
-    ).filter(func.col("doc_content") == "")
+    ).filter(func.col("content") == "")
 
     num_errors = num_empty_df.count()
     if num_errors > 0:
