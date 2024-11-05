@@ -12,6 +12,7 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.vectorsearch import VectorIndexType
 from databricks.sdk.errors import ResourceDoesNotExist
 from utils.agents.tools import Tool
+from dataclasses import asdict
 
 FilterDict = Dict[str, Union[str, int, float, List[Union[str, int, float]]]]
 
@@ -272,16 +273,16 @@ class VectorSearchRetrieverTool(Tool):
 
     def _get_parameters_schema(self) -> dict:
         schema = {
+            "type": "object",
+            "required": ["query"],
+            "additionalProperties": False,
             "properties": {
                 "query": {
                     # "default": None,
                     "description": self.retriever_query_parameter_prompt,
                     "type": "string",
                 },
-                "type": "object",
-                "required": ["query"],
-                "additionalProperties": False,
-            }
+            },
         }
 
         if self.filterable_columns:
@@ -406,7 +407,7 @@ class VectorSearchRetrieverTool(Tool):
                     del metadata[self.vector_search_schema.primary_key]
 
                     doc = Document(page_content=page_content, metadata=metadata, id=id)
-                    docs.append(doc)
+                    docs.append(asdict(doc))
 
         return docs
 
@@ -423,21 +424,23 @@ class VectorSearchRetrieverTool(Tool):
         """
         vs_filters = {}
         for filter_item in filters:
-            key = filter_item["field"]
-            value = filter_item["filter"]
+            suggested_field = filter_item["field"]
+            suggested_filter = filter_item["filter"]
 
-            if isinstance(value, list):
-                vs_filters[key] = {"OR": value}
-            elif isinstance(value, dict):
-                operator, operand = next(iter(value.items()))
-                if operator in ["<", "<=", ">", ">="]:
-                    vs_filters[f"{key} {operator}"] = operand
-                elif operator.upper() == "LIKE":
-                    vs_filters[f"{key} LIKE"] = operand
-                elif operator.upper() == "NOT":
-                    vs_filters[f"{key} !="] = operand
+            if isinstance(suggested_filter, list):
+                # vs_filters[key] = {"OR": value}
+                vs_filters[suggested_field] = suggested_filter
+            elif isinstance(suggested_filter, dict):
+                operator, operand = next(iter(suggested_filter.items()))
+                vs_filters[suggested_field + " " + operator] = operand
+                # if operator in ["<", "<=", ">", ">="]:
+                #     vs_filters[f"{key} {operator}"] = operand
+                # elif operator.upper() == "LIKE":
+                #     vs_filters[f"{key} LIKE"] = operand
+                # elif operator.upper() == "NOT":
+                #     vs_filters[f"{key} !="] = operand
             else:
-                vs_filters[key] = value
+                vs_filters[suggested_field] = suggested_filter
         return vs_filters
 
     def get_resource_dependencies(self):

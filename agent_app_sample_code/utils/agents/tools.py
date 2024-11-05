@@ -5,6 +5,7 @@ from unitycatalog.ai.core.utils.docstring_utils import parse_docstring
 import yaml
 import importlib
 import mlflow
+import json
 
 _CLASS_PATH_KEY = "class_path"
 
@@ -160,4 +161,4 @@ class FunctionTool(Tool):
 @mlflow.trace(span_type="FUNCTION")
 def execute_function(tool, args):
     result = tool(**args)
-    return result
+    return json.dumps(result)
