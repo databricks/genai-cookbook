@@ -60,7 +60,20 @@ def get_workspace_hostname() -> str:
             )
 
 
-def get_table_url(table_fqdn):
+def get_table_url(table_fqdn: str) -> str:
+    """Generate the URL for a Unity Catalog table in the Databricks UI.
+
+    Args:
+        table_fqdn: Fully qualified table name in format 'catalog.schema.table'.
+                   Can optionally include backticks around identifiers.
+
+    Returns:
+        str: The full URL to view the table in the Databricks UI.
+
+    Example:
+        >>> get_table_url("main.default.my_table")
+        'https://my-workspace.cloud.databricks.com/explore/data/main/default/my_table'
+    """
     table_fqdn = table_fqdn.replace("`", "")
     catalog, schema, table = table_fqdn.split(".")
     browser_url = get_workspace_hostname()
@@ -68,11 +81,45 @@ def get_table_url(table_fqdn):
     return url
 
 
-def get_volume_url(volume_fqdn):
+def get_volume_url(volume_fqdn: str) -> str:
+    """Generate the URL for a Unity Catalog volume in the Databricks UI.
+
+    Args:
+        volume_fqdn: Fully qualified volume name in format 'catalog.schema.volume'.
+                    Can optionally include backticks around identifiers.
+
+    Returns:
+        str: The full URL to view the volume in the Databricks UI.
+
+    Example:
+        >>> get_volume_url("main.default.my_volume")
+        'https://my-workspace.cloud.databricks.com/explore/data/volumes/main/default/my_volume'
+    """
     volume_fqdn = volume_fqdn.replace("`", "")
     catalog, schema, volume = volume_fqdn.split(".")
     browser_url = get_workspace_hostname()
     url = f"{browser_url}/explore/data/volumes/{catalog}/{schema}/{volume}"
+    return url
+
+
+def get_function_url(function_fqdn: str) -> str:
+    """Generate the URL for a Unity Catalog function in the Databricks UI.
+
+    Args:
+        function_fqdn: Fully qualified function name in format 'catalog.schema.function'.
+                      Can optionally include backticks around identifiers.
+
+    Returns:
+        str: The full URL to view the function in the Databricks UI.
+
+    Example:
+        >>> get_function_url("main.default.my_function")
+        'https://my-workspace.cloud.databricks.com/explore/data/functions/main/default/my_function'
+    """
+    function_fqdn = function_fqdn.replace("`", "")
+    catalog, schema, function = function_fqdn.split(".")
+    browser_url = get_workspace_hostname()
+    url = f"{browser_url}/explore/data/functions/{catalog}/{schema}/{function}"
     return url
 
 
