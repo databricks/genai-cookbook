@@ -12,6 +12,7 @@
 
 # COMMAND ----------
 import sys
+
 # Add the parent directory to the path so we can import the `utils` modules
 sys.path.append("../..")
 
@@ -33,9 +34,13 @@ from langchain_core.prompts import (
 )
 from langchain_core.runnables import RunnablePassthrough, RunnableBranch
 from langchain_core.messages import HumanMessage, AIMessage
-from utils.agents.chat import get_messages_array, extract_user_query_string, extract_chat_history
-from utils.agents.config import RAGConfig
-from utils.agents.config import load_first_yaml_file
+from utils.agents.chat import (
+    get_messages_array,
+    extract_user_query_string,
+    extract_chat_history,
+)
+from utils.agents.rag_only_agent import RAGConfig
+from utils.agents.yaml_loader import load_first_yaml_file
 import yaml
 
 # COMMAND ----------
@@ -64,9 +69,7 @@ llm_config = rag_config.llm_config
 # Connect to the Vector Search Index
 ############
 vs_client = VectorSearchClient(disable_notice=True)
-vs_index = vs_client.get_index(
-    index_name=retriever_config.vector_search_index
-)
+vs_index = vs_client.get_index(index_name=retriever_config.vector_search_index)
 vector_search_schema = retriever_config.vector_search_schema
 
 ############
@@ -205,7 +208,7 @@ mlflow.models.set_model(model=agent)
 
 # COMMAND ----------
 
-# Set to False for logging, True for when iterating on code in this notebook 
+# Set to False for logging, True for when iterating on code in this notebook
 debug = False
 
 # To run this code, you will need to first run 02_agent to dump the configuration to a YAML file this notebook can load.

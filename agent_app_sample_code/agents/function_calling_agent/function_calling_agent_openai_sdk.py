@@ -14,6 +14,8 @@
 
 import sys
 
+from utils.agents.yaml_loader import load_first_yaml_file
+
 # Add the parent directory to the path so we can import the `utils` modules
 sys.path.append("../..")
 
@@ -34,7 +36,7 @@ from utils.agents.chat import (
     extract_user_query_string,
     extract_chat_history,
 )
-from utils.agents.config import FunctionCallingAgentConfig, load_first_yaml_file
+from utils.agents.function_calling_agent import FunctionCallingAgentConfig
 from utils.agents.tools import execute_function
 
 # COMMAND ----------

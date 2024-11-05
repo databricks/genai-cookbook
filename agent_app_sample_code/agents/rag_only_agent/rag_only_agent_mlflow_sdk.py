@@ -12,6 +12,7 @@
 
 # COMMAND ----------
 import sys
+
 # Add the parent directory to the path so we can import the `utils` modules
 sys.path.append("../..")
 
@@ -20,13 +21,24 @@ from dataclasses import asdict, dataclass
 import mlflow
 import pandas as pd
 from mlflow.models import set_model, ModelConfig
-from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, ChatCompletionResponse, ChainCompletionChoice, Message
+from mlflow.models.rag_signatures import (
+    StringResponse,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    ChainCompletionChoice,
+    Message,
+)
 from mlflow.deployments import get_deploy_client
 
-from utils.agents.vector_search import VectorSearchRetriever, VectorSearchRetrieverConfig
-from utils.agents.config import load_first_yaml_file
-from utils.agents.config import RAGConfig
-from utils.agents.chat import chat_completion, get_messages_array, extract_user_query_string, extract_chat_history
+from utils.agents.vector_search import VectorSearchRetriever, VectorSearchRetrieverTool
+from utils.agents.yaml_loader import load_first_yaml_file
+from utils.agents.rag_only_agent import RAGConfig
+from utils.agents.chat import (
+    chat_completion,
+    get_messages_array,
+    extract_user_query_string,
+    extract_chat_history,
+)
 import yaml
 
 # COMMAND ----------
@@ -46,12 +58,14 @@ from databricks.vector_search.client import VectorSearchClient
 
 # COMMAND ----------
 
+
 class RAGAgent(mlflow.pyfunc.PythonModel):
     """
     Class representing an Agent that only includes an LLM
 
     If no explicit configuration is provided, the Agent will attempt to load the configuration from the following locations:
     """
+
     def __init__(self):
         config_paths = [
             "../../configs/agent_model_config.yaml",
@@ -59,13 +73,13 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
         ]
         rag_config_yml = load_first_yaml_file(config_paths)
         self.config = RAGConfig.parse_obj(yaml.safe_load(rag_config_yml))
-        retriever_config = VectorSearchRetrieverConfig.parse_obj(self.config.vector_search_retriever_config)
+        retriever_config = VectorSearchRetrieverTool.parse_obj(
+            self.config.vector_search_retriever_config
+        )
         self.model_serving_client = get_deploy_client("databricks")
 
         # Load the retriever
-        self.retriever = VectorSearchRetriever(
-            config=retriever_config
-        )
+        self.retriever = VectorSearchRetriever(config=retriever_config)
 
     @mlflow.trace(name="chain", span_type="CHAIN")
     def predict(
@@ -99,7 +113,6 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
 
         context = self.retriever(vs_query)
 
-        
         ##############################################################################
         # Generate Answer
         system_prompt = self.config.llm_config.llm_system_prompt_template
@@ -128,9 +141,13 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
 
         chat_history_formatted = self.format_chat_history(chat_history)
 
-        prompt = query_rewrite_template.format(question=query, chat_history=chat_history_formatted)
+        prompt = query_rewrite_template.format(
+            question=query, chat_history=chat_history_formatted
+        )
 
-        model_response = self.chat_completion(messages=[{"role": "user", "content": prompt}])
+        model_response = self.chat_completion(
+            messages=[{"role": "user", "content": prompt}]
+        )
 
         return model_response.choices[0]["message"]["content"]
 
@@ -139,7 +156,7 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
             model_serving_client=self.model_serving_client,
             llm_endpoint_name=self.config.llm_config.llm_endpoint_name,
             llm_parameters=self.config.llm_config.llm_parameters.dict(),
-            messages=messages
+            messages=messages,
         )
 
     @mlflow.trace(span_type="PARSER")
@@ -147,7 +164,7 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
         self, model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame]
     ) -> List[Dict[str, str]]:
         return get_messages_array(model_input)
-        
+
     @mlflow.trace(span_type="PARSER")
     def extract_user_query_string(
         self, chat_messages_array: List[Dict[str, str]]
@@ -203,11 +220,12 @@ class RAGAgent(mlflow.pyfunc.PythonModel):
 
         return "\n".join(formatted_history)
 
+
 set_model(RAGAgent())
 
 # COMMAND ----------
 
-# Set to False for logging, True for when iterating on code in this notebook 
+# Set to False for logging, True for when iterating on code in this notebook
 debug = False
 
 # To run this code, you will need to first run 02_agent to dump the configuration to a YAML file this notebook can load.
@@ -230,7 +248,4 @@ if debug:
         ]
     }
     agent.load_context(None)
-    response = agent.predict(
-        model_input=input_example
-    )
-
+    response = agent.predict(model_input=input_example)
