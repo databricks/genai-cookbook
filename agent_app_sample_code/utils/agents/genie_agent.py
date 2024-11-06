@@ -2,8 +2,10 @@ from pydantic import BaseModel
 from typing import Any
 import yaml
 
+from utils.agents.tools import SerializableModel
 
-class GenieAgentConfig(BaseModel):
+
+class GenieAgentConfig(SerializableModel):
     """
     Configuration for the agent with MLflow input example.
 
@@ -22,13 +24,13 @@ class GenieAgentConfig(BaseModel):
         "I encountered an error trying to answer your question, please try again."
     )
 
-    def to_yaml(self) -> str:
-        # exclude_none = True prevents unused parameters, such as additional LLM parameters, from being included in the config
-        data = self.model_dump(exclude_none=True)
-        return yaml.dump(data, default_flow_style=False)
+    # def to_yaml(self) -> str:
+    #     # exclude_none = True prevents unused parameters, such as additional LLM parameters, from being included in the config
+    #     data = self.model_dump(exclude_none=True)
+    #     return yaml.dump(data, default_flow_style=False)
 
-    @classmethod
-    def from_yaml(cls, yaml_str: str) -> "GenieAgentConfig":
-        # Load the data from YAML
-        agent_config_dict = yaml.safe_load(yaml_str)
-        return cls(**agent_config_dict)
+    # @classmethod
+    # def from_yaml(cls, yaml_str: str) -> "GenieAgentConfig":
+    #     # Load the data from YAML
+    #     agent_config_dict = yaml.safe_load(yaml_str)
+    #     return cls(**agent_config_dict)

@@ -42,6 +42,8 @@ from utils.agents.chat import (
 )
 from databricks.sdk import WorkspaceClient
 
+logging.getLogger().setLevel(logging.INFO)
+
 
 # COMMAND ----------
 
@@ -182,7 +184,7 @@ class GenieAPIWrapper:
             while True and iteration_count < MAX_ITERATIONS:
                 # try:  # genie API randomly crashes with BadRequest: Message <id> does not have a query statementId.  This is instead caught in the Agent itself to capture all unknown exceptions from the API wrapper.
                 iteration_count += 1
-                logging.info(
+                logging.debug(
                     f"Polling for result {message_id} {conversation_id} iteration {iteration_count}"
                 )
                 resp = self._genie_client._api.do(
@@ -190,7 +192,7 @@ class GenieAPIWrapper:
                     f"/api/2.0/genie/spaces/{self.space_id}/conversations/{conversation_id}/messages/{message_id}",
                     headers=self.headers,
                 )
-                print(resp)
+                logging.debug(f"Genie polling response: {resp}")
                 if resp["status"] == "EXECUTING_QUERY":
                     with mlflow.start_span(name="get_sql_query") as span:
                         query_result = next(
@@ -211,7 +213,7 @@ class GenieAPIWrapper:
                     Genie didn't run a query, returned a question or comment to the user
                     """
                     with mlflow.start_span(name="get_genie_response") as span:
-                        logging.info(f"Genie polling returned {resp}")
+                        logging.debug(f"Genie polling returned {resp}")
                         span.set_inputs(resp)
                         # Get first attachment from array safely
                         first_attachment = (
@@ -322,17 +324,38 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
     Class representing an Agent that does function-calling with tools using OpenAI SDK
     """
 
+    def load_context(self, context):
+        print("load_context")
+        print(context.model_config)
+
     def __init__(self, agent_config: Optional[GenieAgentConfig] = None):
+        print("init")
         if agent_config is None:
+            # Try to load from local config file first for inner dev loop; in serving env these files will not be present, so load the model's logged config e.g., the config from mlflow.pyfunc.log_model(model_config=...) via mlflow.ModelConfig()
             config_paths = [
                 f"../../configs/{CONFIG_FILE_NAME}",
                 f"./configs/{CONFIG_FILE_NAME}",
             ]
-            self.agent_config = GenieAgentConfig.from_yaml(
-                load_first_yaml_file(config_paths)
-            )
+            try:
+                self.agent_config = GenieAgentConfig.from_yaml(
+                    load_first_yaml_file(config_paths)
+                )
+            except ValueError as e:
+                logging.info(
+                    f"No local config YAML found at {config_paths}, loading mlflow.ModelConfig() instead."
+                )
+                model_config = mlflow.models.ModelConfig()
+                self.agent_config = GenieAgentConfig(**model_config.to_dict())
+                logging.info(
+                    f"Loaded GenieAgentConfig from mlflow.ModelConfig(): {self.agent_config}"
+                )
         else:
             self.agent_config = agent_config
+
+        self.test = mlflow.models.ModelConfig(
+            # development_config=f"../../configs/{CONFIG_FILE_NAME}"
+        )
+        print(self.test.get("genie_space_id"))
 
         # Load the API wrapper
         self._genie_agent = GenieAPIWrapper(self.agent_config.genie_space_id)
@@ -434,7 +457,7 @@ set_model(GenieAgent())
 
 # COMMAND ----------
 
-debug = True
+debug = False
 if debug:
     # mlflow.tracing.disable()
     agent = GenieAgent()
