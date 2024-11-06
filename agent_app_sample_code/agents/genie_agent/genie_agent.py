@@ -28,6 +28,7 @@ import tiktoken
 import logging
 import uuid
 import time
+import os
 from datetime import datetime
 from typing import Union
 import pandas as pd
@@ -41,8 +42,7 @@ from utils.agents.chat import (
     concat_messages_array_to_string,
 )
 from databricks.sdk import WorkspaceClient
-
-logging.getLogger().setLevel(logging.INFO)
+from utils.agents.utils import load_config
 
 
 # COMMAND ----------
@@ -324,38 +324,15 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
     Class representing an Agent that does function-calling with tools using OpenAI SDK
     """
 
-    def load_context(self, context):
-        print("load_context")
-        print(context.model_config)
-
-    def __init__(self, agent_config: Optional[GenieAgentConfig] = None):
-        print("init")
-        if agent_config is None:
-            # Try to load from local config file first for inner dev loop; in serving env these files will not be present, so load the model's logged config e.g., the config from mlflow.pyfunc.log_model(model_config=...) via mlflow.ModelConfig()
-            config_paths = [
-                f"../../configs/{CONFIG_FILE_NAME}",
-                f"./configs/{CONFIG_FILE_NAME}",
-            ]
-            try:
-                self.agent_config = GenieAgentConfig.from_yaml(
-                    load_first_yaml_file(config_paths)
-                )
-            except ValueError as e:
-                logging.info(
-                    f"No local config YAML found at {config_paths}, loading mlflow.ModelConfig() instead."
-                )
-                model_config = mlflow.models.ModelConfig()
-                self.agent_config = GenieAgentConfig(**model_config.to_dict())
-                logging.info(
-                    f"Loaded GenieAgentConfig from mlflow.ModelConfig(): {self.agent_config}"
-                )
-        else:
-            self.agent_config = agent_config
-
-        self.test = mlflow.models.ModelConfig(
-            # development_config=f"../../configs/{CONFIG_FILE_NAME}"
+    def __init__(
+        self,
+        agent_config: Optional[Union[GenieAgentConfig, str]] = None,
+    ):
+        self.agent_config = load_config(
+            agent_config=agent_config, default_config_file_name=CONFIG_FILE_NAME
         )
-        print(self.test.get("genie_space_id"))
+        if not self.agent_config:
+            raise ValueError("No agent config found")
 
         # Load the API wrapper
         self._genie_agent = GenieAPIWrapper(self.agent_config.genie_space_id)

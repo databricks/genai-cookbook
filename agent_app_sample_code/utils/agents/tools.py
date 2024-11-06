@@ -64,6 +64,11 @@ def obj_to_yaml(obj: BaseModel) -> str:
     return yaml.dump(data)
 
 
+def obj_to_yaml_file(obj: BaseModel, yaml_file_path: str) -> None:
+    with open(yaml_file_path, "w") as handle:
+        handle.write(obj_to_yaml(obj))
+
+
 # Helper method used by SerializableModel's with fields containing SerializableModels
 def _load_class_from_dict(data: Dict[str, Any]) -> Tuple[Type, Dict[str, Any]]:
     """Dynamically load a class from data containing a class path.

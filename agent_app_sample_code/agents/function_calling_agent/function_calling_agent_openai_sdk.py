@@ -28,7 +28,6 @@ from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, 
 from databricks.sdk import WorkspaceClient
 import os
 from utils.agents.tools import execute_function
-from utils.agents.yaml_loader import load_first_yaml_file
 
 from utils.agents.chat import (
     get_messages_array,
@@ -36,28 +35,29 @@ from utils.agents.chat import (
     extract_chat_history,
 )
 from utils.agents.function_calling_agent import FunctionCallingAgentConfig
-from utils.agents.tools import execute_function
+from utils.agents.tools import execute_function, load_config
 
 # COMMAND ----------
 
 
 # DBTITLE 1,Agent
+
+CONFIG_FILE_NAME = "function_calling_agent_config.yaml"
+
+
 class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
     """
     Class representing an Agent that does function-calling with tools using OpenAI SDK
     """
 
-    def __init__(self, agent_config: Optional[FunctionCallingAgentConfig] = None):
-        if agent_config is None:
-            config_paths = [
-                "../../configs/agent_model_config.yaml",
-                "./configs/agent_model_config.yaml",
-            ]
-            self.agent_config = FunctionCallingAgentConfig.from_yaml(
-                load_first_yaml_file(config_paths)
-            )
-        else:
-            self.agent_config = agent_config
+    def __init__(
+        self, agent_config: Optional[Union[FunctionCallingAgentConfig, str]] = None
+    ):
+        self.agent_config = load_config(
+            agent_config=agent_config, default_config_file_name=CONFIG_FILE_NAME
+        )
+        if not self.agent_config:
+            raise ValueError("No agent config found")
 
         w = WorkspaceClient()
         self.model_serving_client = w.serving_endpoints.get_open_ai_client()
