@@ -16,7 +16,7 @@ import json
 import os
 from typing import Any, Callable, Dict, List, Optional, Union
 import mlflow
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 import pandas as pd
 from mlflow.models import set_model, ModelConfig
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
@@ -33,6 +33,10 @@ from utils.agents.multi_agent import (
     FINISH_ROUTE_NAME,
     SUPERVISOR_ROUTE_NAME,
 )
+from utils.agents.chat import get_messages_array
+from utils.agents.playground_parser import (
+    convert_messages_to_playground_tool_display_strings,
+)
 
 import logging
 
@@ -40,6 +44,8 @@ logging.getLogger("mlflow").setLevel(logging.ERROR)
 
 from mlflow.entities import Trace
 import mlflow.deployments
+
+from enum import Enum
 
 
 # COMMAND ----------
@@ -102,6 +108,65 @@ import mlflow.deployments
 CONFIG_FILE_NAME = "multi_agent_supervisor_config.yaml"
 
 
+class ConversationStatus(Enum):
+    ACTIVE = "active"
+    FINISHED = "finished"
+    ERROR = "error"
+
+
+@mlflow.trace()
+def remove_message_keys_with_null_values(message: Dict[str, str]) -> Dict[str, str]:
+    """
+    Remove any keys with None/null values from the message.
+    Having a null value for a key breaks DBX model serving input validation even if that key is marked as optional in the schema, so we remove them.
+    Example: refusal key is set as None by OpenAI
+    """
+    return {k: v for k, v in message.items() if v is not None}
+
+
+@dataclass
+class SupervisorState:
+    """Tracks essential conversation state"""
+
+    chat_history: List[Dict[str, str]] = field(default_factory=list)
+    current_route: str = SUPERVISOR_ROUTE_NAME
+    number_of_workers_called: int = 0
+    num_messages_at_start: int = 0
+    status: ConversationStatus = ConversationStatus.ACTIVE
+    error: Optional[str] = None
+
+    @mlflow.trace()
+    def append_new_message_to_history(self, message: Dict[str, str]) -> None:
+        span = mlflow.get_current_active_span()
+        span.set_inputs({"message": message})
+        message_with_no_null_values_for_keys = remove_message_keys_with_null_values(
+            message
+        )
+        self.chat_history.append(message_with_no_null_values_for_keys)
+        span.set_outputs(self.chat_history)
+
+    @mlflow.trace()
+    def replace_chat_history(self, new_chat_history: List[Dict[str, str]]) -> None:
+        span = mlflow.get_current_active_span()
+        span.set_inputs(
+            {
+                "new_chat_history": new_chat_history,
+                "current_chat_history": self.chat_history,
+            }
+        )
+        messages_with_no_null_values_for_keys = []
+        for message in new_chat_history:
+            messages_with_no_null_values_for_keys.append(
+                remove_message_keys_with_null_values(message)
+            )
+        self.chat_history = messages_with_no_null_values_for_keys.copy()
+        span.set_outputs(self.chat_history)
+
+    def finish(self, error: Optional[str] = None) -> None:
+        self.status = ConversationStatus.ERROR if error else ConversationStatus.FINISHED
+        self.error = error
+
+
 class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
     """
     Class representing an Agent that does function-calling with tools using OpenAI SDK
@@ -110,38 +175,67 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
     def __init__(
         self, agent_config: Optional[Union[MultiAgentSupervisorConfig, str]] = None
     ):
-        self.agent_config: MultiAgentSupervisorConfig = load_config(
+        # Initialize core configuration
+        self._initialize_config(agent_config)
+
+        # Initialize clients
+        self._initialize_model_serving_clients()
+
+        # Set up agents and routing
+        self._initialize_supervised_agents()
+
+        # Set up prompts and tools
+        self._initialize_supervisor_prompts_and_tools()
+
+        # Initialize state
+        self.state = None  # Will be initialized per conversation
+
+    def _initialize_config(
+        self, agent_config: Optional[Union[MultiAgentSupervisorConfig, str]]
+    ):
+        """Initialize and validate the agent configuration"""
+        self.agent_config = load_config(
             agent_config=agent_config, default_config_file_name=CONFIG_FILE_NAME
         )
         if not self.agent_config:
             raise ValueError("No agent config found")
 
+        # Set core configuration values
+        self.MAX_LOOPS = self.agent_config.max_workers_called
+        self.debug = self.agent_config.playground_debug_mode
+
+    def _initialize_model_serving_clients(self):
+        """Initialize API clients for model serving"""
         w = WorkspaceClient()
         self.model_serving_client = w.serving_endpoints.get_open_ai_client()
 
         # used for calling the child agent's deployments
         self.mlflow_serving_client = mlflow.deployments.get_deploy_client("databricks")
 
-        # internal agents.  finish agent is just a Callable with logic to return the last message to the user / format messages in playground style.
+    def _initialize_supervised_agents(self):
+        """Initialize the agent registry and capabilities"""
+        # Initialize base agents (finish and supervisor)
         self.agents = {
             FINISH_ROUTE_NAME: {
                 "agent_fn": self.finish_agent,
-                "agent_description": "End the converastion, returning the last message to the user.",
+                "agent_description": "End the conversation, returning the last message to the user.",
             },
             SUPERVISOR_ROUTE_NAME: {
                 "agent_fn": self.supervisor_agent,
-                "agent_description": "Controls the conversation, deciding which Agent to use next.  It only makes decisions about which agent to call, and does not respond to the user.",
+                "agent_description": "Controls the conversation, deciding which Agent to use next. It only makes decisions about which agent to call, and does not respond to the user.",
             },
         }
 
-        # initialize each child agent & where to find it
+        # Add configured worker agents
         for agent in self.agent_config.agents:
             self.agents[agent.name] = {
                 "agent_description": agent.description,
                 "endpoint_name": agent.endpoint_name,
             }
 
-        # Create agents string for system prompt's `agent_config.supervisor_system_prompt`
+    def _initialize_supervisor_prompts_and_tools(self):
+        """Initialize prompts and function calling tools"""
+        # Create agents string for system prompt
         agents_info = [
             WORKER_PROMPT_TEMPLATE.format(
                 worker_name=key, worker_description=value["agent_description"]
@@ -149,10 +243,6 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
             for key, value in self.agents.items()
         ]
         workers_names_and_descriptions = "".join(agents_info)
-
-        # Update to use config values instead of hardcoded constants
-        self.MAX_LOOPS = self.agent_config.max_workers_called
-        self.debug = self.agent_config.playground_debug_mode
 
         # Update system prompt with template variables
         self.system_prompt = self.agent_config.supervisor_system_prompt.format(
@@ -164,7 +254,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
             workers_names_and_descriptions=workers_names_and_descriptions,
         )
 
-        # Create the supervisor routing function
+        # Initialize routing function schema
         self.route_function = {
             "type": "function",
             "function": {
@@ -190,57 +280,49 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         }
         self.tool_json_schemas = [self.route_function]
 
-        # empty state
-        self.chat_history = []
-        self.next_route = SUPERVISOR_ROUTE_NAME
-
-        # track how many supervsior <> agent loops so we can cap it
-        self.num_loops = 0
-
-        # track how many messages came in the history, so when we dump playground formatted messages out, we don't re-dump the history
-        self.num_in_history = None
-
     @mlflow.trace()
     def route_response(self, next_route):
         # print("selected next: " + next_route)
-        self.next_route = next_route
+        self.state.current_route = next_route
         return self.call_next_route()
 
     @mlflow.trace()
     def call_next_route(self):
-        logging.info(f"Calling next route: {self.next_route}")
-        if self.next_route == FINISH_ROUTE_NAME:
+        span = mlflow.get_current_active_span()
+        span.set_attributes(asdict(self.state))
+        logging.info(f"Calling next route: {self.state.current_route}")
+        if self.state.current_route == FINISH_ROUTE_NAME:
             return self.finish_agent()
-        elif self.next_route == SUPERVISOR_ROUTE_NAME:
+        elif self.state.current_route == SUPERVISOR_ROUTE_NAME:
             return self.supervisor_agent()
         else:
-            agent_output = self.call_agent(self.next_route)
-            self.chat_history = agent_output["messages"]
-            # print(agent_output["content"])
-            agent_func = self.agents.get(self.next_route)
-            self.next_route = SUPERVISOR_ROUTE_NAME
+            agent_output = self.call_agent(self.state.current_route)
+            # TODO: the agents by default return the enitre message history in their response, but they should provide a way to return only the new messages
+            self.state.replace_chat_history(agent_output["messages"])
+            self.state.current_route = SUPERVISOR_ROUTE_NAME
             return self.call_next_route()
 
     @mlflow.trace()
     def append_to_chat_history(self, message: Dict[str, Any]):
-        self.chat_history.append(message)
-        return self.chat_history  # hack to show in mlflow trace
+        self.state.append_new_message_to_history(message)
+        mlflow.get_current_active_span().set_outputs(self.state.chat_history)
+        # return self.state.messages  # hack to show in mlflow trace
 
     @mlflow.trace()
     def end_early(self):
-        return self.route_response("FINISH")
+        return self.route_response(FINISH_ROUTE_NAME)
 
     @mlflow.trace(span_type="AGENT")
     def supervisor_agent(self):
 
-        if self.num_loops >= self.agent_config.max_workers_called:
+        if self.state.number_of_workers_called >= self.agent_config.max_workers_called:
             # finish early
             logging.warning("Finishing early due to exceeding max iterations.")
             return self.end_early()
 
         messages = (
             [{"role": "system", "content": self.system_prompt}]
-            + self.chat_history
+            + self.state.chat_history
             + [
                 {
                     "role": "user",
@@ -263,7 +345,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                 function = tool_call.function
                 args = json.loads(function.arguments)
                 if function.name == ROUTING_FUNCTION_NAME:
-                    self.num_loops += 1
+                    self.state.number_of_workers_called += 1
                     return self.route_response(
                         next_route=args[NEXT_WORKER_OR_FINISH_PARAM]
                     )
@@ -271,13 +353,13 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                     logging.error(
                         f"Supervisor LLM failed to call the {ROUTING_FUNCTION_NAME}(...) function to determine the next step, so we will default to finishing.  It tried to call `{function.name}` with args `{function.arguments}`."
                     )
-                    self.next_route = FINISH_ROUTE_NAME
+                    self.state.current_route = FINISH_ROUTE_NAME
                     return self.call_next_route()
         else:
             logging.error(
                 f"Supervisor LLM failed to choose a tool at all, so we will default to finishing.  It said `{assistant_message}`."
             )
-            self.next_route = FINISH_ROUTE_NAME
+            self.state.current_route = FINISH_ROUTE_NAME
             return self.call_next_route()
 
     @mlflow.trace()
@@ -288,7 +370,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
             # this request will grab the mlflow trace from the endpoint
             request = {
                 "databricks_options": {"return_trace": True},
-                "messages": self.chat_history,
+                "messages": self.state.chat_history,
             }
             completion = self.mlflow_serving_client.predict(
                 endpoint=endpoint_name, inputs=request
@@ -309,7 +391,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                 "content": f"ERROR: This agent does not exist.  Please select one of: {list(self.agents.keys())}",
                 "name": SUPERVISOR_ROUTE_NAME,
             }
-            raise ValueError(f"Invalid agent selected: {self.next_route}")
+            raise ValueError(f"Invalid agent selected: {self.state.current_route}")
 
     @mlflow.trace(span_type="PARSER")
     def finish_agent(self):
@@ -317,21 +399,24 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         if self.agent_config.playground_debug_mode is True:
             return {
                 "response": (
-                    self.chat_history[-1]["content"] if self.chat_history else ""
+                    self.state.chat_history[-1]["content"]
+                    if self.state.chat_history
+                    else ""
                 ),
-                "messages": self.chat_history,
+                "messages": self.state.chat_history,
                 # only parse the new messages we added into playground format
-                "content": self.stringify_messages(
-                    self.chat_history[self.num_in_history :]
+                "content": convert_messages_to_playground_tool_display_strings(
+                    self.state.chat_history[self.state.num_messages_at_start :]
                 ),
             }
         else:
             return {
                 "content": (
-                    self.chat_history[-1]["content"] if self.chat_history else ""
+                    self.state.chat_history[-1]["content"]
+                    if self.state.chat_history
+                    else ""
                 ),
-                "messages": self.chat_history,
-                # "": self.stringify_messages(self.chat_history),
+                "messages": self.state.chat_history,
             }
 
     @mlflow.trace(name="agent", span_type="AGENT")
@@ -341,20 +426,18 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame] = None,
         params: Any = None,
     ) -> StringResponse:
-        # Extract `messages` key from the `model_input`
-        messages = self.get_messages_array(model_input)
+        try:
+            messages = get_messages_array(model_input)
+            self.state = SupervisorState()
+            self.state.replace_chat_history(messages)
+            self.state.num_messages_at_start = len(messages)
+            result = self.call_next_route()
+            self.state.finish()
+            return result
 
-        # Set initial chat_history
-        self.chat_history = self.convert_messages_to_open_ai_format(messages)
-
-        self.num_in_history = len(self.chat_history)
-
-        # reset state
-        self.next_route = SUPERVISOR_ROUTE_NAME
-        self.num_loops = 0
-
-        # enter the supervisor loop
-        return self.call_next_route()
+        except Exception as e:
+            self.state.finish(error=str(e))
+            raise
 
     def chat_completion(self, messages: List[Dict[str, str]], tools: bool = False):
         endpoint_name = self.agent_config.llm_endpoint_name
@@ -379,148 +462,6 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         else:
             return traced_create(model=endpoint_name, messages=messages, **llm_options)
         # Openai - end
-
-    @mlflow.trace(span_type="PARSER")
-    def get_messages_array(
-        self, model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame]
-    ) -> List[Dict[str, str]]:
-        if type(model_input) == ChatCompletionRequest:
-            return model_input.messages
-        elif type(model_input) == dict:
-            return model_input.get("messages")
-        elif type(model_input) == pd.DataFrame:
-            return model_input.iloc[0].to_dict().get("messages")
-
-    @mlflow.trace(span_type="PARSER")
-    def extract_user_query_string(
-        self, chat_messages_array: List[Dict[str, str]]
-    ) -> str:
-        """
-        Extracts user query string from the chat messages array.
-
-        Args:
-            chat_messages_array: Array of chat messages.
-
-        Returns:
-            User query string.
-        """
-
-        if isinstance(chat_messages_array, pd.Series):
-            chat_messages_array = chat_messages_array.tolist()
-
-        if isinstance(chat_messages_array[-1], dict):
-            return chat_messages_array[-1]["content"]
-        elif isinstance(chat_messages_array[-1], Message):
-            return chat_messages_array[-1].content
-        else:
-            return chat_messages_array[-1]
-
-    @mlflow.trace(span_type="PARSER")
-    def extract_chat_history(
-        self, chat_messages_array: List[Dict[str, str]]
-    ) -> List[Dict[str, str]]:
-        """
-        Extracts the chat history from the chat messages array.
-
-        Args:
-            chat_messages_array: Array of chat messages.
-
-        Returns:
-            The chat history.
-        """
-        # Convert DataFrame to dict
-        if isinstance(chat_messages_array, pd.Series):
-            chat_messages_array = chat_messages_array.tolist()
-
-        # Dictionary, return as is
-        if isinstance(chat_messages_array[0], dict):
-            return chat_messages_array[:-1]  # return all messages except the last one
-        # MLflow Message, convert to Dictionary
-        elif isinstance(chat_messages_array[0], Message):
-            new_array = []
-            for message in chat_messages_array[:-1]:
-                new_array.append(asdict(message))
-            return new_array
-        else:
-            raise ValueError(
-                "chat_messages_array is not an Array of Dictionary, Pandas DataFrame, or array of MLflow Message."
-            )
-
-    @mlflow.trace(span_type="PARSER")
-    def convert_messages_to_open_ai_format(
-        self, chat_messages_array: List[Dict[str, str]]
-    ) -> List[Dict[str, str]]:
-        """
-        Extracts the chat history from the chat messages array.
-
-        Args:
-            chat_messages_array: Array of chat messages.
-
-        Returns:
-            The chat history.
-        """
-        # Convert DataFrame to dict
-        if isinstance(chat_messages_array, pd.Series):
-            chat_messages_array = chat_messages_array.tolist()
-
-        # Dictionary, return as is
-        if isinstance(chat_messages_array[0], dict):
-            return chat_messages_array  # return all messages except the last one
-        # MLflow Message, convert to Dictionary
-        elif isinstance(chat_messages_array[0], Message):
-            new_array = []
-            for message in chat_messages_array:
-                new_array.append(asdict(message))
-            return new_array
-        else:
-            raise ValueError(
-                "chat_messages_array is not an Array of Dictionary, Pandas DataFrame, or array of MLflow Message."
-            )
-
-    # helpers for playground & review app formatting of tool calls
-    @mlflow.trace(span_type="PARSER")
-    def stringify_messages(self, messages: List[Dict[str, str]]) -> str:
-        output = ""
-        for msg in messages:  # ignore first user input
-            if msg["role"] == "assistant" and msg.get("tool_calls"):  # tool call
-                for tool_call in msg["tool_calls"]:
-                    output += self.stringify_tool_call(tool_call)
-                # output += f"<uc_function_call>{json.dumps(msg, indent=2)}</uc_function_call>"
-            elif msg["role"] == "tool":  # tool response
-                output += self.stringify_tool_result(msg)
-                # output += f"<uc_function_result>{json.dumps(msg, indent=2)}</uc_function_result>"
-            else:
-                output += msg["content"] if msg["content"] != None else ""
-        return output
-
-    @mlflow.trace(span_type="PARSER")
-    def stringify_tool_call(self, tool_call) -> str:
-        try:
-            function = tool_call["function"]
-            args_dict = json.loads(function["arguments"])
-            request = {
-                "id": tool_call["id"],
-                "name": function["name"],
-                "arguments": json.dumps(args_dict),
-            }
-
-            return f"<uc_function_call>{json.dumps(request)}</uc_function_call>"
-
-        except Exception as e:
-            print("Failed to stringify tool call: ", e)
-            return str(tool_call)
-
-    @mlflow.trace(span_type="PARSER")
-    def stringify_tool_result(self, tool_msg) -> str:
-        try:
-
-            result = json.dumps(
-                {"id": tool_msg["tool_call_id"], "content": tool_msg["content"]}
-            )
-            return f"<uc_function_result>{result}</uc_function_result>"
-        except Exception as e:
-            print("Failed to stringify tool result:", e)
-            return str(tool_msg)
 
 
 # tell MLflow logging where to find the agent's code
@@ -553,15 +494,15 @@ if debug:
     output = agent.predict(model_input=vibe_check_query)
     print(output)
 
-#     input_2 = output["messages"].copy()
-#     input_2.append(
-#         {
-#             "role": "user",
-#             "content": f"did user 8e753fa6-2464-4354-887c-a25ace971a7e experience these?",
-#         },
-#     )
+    input_2 = output["messages"].copy()
+    input_2.append(
+        {
+            "role": "user",
+            "content": f"did user 8e753fa6-2464-4354-887c-a25ace971a7e experience these?",
+        },
+    )
 
-#     output_2 = agent.predict(model_input={"messages": input_2})
+    output_2 = agent.predict(model_input={"messages": input_2})
 
 # # COMMAND ----------
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Any, List, Literal, Dict
 from utils.agents.llm import LLMConfig, LLMParametersConfig
 from utils.agents.tools import (
@@ -92,9 +92,16 @@ class MultiAgentSupervisorConfig(SerializableModel):
     - model_serving: Supervised agent is deployed as a Databricks Model Serving endpoint that gets called. Use this mode when deploying the agent to pre-prod/prod environments.
     """
 
+    @field_validator("max_workers_called")
+    def validate_max_workers(cls, v: int) -> int:
+        if v <= 1:
+            raise ValueError("max_workers_called must be greater than 1")
+        return v
+
     max_workers_called: int = 5
     """
     The maximum turns of conversations with the workers before the last worker's response is returned to the user by the supervisor's hard coded logic.
+    Must be greater than 1.
     """
 
     supervisor_system_prompt: str = """## Role
