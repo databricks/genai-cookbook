@@ -14,8 +14,6 @@
 
 import sys
 
-from utils.agents.yaml_loader import load_first_yaml_file
-
 # Add the parent directory to the path so we can import the `utils` modules
 sys.path.append("../..")
 
@@ -30,6 +28,7 @@ from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, 
 from databricks.sdk import WorkspaceClient
 import os
 from utils.agents.tools import execute_function
+from utils.agents.yaml_loader import load_first_yaml_file
 
 from utils.agents.chat import (
     get_messages_array,
@@ -47,13 +46,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
     """
     Class representing an Agent that does function-calling with tools using OpenAI SDK
     """
-
-    # def __init__(self, agent_config: dict = None):
-    #     self.__agent_config = agent_config
-    #     if self.__agent_config is None:
-    #         self.__agent_config = globals().get("__mlflow_model_config__")
-
-    #     print(globals().get("__mlflow_model_config__"))
 
     def __init__(self, agent_config: Optional[FunctionCallingAgentConfig] = None):
         if agent_config is None:
