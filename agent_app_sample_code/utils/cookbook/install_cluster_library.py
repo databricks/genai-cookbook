@@ -7,6 +7,7 @@ from databricks.sdk.service.compute import (
     LibraryInstallStatus,
     PythonPyPiLibrary,
 )
+import time
 
 
 def parse_requirements(requirements_path: str) -> List[str]:
