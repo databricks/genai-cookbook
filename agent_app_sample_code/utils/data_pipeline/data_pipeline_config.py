@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, computed_field, ConfigDict
-from typing import Optional
+from pydantic import Field, computed_field, field_validator
+from typing import Optional, Dict, Any
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.catalog import VolumeType
 from databricks.sdk.errors.platform import ResourceAlreadyExists, ResourceDoesNotExist
@@ -9,9 +9,11 @@ from utils.cookbook.databricks_utils import get_volume_url
 import yaml
 from utils.data_pipeline.recursive_character_text_splitter import ChunkingConfig
 import os
+from utils.agents.tools import SerializableModel
+from utils.agents.tools import obj_to_yaml, load_obj_from_yaml
 
 
-class UCVolumeSourceConfig(BaseModel):
+class UCVolumeSourceConfig(SerializableModel):
     """
     Source data configuration for the Unstructured Data Pipeline. You can modify this class to add additional configuration settings.
 
@@ -23,6 +25,14 @@ class UCVolumeSourceConfig(BaseModel):
       uc_volume_name (str):
         Required. Name of the Unity Catalog volume.
     """
+
+    @field_validator("uc_catalog_name", "uc_schema_name", "uc_volume_name")
+    def validate_not_default(cls, value: str) -> str:
+        if value == "REPLACE_ME":
+            raise ValueError(
+                "Please replace the default value 'REPLACE_ME' with your actual configuration"
+            )
+        return value
 
     uc_catalog_name: str = Field(..., min_length=1)
     uc_schema_name: str = Field(..., min_length=1)
@@ -126,7 +136,7 @@ class UCVolumeSourceConfig(BaseModel):
             raise Exception(f"Failed to list files in volume: {str(e)}")
 
 
-class DataPipelineOuputConfig(BaseModel):
+class DataPipelineOuputConfig(SerializableModel):
     """Configuration for managing output locations and naming conventions in the data pipeline.
 
     This class handles the configuration of table names and vector search endpoints for the data pipeline.
@@ -169,9 +179,18 @@ class DataPipelineOuputConfig(BaseModel):
             # - my_catalog.my_schema.agent_docs_chunked_index
     """
 
+    @field_validator(
+        "uc_catalog_name", "uc_schema_name", "base_table_name", "vector_search_endpoint"
+    )
+    def validate_not_default(cls, value: str) -> str:
+        if value == "REPLACE_ME":
+            raise ValueError(
+                "Please replace the default value 'REPLACE_ME' with your actual configuration"
+            )
+        return value
+
     uc_catalog_name: str = Field(..., min_length=1)
     uc_schema_name: str = Field(..., min_length=1)
-
     base_table_name: str = Field(..., min_length=1)  # e.g. "agent"
 
     docs_table_postfix: str = "docs"
@@ -319,42 +338,66 @@ class DataPipelineOuputConfig(BaseModel):
         return (True, msg)
 
 
-class DataPipelineConfig(BaseModel):
+class DataPipelineConfig(SerializableModel):
     source: UCVolumeSourceConfig
     output: DataPipelineOuputConfig
     chunking_config: ChunkingConfig
 
-    def to_yaml(self) -> str:
-        # exclude_none = True prevents unused parameters from being included in the config
-        data = self.model_dump(
-            exclude_none=True, exclude={"source": {"volume_path", "volume_uc_fqn"}}
-        )
-        return yaml.dump(data, default_flow_style=False)
-
-    @classmethod
-    def from_yaml(cls, yaml_str: str) -> "DataPipelineConfig":
-        # Load the data from YAML
-        config_dict = yaml.safe_load(yaml_str)
-        return cls(**config_dict)
-
-    @classmethod
-    def from_yaml_file(cls, file_path: str) -> "DataPipelineConfig":
-        """
-        Load configuration from a YAML file.
-
-        Args:
-            file_path (str): Path to the YAML configuration file
+    def model_dump(self, **kwargs) -> Dict[str, Any]:
+        """Override model_dump to exclude name and description fields.
 
         Returns:
-            DataPipelineConfig: Configuration object loaded from the file
-
-        Raises:
-            FileNotFoundError: If the specified file doesn't exist
-            yaml.YAMLError: If the file contains invalid YAML
+            Dict[str, Any]: Dictionary representation of the model excluding name and description.
         """
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Configuration file not found: {file_path}")
+        model_dumped = super().model_dump(**kwargs)
+        model_dumped["source"] = yaml.safe_load(obj_to_yaml(self.source))
+        model_dumped["output"] = yaml.safe_load(obj_to_yaml(self.output))
+        model_dumped["chunking_config"] = yaml.safe_load(
+            obj_to_yaml(self.chunking_config)
+        )
+        return model_dumped
 
-        with open(file_path, "r") as f:
-            yaml_str = f.read()
-        return cls.from_yaml(yaml_str)
+    @classmethod
+    def _load_class_from_dict(
+        cls, class_object, data: Dict[str, Any]
+    ) -> "SerializableModel":
+        # Deserialize sub-configs
+        data["source"] = load_obj_from_yaml(yaml.dump(data["source"]))
+        data["output"] = load_obj_from_yaml(yaml.dump(data["output"]))
+        data["chunking_config"] = load_obj_from_yaml(yaml.dump(data["chunking_config"]))
+        return class_object(**data)
+
+    # def to_yaml(self) -> str:
+    #     # exclude_none = True prevents unused parameters from being included in the config
+    #     data = self.model_dump(
+    #         exclude_none=True, exclude={"source": {"volume_path", "volume_uc_fqn"}}
+    #     )
+    #     return yaml.dump(data, default_flow_style=False)
+
+    # @classmethod
+    # def from_yaml(cls, yaml_str: str) -> "DataPipelineConfig":
+    #     # Load the data from YAML
+    #     config_dict = yaml.safe_load(yaml_str)
+    #     return cls(**config_dict)
+
+    # @classmethod
+    # def from_yaml_file(cls, file_path: str) -> "DataPipelineConfig":
+    #     """
+    #     Load configuration from a YAML file.
+
+    #     Args:
+    #         file_path (str): Path to the YAML configuration file
+
+    #     Returns:
+    #         DataPipelineConfig: Configuration object loaded from the file
+
+    #     Raises:
+    #         FileNotFoundError: If the specified file doesn't exist
+    #         yaml.YAMLError: If the file contains invalid YAML
+    #     """
+    #     if not os.path.exists(file_path):
+    #         raise FileNotFoundError(f"Configuration file not found: {file_path}")
+
+    #     with open(file_path, "r") as f:
+    #         yaml_str = f.read()
+    #     return cls.from_yaml(yaml_str)

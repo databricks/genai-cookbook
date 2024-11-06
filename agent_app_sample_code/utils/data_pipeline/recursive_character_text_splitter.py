@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from utils.cookbook.databricks_utils import get_workspace_hostname
 from databricks.sdk.service.serving import EndpointStateReady
 from databricks.sdk.errors.platform import ResourceDoesNotExist
-
+from utils.agents.tools import SerializableModel
 
 # %md
 # ##### `get_recursive_character_text_splitter`
@@ -259,7 +259,7 @@ def get_recursive_character_text_splitter(
     return _recursive_character_text_splitter
 
 
-class ChunkingConfig(BaseModel):
+class ChunkingConfig(SerializableModel):
     """
     Configuration for the Unstructured Data Pipeline.
 
