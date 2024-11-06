@@ -1,4 +1,4 @@
-from typing import Optional, Any, Callable, get_type_hints, Type, Dict, Tuple
+from typing import Optional, Any, Callable, get_type_hints, Type, Dict, Tuple, List
 from pydantic import create_model, Field, BaseModel
 import inspect
 from unitycatalog.ai.core.utils.docstring_utils import parse_docstring
@@ -6,6 +6,7 @@ import yaml
 import importlib
 import mlflow
 import json
+from mlflow.models.resources import DatabricksResource
 
 _CLASS_PATH_KEY = "class_path"
 
@@ -57,6 +58,9 @@ class SerializableModel(BaseModel):
         cls, class_object, data: Dict[str, Any]
     ) -> "SerializableModel":
         return class_object(**data)
+
+    def pretty_print(self):
+        print(json.dumps(self.model_dump(), indent=2))
 
 
 def obj_to_yaml(obj: BaseModel) -> str:
@@ -127,6 +131,13 @@ class Tool(SerializableModel):
             "_get_parameters_schema must be implemented by Tool subclasses. This method should "
             "return an OpenAPI-compatible JSON schema dict describing the tool's input parameters. "
             "The schema should include parameter names, types, descriptions, and any validation rules."
+        )
+
+    def get_resource_dependencies(self) -> List[DatabricksResource]:
+        """Returns a list of Databricks resources (mlflow.models.resources.* objects) that the tool uses.  Used to securely provision credentials for these resources when the tool is deployed to Model Serving."""
+        raise NotImplementedError(
+            "get_resource_dependencies must be implemented by Tool subclasses. This method should "
+            "return a list of mlflow.models.resources.* objects that the tool depends on."
         )
 
 
@@ -221,6 +232,9 @@ class FunctionTool(Tool):
     def _get_parameters_schema(self) -> dict:
         """Returns the JSON schema for the tool's parameters."""
         return self._input_schema.model_json_schema()
+
+    def get_resource_dependencies(self) -> List[DatabricksResource]:
+        return []
 
 
 @mlflow.trace(span_type="FUNCTION")

@@ -3,6 +3,7 @@ from mlflow.entities import Document
 from mlflow.models.resources import (
     DatabricksVectorSearchIndex,
     DatabricksServingEndpoint,
+    DatabricksResource,
 )
 
 import json
@@ -443,7 +444,7 @@ class VectorSearchRetrieverTool(Tool):
                 vs_filters[suggested_field] = suggested_filter
         return vs_filters
 
-    def get_resource_dependencies(self):
+    def get_resource_dependencies(self) -> List[DatabricksResource]:
         dependencies = [
             DatabricksVectorSearchIndex(index_name=self.vector_search_index)
         ]
@@ -451,7 +452,7 @@ class VectorSearchRetrieverTool(Tool):
         # Get the embedding model endpoint
         index_info, _, _, _ = self._get_index_and_table_info()
         if index_info.index_type == VectorIndexType.DELTA_SYNC:
-            # Only works for DELTA_SYNC indexes
+            # Only DELTA_SYNC indexes have embedding model endpoints
             for (
                 embedding_source_col
             ) in index_info.delta_sync_index_spec.embedding_source_columns:
@@ -461,7 +462,7 @@ class VectorSearchRetrieverTool(Tool):
                         DatabricksServingEndpoint(endpoint_name=endpoint_name),
                     )
                 else:
-                    raise ValueError(
+                    print(
                         f"Could not identify the embedding model endpoint resource for {self.vector_search_index}.  Please manually add the embedding model endpoint to `databricks_resources`."
                     )
         return dependencies

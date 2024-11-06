@@ -1,8 +1,6 @@
-from pydantic import BaseModel
-from typing import Any
-import yaml
-
+from typing import Any, List
 from utils.agents.tools import SerializableModel
+from mlflow.models.resources import DatabricksResource, DatabricksGenieSpace
 
 
 class GenieAgentConfig(SerializableModel):
@@ -23,3 +21,10 @@ class GenieAgentConfig(SerializableModel):
     encountered_error_user_message: str = (
         "I encountered an error trying to answer your question, please try again."
     )
+
+    # name: str
+    # description: str
+    # endpoint_name: str
+
+    def get_resource_dependencies(self) -> List[DatabricksResource]:
+        return [DatabricksGenieSpace(genie_space_id=self.genie_space_id)]

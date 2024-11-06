@@ -2,10 +2,10 @@ from typing import List, Any, Dict
 import yaml
 import importlib
 from pydantic import BaseModel
-from utils.agents.tools import obj_to_yaml, _load_class_from_dict, load_obj_from_yaml
-from utils.agents.tools import Tool
+from utils.agents.tools import obj_to_yaml, load_obj_from_yaml
 from utils.agents.llm import LLMConfig
 from utils.agents.tools import SerializableModel
+from mlflow.models.resources import DatabricksResource, DatabricksServingEndpoint
 
 
 class FunctionCallingAgentConfig(SerializableModel):
@@ -21,7 +21,18 @@ class FunctionCallingAgentConfig(SerializableModel):
     tools: List[Any]
     llm_config: LLMConfig
     # Used by MLflow to set the Agent's input schema
-    input_example: Any
+    input_example: Any = {
+        "messages": [
+            {
+                "role": "user",
+                "content": "What can you help me with?",
+            },
+        ]
+    }
+
+    # name: str
+    # description: str
+    # endpoint_name: str
 
     def model_dump(self, **kwargs) -> Dict[str, Any]:
         """Override model_dump to exclude name and description fields.
@@ -48,3 +59,13 @@ class FunctionCallingAgentConfig(SerializableModel):
         # Replace tools with deserialized instances
         data["tools"] = tools
         return class_object(**data)
+
+    def get_resource_dependencies(self) -> List[DatabricksResource]:
+        dependencies = [
+            DatabricksServingEndpoint(endpoint_name=self.llm_config.llm_endpoint_name),
+        ]
+
+        # Add the Databricks resources for the retriever's vector indexes
+        for tool in self.tools:
+            dependencies.extend(tool.get_resource_dependencies())
+        return dependencies

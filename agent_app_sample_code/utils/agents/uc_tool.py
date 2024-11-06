@@ -1,5 +1,5 @@
 from pydantic import model_validator, computed_field, Field
-from typing import Dict, Any
+from typing import Dict, Any, List
 from unitycatalog.ai.core.databricks import DatabricksFunctionClient
 from pyspark.errors import SparkRuntimeException
 from unitycatalog.ai.openai.toolkit import UCFunctionToolkit
@@ -9,6 +9,7 @@ from utils.agents.tools import Tool
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import ResourceDoesNotExist
 from utils.cookbook.databricks_utils import get_function_url
+from mlflow.models.resources import DatabricksResource, DatabricksFunction
 
 
 class UCTool(Tool):
@@ -139,3 +140,6 @@ class UCTool(Tool):
         """
         kwargs["exclude"] = {"name", "description"}.union(kwargs.get("exclude", set()))
         return super().model_dump(**kwargs)
+
+    def get_resource_dependencies(self) -> List[DatabricksResource]:
+        return [DatabricksFunction(function_name=self.uc_function_name)]

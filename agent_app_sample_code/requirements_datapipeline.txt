@@ -6,3 +6,4 @@ torch==2.3.0
 tiktoken==0.7.0
 langchain-text-splitters==0.2.0
 pypandoc_binary==1.13
+pyyaml

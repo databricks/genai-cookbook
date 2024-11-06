@@ -22,6 +22,9 @@ from mlflow.models import set_model, ModelConfig
 from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
 from databricks.sdk import WorkspaceClient
 import os
+from utils.agents.utils import (
+    remove_message_keys_with_null_values,
+)
 from utils.agents.utils import load_config
 from utils.agents.multi_agent import (
     MultiAgentSupervisorConfig,
@@ -112,16 +115,6 @@ class ConversationStatus(Enum):
     ACTIVE = "active"
     FINISHED = "finished"
     ERROR = "error"
-
-
-@mlflow.trace()
-def remove_message_keys_with_null_values(message: Dict[str, str]) -> Dict[str, str]:
-    """
-    Remove any keys with None/null values from the message.
-    Having a null value for a key breaks DBX model serving input validation even if that key is marked as optional in the schema, so we remove them.
-    Example: refusal key is set as None by OpenAI
-    """
-    return {k: v for k, v in message.items() if v is not None}
 
 
 @dataclass

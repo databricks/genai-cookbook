@@ -102,6 +102,29 @@ def get_volume_url(volume_fqdn: str) -> str:
     return url
 
 
+def get_mlflow_experiment_url(experiment_id: str) -> str:
+    """Generate the URL for an MLflow experiment in the Databricks UI.
+
+    Args:
+        experiment_id: The ID of the MLflow experiment
+
+    Returns:
+        str: The full URL to view the MLflow experiment in the Databricks UI.
+
+    Example:
+        >>> get_mlflow_experiment_url("<experiment_id>")
+        'https://my-workspace.cloud.databricks.com/ml/experiments/<experiment_id>'
+    """
+    browser_url = get_workspace_hostname()
+    url = f"{browser_url}/ml/experiments/{experiment_id}"
+    return url
+
+
+def get_mlflow_experiment_traces_url(experiment_id: str) -> str:
+    """Generate the URL for the MLflow experiment traces in the Databricks UI."""
+    return get_mlflow_experiment_url(experiment_id) + "?compareRunsMode=TRACES"
+
+
 def get_function_url(function_fqdn: str) -> str:
     """Generate the URL for a Unity Catalog function in the Databricks UI.
 
@@ -120,6 +143,24 @@ def get_function_url(function_fqdn: str) -> str:
     catalog, schema, function = function_fqdn.split(".")
     browser_url = get_workspace_hostname()
     url = f"{browser_url}/explore/data/functions/{catalog}/{schema}/{function}"
+    return url
+
+
+def get_cluster_url(cluster_id: str) -> str:
+    """Generate the URL for a Databricks cluster in the Databricks UI.
+
+    Args:
+        cluster_id: The ID of the cluster
+
+    Returns:
+        str: The full URL to view the cluster in the Databricks UI.
+
+    Example:
+        >>> get_cluster_url("<cluster_id>")
+        'https://my-workspace.cloud.databricks.com/compute/clusters/<cluster_id>'
+    """
+    browser_url = get_workspace_hostname()
+    url = f"{browser_url}/compute/clusters/{cluster_id}"
     return url
 
 
