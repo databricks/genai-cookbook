@@ -1,19 +1,12 @@
-# Databricks notebook source
-import pandas as pd
 from typing import List, Mapping, Optional
 
-import mlflow
 import mlflow.entities as mlflow_entities
 
 from pyspark import sql
 from pyspark.sql import functions as F, types as T
 from pyspark.sql.window import Window
 
-from databricks import agents
-from databricks.sdk import WorkspaceClient
 from databricks.rag_eval.evaluation import traces
-
-# COMMAND ----------
 
 # Deduplicate the assessment log
 
@@ -108,9 +101,7 @@ def _dedup_assessment_log(assessment_log_df: sql.DataFrame) -> sql.DataFrame:
         # F.col("schema_version")
     )
 
-# COMMAND ----------
-
-## Attach ground truth
+    ## Attach ground truth
 
 
 def attach_ground_truth(request_log_df, deduped_assessment_log_df):
@@ -141,16 +132,14 @@ def attach_ground_truth(request_log_df, deduped_assessment_log_df):
 
     raw_requests_with_feedback_df = raw_requests_with_feedback_df.drop("request_id")
     return raw_requests_with_feedback_df
-
-# COMMAND ----------
-
+  
 _EXPECTED_RETRIEVAL_CONTEXT_SCHEMA = T.ArrayType(
-    T.StructType(
-        [
-            T.StructField("doc_uri", T.StringType()),
-            T.StructField("content", T.StringType()),
-        ]
-    )
+  T.StructType(
+      [
+          T.StructField("doc_uri", T.StringType()),
+          T.StructField("content", T.StringType()),
+      ]
+  )
 )
 
 
@@ -236,9 +225,7 @@ def identify_potential_eval_set_records(raw_requests_with_feedback_df):
         ),
     )
     return requests_with_feedback_df
-
-# COMMAND ----------
-
+  
 def create_potential_evaluation_set(request_log_df, assessment_log_df):
     raw_requests_with_feedback_df = attach_ground_truth(
         request_log_df, assessment_log_df

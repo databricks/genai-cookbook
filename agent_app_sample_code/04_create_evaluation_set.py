@@ -1,7 +1,9 @@
 # Databricks notebook source
 # MAGIC %md # Review App Logs to Evaluation Set
 # MAGIC
-# MAGIC This step will bootstrap an evaluation set with the feedback that stakeholders have provided by using the Review App.  Note that you can bootstrap an evaluation set with *just* questions, so even if your stakeholders only chatted with the app vs. providing feedback, you can follow this step.
+# MAGIC This notebook will bootstrap an evaluation set with the feedback that stakeholders have provided by using the Review App.
+# MAGIC
+# MAGIC Note that you can bootstrap an evaluation set with *just* questions, so even if your stakeholders have only chatted with the app vs. providing feedback, you can follow this step.
 # MAGIC
 # MAGIC Visit [documentation](https://docs.databricks.com/generative-ai/agent-evaluation/evaluation-set.html#evaluation-set-schema) to understand the Agent Evaluation Evaluation Set schema - these fields are referenced below.
 # MAGIC
@@ -17,64 +19,100 @@
 # MAGIC    - `request`: As entered by the user
 # MAGIC
 # MAGIC Across all of the above, if the user 👍 a chunk from the `retrieved_context`, the `doc_uri` of that chunk is included in `expected_retrieved_context` for the question.
+# MAGIC
+# MAGIC **Once you have run this notebook, return to the `02_agent` notebook to evaluate the quality of your agent using your new evaluation set!**
 
 # COMMAND ----------
 
-# MAGIC %pip install -U -qqqq databricks-agents mlflow mlflow-skinny databricks-sdk
+# MAGIC %md
+# MAGIC
+# MAGIC **Important note:** Throughout this notebook, we indicate which cell's code you:
+# MAGIC - ✅✏️ should customize - these cells contain code & config with business logic that you should edit to meet your requirements & tune quality.
+# MAGIC - 🚫✏️ should not customize - these cells contain boilerplate code required to load/save/execute your Agent
+# MAGIC
+# MAGIC *Cells that don't require customization still need to be run!  You CAN change these cells, but if this is the first time using this notebook, we suggest not doing so.*
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### 🚫✏️ Install Python libraries
+# MAGIC
+# MAGIC You do not need to modify this cell unless you need additional Python packages in your Agent.
+
+# COMMAND ----------
+
+# MAGIC %pip install -qqqq -U -r requirements.txt
+# MAGIC # Restart to load the packages into the Python environment
 # MAGIC dbutils.library.restartPython()
 
 # COMMAND ----------
 
-# MAGIC %run ./00_global_config
+# MAGIC %md
+# MAGIC ## 0️⃣ Setup: Load the Agent's configuration that is shared with the other notebooks
 
 # COMMAND ----------
 
-# MAGIC %run ./utils/eval_set_utilities
+# MAGIC %md
+# MAGIC #### 🚫✏️ Get the shared configuration
+# MAGIC
+# MAGIC ** If you configured `00_shared_config`, just run this cell as-is.**
+# MAGIC
+# MAGIC From the shared configuration, this notebook uses:
+# MAGIC * The Evaluation Set stored in Unity Catalog
+# MAGIC * The MLflow experiment for tracking Agent verions & their quality evaluations
+# MAGIC * The UC model to get details of the deployed Agent
+# MAGIC
+# MAGIC *These values can be set here if you want to use this notebook independently.*
 
 # COMMAND ----------
 
-import pandas as pd
-
+from utils.cookbook.agent_config import CookbookAgentConfig
 import mlflow
 
+# Load the shared configuration
+cookbook_shared_config = CookbookAgentConfig.from_yaml_file('./configs/cookbook_config.yaml')
+
+# Print configuration 
+cookbook_shared_config.pretty_print()
+
+# Set the MLflow Experiment that is used to track metadata about each run of this Data Pipeline.
+experiment_info = mlflow.set_experiment(cookbook_shared_config.mlflow_experiment_name)
+
 # COMMAND ----------
 
-# MAGIC %md ## Get the request and assessment log tables
+# MAGIC %md
+# MAGIC 🚫✏️ Import the cookbook utilities for transforming inference tables into an evaluation set
+
+# COMMAND ----------
+from utils.evaluation.evaluation_set import create_potential_evaluation_set, _dedup_assessment_log
+
+# COMMAND ----------
+
+# MAGIC %md ## 🚫✏️ Get the request and assessment log tables
 # MAGIC
 # MAGIC These tables are updated every ~hour with data from the raw Inference Table. See [docs](https://docs.databricks.com/en/generative-ai/deploy-agent.html#agent-enhanced-inference-tables) for the schema.
 
 # COMMAND ----------
 
-w = WorkspaceClient()
+from utils.get_inference_tables import get_inference_tables
 
-deployment = agents.get_deployments(UC_MODEL_NAME)
-endpoint = w.serving_endpoints.get(deployment[0].endpoint_name)
+inference_table_locations = get_inference_tables(cookbook_shared_config.uc_model)
 
-
-try:
-    endpoint_config = endpoint.config.auto_capture_config
-except AttributeError as e:
-    endpoint_config = endpoint.pending_config.auto_capture_config
-
-inference_table_name = endpoint_config.state.payload_table.name
-inference_table_catalog = endpoint_config.catalog_name
-inference_table_schema = endpoint_config.schema_name
-
-# Cleanly formatted tables
-assessment_log_table_name = f"{inference_table_catalog}.{inference_table_schema}.`{inference_table_name}_assessment_logs`"
-request_log_table_name = f"{inference_table_catalog}.{inference_table_schema}.`{inference_table_name}_request_logs`"
+# Get the table names
+assessment_log_table_name = f"{inference_table_locations['uc_catalog_name']}.{inference_table_locations['uc_schema_name']}.`{inference_table_locations['table_names']['assessment_logs']}`"
+request_log_table_name = f"{inference_table_locations['uc_catalog_name']}.{inference_table_locations['uc_schema_name']}.`{inference_table_locations['table_names']['request_logs']}`"
 
 print(f"Assessment logs: {assessment_log_table_name}")
 print(f"Request logs: {request_log_table_name}")
 
-
+# De-duplicate the assessment logs
 assessment_log_df = _dedup_assessment_log(spark.table(assessment_log_table_name))
 request_log_df = spark.table(request_log_table_name)
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## ETL the request & assessment logs into Evaluation Set schema
+# MAGIC ## 🚫✏️ ETL the request & assessment logs into Evaluation Set schema
 # MAGIC
 # MAGIC Note: We leave the complete set of columns from the request and assesment logs in this table - you can use these for debugging any issues.
 
@@ -84,17 +122,16 @@ requests_with_feedback_df = create_potential_evaluation_set(
     request_log_df, assessment_log_df
 )
 
-requests_with_feedback_df.columns
-
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Inspect the potential evaluation set using MLflow Tracing
+# MAGIC ## ✅✏️  Inspect the potential evaluation set using MLflow Tracing
 # MAGIC
-# MAGIC Click on the `trace` column in the displayed table to view the Trace.  You should inspect these records
+# MAGIC Click on the `trace` column in the displayed table to view the Trace.  You should inspect these records and determine which should be included in your evaluation set.
 
 # COMMAND ----------
 
+from pyspark.sql import functions as F
 display(
     requests_with_feedback_df.select(
         F.col("request_id"),
@@ -110,7 +147,9 @@ display(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # Save the resulting evaluation set to a Delta Table
+# MAGIC ## ✅✏️ Save the resulting evaluation set to a Delta Table
+# MAGIC
+# MAGIC Based on your analysis above, save the selected subset of records to your evaluation set.
 
 # COMMAND ----------
 
@@ -125,4 +164,6 @@ eval_set = requests_with_feedback_df[
     ]
 ]
 
-eval_set.write.format("delta").mode("overwrite").saveAsTable(EVALUATION_SET_FQN)
+eval_set.write.format("delta").mode("overwrite").saveAsTable(cookbook_shared_config.evaluation_set_table)
+
+display(spark.table(cookbook_shared_config.evaluation_set_table))

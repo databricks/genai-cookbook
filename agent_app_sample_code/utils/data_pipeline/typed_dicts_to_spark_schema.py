@@ -1,18 +1,3 @@
-# Databricks notebook source
-# MAGIC %md
-# MAGIC #### `typed_dicts_to_spark_schema`
-# MAGIC
-# MAGIC `typed_dicts_to_spark_schema` converts multiple TypedDicts into a Spark schema, allowing for the combination of multiple TypedDicts into a single Spark DataFrame schema. This function enables the resulting Delta Table to reflect the schema defined in `ParserReturnValue`.
-# MAGIC
-# MAGIC Arguments:
-# MAGIC - `*typed_dicts`: A variable number of TypedDict classes to be converted.
-# MAGIC
-# MAGIC Returns:
-# MAGIC - `StructType`: A Spark schema represented as a StructType object, which is a collection of StructField objects derived from the provided TypedDicts.
-# MAGIC
-
-# COMMAND ----------
-
 from pyspark.sql.types import (
     StructType,
     StructField,
@@ -95,9 +80,7 @@ def typed_dict_to_spark_fields(typed_dict: type[TypedDict]) -> StructType:
 
     # Create and return the StructType object
     return fields
-
-# COMMAND ----------
-
+  
 def typed_dicts_to_spark_schema(*typed_dicts: type[TypedDict]) -> StructType:
     """
     Converts multiple TypedDicts into a Spark schema.
