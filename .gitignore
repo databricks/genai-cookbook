@@ -7,6 +7,7 @@ __pycache__
 
 # Exclude `databricks sync` CLI command snapshots
 .databricks
+agent_app_sample_code/configs/*/*.yaml
 agent_app_sample_code/configs/*.yaml
 dist/
 mlruns/
