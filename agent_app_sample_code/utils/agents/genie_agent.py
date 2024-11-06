@@ -23,14 +23,3 @@ class GenieAgentConfig(SerializableModel):
     encountered_error_user_message: str = (
         "I encountered an error trying to answer your question, please try again."
     )
-
-    # def to_yaml(self) -> str:
-    #     # exclude_none = True prevents unused parameters, such as additional LLM parameters, from being included in the config
-    #     data = self.model_dump(exclude_none=True)
-    #     return yaml.dump(data, default_flow_style=False)
-
-    # @classmethod
-    # def from_yaml(cls, yaml_str: str) -> "GenieAgentConfig":
-    #     # Load the data from YAML
-    #     agent_config_dict = yaml.safe_load(yaml_str)
-    #     return cls(**agent_config_dict)

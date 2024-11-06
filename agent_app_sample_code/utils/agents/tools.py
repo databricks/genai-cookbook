@@ -58,59 +58,6 @@ class SerializableModel(BaseModel):
     ) -> "SerializableModel":
         return class_object(**data)
 
-    # @classmethod
-    # def from_yaml(cls, yaml_str: str) -> "SerializableModel":
-    #     """Create an instance from a YAML string.
-
-    #     Args:
-    #         yaml_str: YAML string containing the model data
-
-    #     Returns:
-    #         SerializableModel: An instance of the appropriate subclass
-
-    #     Raises:
-    #         ValueError: If the data cannot be parsed or is missing required fields
-    #     """
-    #     return load_obj_from_yaml(yaml_str)
-    #     # data = yaml.safe_load(yaml_str)
-    #     # if not isinstance(data, dict):
-    #     #     raise ValueError(f"Expected dict, got {type(data)}")
-
-    #     # class_path = data.pop(_CLASS_PATH_KEY)
-    #     # # Dynamically import the module and class
-    #     # module_name, class_name = class_path.rsplit(".", 1)
-    #     # module = importlib.import_module(module_name)
-    #     # class_obj = getattr(module, class_name)
-    #     # # Instantiate the class with remaining data
-    #     # return class_obj(**data)
-
-    # @classmethod
-    # def from_dict(cls, data: Dict[str, Any]) -> "SerializableModel":
-    #     """Create an instance from a dictionary, handling class path for proper instantiation.
-
-    #     Args:
-    #         data: Dictionary containing the model data and class path
-
-    #     Returns:
-    #         SerializableModel: An instance of the appropriate subclass
-    #     """
-    #     print("sfsd")
-    #     print(cls.__class__.__name__)
-    #     return cls.from_yaml(yaml.dump(data))
-
-    # @classmethod
-    # def from_yaml_file(cls, yaml_file_path: str) -> "SerializableModel":
-    #     """Create an instance from a YAML file.
-
-    #     Args:
-    #         yaml_file_path: Path to the YAML file
-
-    #     Returns:
-    #         SerializableModel: An instance of the appropriate subclass
-    #     """
-    #     with open(yaml_file_path, "r") as file:
-    #         return cls.from_yaml(file.read())
-
 
 def obj_to_yaml(obj: BaseModel) -> str:
     data = obj.model_dump()
@@ -136,20 +83,8 @@ def _load_class_from_dict(data: Dict[str, Any]) -> Tuple[Type, Dict[str, Any]]:
 
 def load_obj_from_yaml(yaml_str: str) -> SerializableModel:
     data = yaml.safe_load(yaml_str)
-    # class_path = data.pop(_CLASS_PATH_KEY)
-    # # Dynamically import the module and class
-    # module_name, class_name = class_path.rsplit(".", 1)
-    # module = importlib.import_module(module_name)
-    # class_obj = getattr(module, class_name)
-    # Instantiate the class with remaining data
-
     class_obj, remaining_data = _load_class_from_dict(data)
-    # print(class_obj)
-    # print(type(class_obj))
-    # print(remaining_data)
-    # print(class_obj.from_dict)
     return class_obj._load_class_from_dict(class_obj, remaining_data)
-    # return class_obj(**data)
 
 
 def load_obj_from_yaml_file(yaml_file_path: str) -> SerializableModel:
