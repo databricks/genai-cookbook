@@ -15,11 +15,9 @@ import os
 def find_project_root(marker_directory="configs"):
     """Find the project root by looking for the "configs" directory."""
     current = os.path.abspath(os.getcwd())
-    print(f"current: {current}")
     while current != "/":
         # Check current directory
         marker_path = os.path.join(current, marker_directory)
-        print(f"marker_path: {marker_path}")
         if os.path.exists(marker_path) and os.path.isdir(marker_path):
             return current
 
@@ -121,7 +119,6 @@ def load_config(
             )
             pass
     logging.info(f"Trying to load from paths: {config_paths}")
-    print(config_paths)
     try:
         config_file = load_first_yaml_file(config_paths)
         return load_serializable_config_from_yaml(config_file)
