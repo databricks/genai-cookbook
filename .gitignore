@@ -11,3 +11,5 @@ agent_app_sample_code/configs/*/*.yaml
 agent_app_sample_code/configs/*.yaml
 dist/
 mlruns/
+
+_scratch_pad/

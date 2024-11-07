@@ -25,6 +25,9 @@ langchain-text-splitters = "0.2.0"
 ipykernel = "^6.29.5"
 hatchling = "^1.25.0"
 pypandoc-binary = "1.13"
+iprogress = "^0.4"
+unitycatalog-ai = {git = "https://github.com/unitycatalog/unitycatalog.git", subdirectory = "ai/core"}
+unitycatalog-openai = {git = "https://github.com/unitycatalog/unitycatalog.git", subdirectory = "ai/integrations/openai"}
 
 
 [build-system]

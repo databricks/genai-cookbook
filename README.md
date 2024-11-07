@@ -5,6 +5,7 @@
 
 TODO
 
+- set up your .env to point to mlflow exp + dbx tracking uri
 - install poetry env
 - build utils wheel
 - start databricks sync job
