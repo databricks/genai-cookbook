@@ -26,7 +26,7 @@ from cookbook.agents.utils.chat import (
     remove_message_keys_with_null_values,
 )
 from cookbook.agents.utils.load_config import load_config
-from cookbook.config.agents.multi_agent import (
+from cookbook.config.agents.multi_agent_supervisor import (
     MultiAgentSupervisorConfig,
     WORKER_PROMPT_TEMPLATE,
     ROUTING_FUNCTION_NAME,
