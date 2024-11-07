@@ -4,6 +4,7 @@ from typing import Optional
 import json
 import subprocess
 
+from databricks.sdk import WorkspaceClient
 from mlflow.utils import databricks_utils as du
 
 
@@ -208,3 +209,17 @@ def get_active_cluster_id() -> Optional[str]:
         return du.get_active_cluster_id()
     else:
         return get_active_cluster_id_from_databricks_auth()
+
+
+def get_current_user_info(spark) -> tuple[str, str, str]:
+    # Get current user's name & email
+    w = WorkspaceClient()
+    user_email = w.current_user.me().user_name
+    user_name = user_email.split("@")[0].replace(".", "_")
+
+    # Get the workspace default UC catalog
+    default_catalog = spark.sql("select current_catalog() as cur_catalog").collect()[0][
+        "cur_catalog"
+    ]
+
+    return user_email, user_name, default_catalog

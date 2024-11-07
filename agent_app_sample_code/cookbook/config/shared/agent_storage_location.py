@@ -15,20 +15,6 @@ from cookbook.config import SerializableConfig
 from databricks.sdk import WorkspaceClient
 
 
-def get_current_user_info(spark) -> tuple[str, str, str]:
-    # Get current user's name & email
-    w = WorkspaceClient()
-    user_email = w.current_user.me().user_name
-    user_name = user_email.split("@")[0].replace(".", "_")
-
-    # Get the workspace default UC catalog
-    default_catalog = spark.sql("select current_catalog() as cur_catalog").collect()[0][
-        "cur_catalog"
-    ]
-
-    return user_email, user_name, default_catalog
-
-
 class AgentStorageConfig(SerializableConfig):
     """
     Source data configuration for the Unstructured Data Pipeline. You can modify this class to add additional configuration settings.
