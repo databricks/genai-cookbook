@@ -8,23 +8,31 @@ from typing import Optional
 
 import inspect
 from typing import Any, Callable, List, Type, get_type_hints
+import importlib
 
 
-class FunctionTool(Tool):
+class LocalFunctionTool(Tool):
     """Tool implementation that wraps a function"""
 
-    func: Callable
+    # func: Callable
+    func_path: str
     name: str
     description: str
     _input_schema: Type[BaseModel]
 
-    def __init__(
-        self,
-        func: Callable,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-    ):
-        # First process all the validation and setup
+    def _process_function(
+        self, func: Callable, name: Optional[str], description: Optional[str]
+    ) -> tuple[str, str, Type[BaseModel]]:
+        """Process a function to extract name, description and input schema.
+
+        Args:
+            func: The function to process
+            name: Optional override for the function name
+            description: Optional override for the function description
+
+        Returns:
+            Tuple of (processed_name, processed_description, processed_input_schema)
+        """
         processed_name = name or func.__name__
 
         # Validate function has type annotations
@@ -68,13 +76,56 @@ class FunctionTool(Tool):
             func, doc_info.params
         )
 
-        # Now call parent class constructor with processed values
-        super().__init__(
-            func=func,
-            name=processed_name,
-            description=processed_description,
-            _input_schema=processed_input_schema,
-        )
+        return processed_name, processed_description, processed_input_schema
+
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        *,
+        func: Optional[Callable] = None,
+        func_path: Optional[str] = None,
+    ):
+        if func is not None and func_path is not None:
+            raise ValueError("Only one of func or func_path can be provided")
+
+        if func is not None:
+            # Process the function to get name, description and input schema
+            processed_name, processed_description, processed_input_schema = (
+                self._process_function(func, name, description)
+            )
+
+            # Serialize the function's location
+            func_path = f"{func.__module__}.{func.__name__}"
+
+            # Now call parent class constructor with processed values
+            super().__init__(
+                func_path=func_path,
+                name=processed_name,
+                description=processed_description,
+            )
+
+            self._input_schema = processed_input_schema
+
+            self._loaded_callable = None
+            self.load_func()
+        elif func_path is not None:
+
+            super().__init__(
+                func_path=func_path,
+                name=name,
+                description=description,
+                # _input_schema=None,
+            )
+
+            self._loaded_callable = None
+            self.load_func()
+
+            _, _, processed_input_schema = self._process_function(
+                self._loaded_callable, name, description
+            )
+
+            self._input_schema = processed_input_schema
 
     @staticmethod
     def _create_schema_from_function(
@@ -93,10 +144,17 @@ class FunctionTool(Tool):
 
         return create_model(f"{func.__name__.title()}Inputs", **fields)
 
+    def load_func(self):
+        if self._loaded_callable is None:
+            module_name, func_name = self.func_path.rsplit(".", 1)
+            module = importlib.import_module(module_name)
+            self._loaded_callable = getattr(module, func_name)
+
     def __call__(self, **kwargs) -> Any:
         """Execute the tool's function with validated inputs"""
+        self.load_func()
         validated_inputs = self._input_schema(**kwargs)
-        return self.func(**validated_inputs.model_dump())
+        return self._loaded_callable(**validated_inputs.model_dump())
 
     def _get_parameters_schema(self) -> dict:
         """Returns the JSON schema for the tool's parameters."""
