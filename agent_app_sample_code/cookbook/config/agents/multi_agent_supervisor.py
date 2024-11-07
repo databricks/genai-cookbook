@@ -9,6 +9,8 @@ from cookbook.config import (
     load_serializable_config_from_yaml,
 )
 import yaml
+from mlflow.pyfunc import PythonModel
+from typing import Optional
 
 
 # Design for multi-agent
@@ -160,6 +162,7 @@ Your goal is to facilitate the conversation and ensure the user receives a helpf
         Returns:
             Dict[str, Any]: Dictionary representation of the model excluding name and description.
         """
+
         model_dumped = super().model_dump(**kwargs)
         model_dumped["agents"] = [
             yaml.safe_load(serializable_config_to_yaml(agent)) for agent in self.agents
@@ -171,3 +174,77 @@ class SupervisedAgentConfig(SerializableConfig):
     name: str
     description: str
     endpoint_name: str
+    agent_config: SerializableConfig
+    # code: Any
+
+    agent_class_path: str
+
+    # TODO: check agent_class is a subclass of our Agent - need to refactor Agent to a common base class
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        endpoint_name: str,
+        agent_config: SerializableConfig,
+        *,
+        agent_class: Optional[type] = None,
+        agent_class_path: Optional[str] = None,
+    ):
+        """Initialize a SupervisedAgentConfig instance.
+
+        Args:
+            name (str): Name of the supervised agent
+            description (str): Description of the agent's capabilities
+            endpoint_name (str): Databricks Model Serving endpoint name
+            config (Any): Agent's configuration
+            code (Any): Agent's implementation class
+        """
+        if agent_class is not None and agent_class_path is not None:
+            raise ValueError(
+                "Only one of agent_class or agent_class_path can be provided"
+            )
+
+        if agent_class is not None:
+            if not isinstance(agent_class, type):
+                raise ValueError("agent_class must be an uninstantiated class")
+            if not issubclass(agent_class, PythonModel):
+                raise ValueError("agent_class must be a subclass of PythonModel")
+
+            agent_class_path = f"{agent_class.__module__}.{agent_class.__name__}"
+        super().__init__(
+            name=name,
+            description=description,
+            endpoint_name=endpoint_name,
+            agent_config=agent_config,
+            agent_class_path=agent_class_path,
+        )
+
+    def model_dump(self, **kwargs) -> Dict[str, Any]:
+        """Override model_dump to exclude name and description fields.
+
+        Returns:
+            Dict[str, Any]: Dictionary representation of the model excluding name and description.
+        """
+        kwargs["exclude"] = {"agent_config"}.union(kwargs.get("exclude", set()))
+        model_dumped = super().model_dump(**kwargs)
+
+        # dump the config
+        model_dumped["agent_config"] = yaml.safe_load(
+            serializable_config_to_yaml(self.agent_config)
+        )
+
+        return model_dumped
+
+    @classmethod
+    def _load_class_from_dict(
+        cls, class_object, data: Dict[str, Any]
+    ) -> "SerializableConfig":
+        # Deserialize agent config
+
+        agent_config = load_serializable_config_from_yaml(
+            yaml.dump(data["agent_config"])
+        )
+        data["agent_config"] = agent_config
+        # del data["config"]
+
+        return class_object(**data)

@@ -1,17 +1,3 @@
-# Databricks notebook source
-# MAGIC %md
-# MAGIC # Multi-Agent Orchestrator
-# MAGIC
-# MAGIC In this notebook, we construct a multi-agent orchestrator using the supervisor pattern with the OpenAI SDK and Python code. This Agent is encapsulated in a MLflow PyFunc class called `MultiAgentSupervisor()`.
-
-# COMMAND ----------
-
-# # If running this notebook by itself, uncomment these.
-# %pip install -U -r requirements.txt
-# dbutils.library.restartPython()
-
-# COMMAND ----------
-
 import json
 import os
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -40,18 +26,16 @@ from cookbook.agents.utils.chat import get_messages_array
 from cookbook.agents.utils.playground_parser import (
     convert_messages_to_playground_tool_display_strings,
 )
-
+import importlib
 import logging
 
-logging.getLogger("mlflow").setLevel(logging.ERROR)
+# logging.basicConfig(level=logging.INFO)
 
 from mlflow.entities import Trace
 import mlflow.deployments
 
 from enum import Enum
 
-
-# COMMAND ----------
 
 # MAGIC %md
 # MAGIC # MultiAgentSupervisor Flow Documentation
@@ -106,9 +90,7 @@ from enum import Enum
 # MAGIC Each agent's response is added to the chat history, allowing the supervisor to maintain context and make informed routing decisions throughout the conversation.
 
 
-# COMMAND ----------
-
-CONFIG_FILE_NAME = "multi_agent_supervisor_config.yaml"
+MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME = "multi_agent_supervisor_config.yaml"
 
 
 class ConversationStatus(Enum):
@@ -168,6 +150,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
     def __init__(
         self, agent_config: Optional[Union[MultiAgentSupervisorConfig, str]] = None
     ):
+        logging.info("Initializing MultiAgentSupervisor")
         # Initialize core configuration
         self._initialize_config(agent_config)
 
@@ -182,13 +165,15 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
 
         # Initialize state
         self.state = None  # Will be initialized per conversation
+        logging.info("Initialized MultiAgentSupervisor")
 
     def _initialize_config(
         self, agent_config: Optional[Union[MultiAgentSupervisorConfig, str]]
     ):
         """Initialize and validate the agent configuration"""
         self.agent_config = load_config(
-            agent_config=agent_config, default_config_file_name=CONFIG_FILE_NAME
+            agent_config=agent_config,
+            default_config_file_name=MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
         )
         if not self.agent_config:
             raise ValueError("No agent config found")
@@ -196,6 +181,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         # Set core configuration values
         self.MAX_LOOPS = self.agent_config.max_workers_called
         self.debug = self.agent_config.playground_debug_mode
+        logging.info("Initialized agent config")
 
     def _initialize_model_serving_clients(self):
         """Initialize API clients for model serving"""
@@ -204,6 +190,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
 
         # used for calling the child agent's deployments
         self.mlflow_serving_client = mlflow.deployments.get_deploy_client("databricks")
+        logging.info("Initialized model serving clients")
 
     def _initialize_supervised_agents(self):
         """Initialize the agent registry and capabilities"""
@@ -220,11 +207,33 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         }
 
         # Add configured worker agents
-        for agent in self.agent_config.agents:
-            self.agents[agent.name] = {
-                "agent_description": agent.description,
-                "endpoint_name": agent.endpoint_name,
-            }
+        if self.agent_config.agent_loading_mode == "model_serving":
+            # using the model serving endpoints of the agents
+            for agent in self.agent_config.agents:
+                self.agents[agent.name] = {
+                    "agent_description": agent.description,
+                    "endpoint_name": agent.endpoint_name,
+                }
+        elif self.agent_config.agent_loading_mode == "local":
+            # using the local agent classes
+            for agent in self.agent_config.agents:
+                # load the agent class
+                module_name, class_name = agent.agent_class_path.rsplit(".", 1)
+
+                module = importlib.import_module(module_name)
+                # Load the Agent class, which will be a PyFunc
+                agent_class_obj = getattr(module, class_name)
+                self.agents[agent.name] = {
+                    "agent_description": agent.description,
+                    "agent_pyfunc_instance": agent_class_obj(
+                        agent_config=agent.agent_config
+                    ),  # instantiate the PyFunc
+                }
+                logging.info(f"Loaded agent: {agent.name}")
+        else:
+            raise ValueError(
+                f"Invalid agent loading mode: {self.agent_config.agent_loading_mode}"
+            )
 
     def _initialize_supervisor_prompts_and_tools(self):
         """Initialize prompts and function calling tools"""
@@ -358,33 +367,50 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
     @mlflow.trace()
     def call_agent(self, agent_name):
         # print(agent_name)
-        endpoint_name = self.agents.get(agent_name).get("endpoint_name")
-        if endpoint_name:
-            # this request will grab the mlflow trace from the endpoint
-            request = {
-                "databricks_options": {"return_trace": True},
-                "messages": self.state.chat_history,
-            }
-            completion = self.mlflow_serving_client.predict(
-                endpoint=endpoint_name, inputs=request
+        if self.agent_config.agent_loading_mode == "model_serving":
+            endpoint_name = self.agents.get(agent_name).get("endpoint_name")
+            if endpoint_name:
+                # this request will grab the mlflow trace from the endpoint
+                request = {
+                    "databricks_options": {"return_trace": True},
+                    "messages": self.state.chat_history,
+                }
+                completion = self.mlflow_serving_client.predict(
+                    endpoint=endpoint_name, inputs=request
+                )
+
+                logging.info(f"Called agent: {agent_name}")
+                logging.info(f"Got response agent: {completion}")
+
+                # Add the trace from model serving API call to the active trace
+                if trace := completion.pop("databricks_output", {}).get("trace"):
+                    trace = Trace.from_dict(trace)
+                    mlflow.add_trace(trace)
+
+                return completion
+            else:
+                error_message = {
+                    "role": "assistant",
+                    "content": f"ERROR: This agent does not exist.  Please select one of: {list(self.agents.keys())}",
+                    "name": SUPERVISOR_ROUTE_NAME,
+                }
+                raise ValueError(f"Invalid agent selected: {self.state.current_route}")
+        elif self.agent_config.agent_loading_mode == "local":
+            agent_pyfunc_instance = self.agents.get(agent_name).get(
+                "agent_pyfunc_instance"
             )
-
-            logging.info(f"Called agent: {agent_name}")
-            logging.info(f"Got response agent: {completion}")
-
-            # Add the trace from model serving API call to the active trace
-            if trace := completion.pop("databricks_output", {}).get("trace"):
-                trace = Trace.from_dict(trace)
-                mlflow.add_trace(trace)
-
-            return completion
+            if agent_pyfunc_instance:
+                request = {
+                    # "databricks_options": {"return_trace": True},
+                    "messages": self.state.chat_history,
+                }
+                return agent_pyfunc_instance.predict(model_input=request)
+            else:
+                raise ValueError(f"Invalid agent selected: {self.state.current_route}")
         else:
-            error_message = {
-                "role": "assistant",
-                "content": f"ERROR: This agent does not exist.  Please select one of: {list(self.agents.keys())}",
-                "name": SUPERVISOR_ROUTE_NAME,
-            }
-            raise ValueError(f"Invalid agent selected: {self.state.current_route}")
+            raise ValueError(
+                f"Invalid agent loading mode: {self.agent_config.agent_loading_mode}"
+            )
 
     @mlflow.trace(span_type="PARSER")
     def finish_agent(self):
@@ -458,44 +484,43 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
 
 
 # tell MLflow logging where to find the agent's code
-set_model(MultiAgentSupervisor())
+set_model(MultiAgentSupervisor)
 
-# COMMAND ----------
 
-debug = True
-
-# COMMAND ----------
-
-# DBTITLE 1,debugging code
+# IMPORTANT: set this to False before logging the model to MLflow
+debug = (
+    __name__ == "__main__"
+)  ## run in debug mode if being called by > python function_calling_agent.py
 
 
 if debug:
 
-    agent = MultiAgentSupervisor()
+    agent = MultiAgentSupervisor(agent_config=MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME)
 
     vibe_check_query = {
         "messages": [
-            {"role": "user", "content": f"what issues do we have with returned items?"},
+            # {"role": "user", "content": f"how does the CoolTech Elite 5500 work?"},
             # {"role": "user", "content": f"calculate the value of 2+2?"},
-            # {
-            #     "role": "user",
-            #     "content": f"How does account age affect the likelihood of churn?",
-            # },
+            {
+                "role": "user",
+                "content": f"How does account age affect the likelihood of churn?",
+            },
         ]
     }
 
     output = agent.predict(model_input=vibe_check_query)
-    print(output)
+    print(output["content"])
 
     input_2 = output["messages"].copy()
     input_2.append(
         {
             "role": "user",
-            "content": f"did user 8e753fa6-2464-4354-887c-a25ace971a7e experience these?",
+            "content": f"who is the user most likely to do this?",
         },
     )
 
     output_2 = agent.predict(model_input={"messages": input_2})
+    print(output_2["content"])
 
 # # COMMAND ----------
 

@@ -47,7 +47,7 @@ from cookbook.agents.utils.load_config import load_config
 
 # COMMAND ----------
 
-CONFIG_FILE_NAME = "genie_config.yaml"
+GENIE_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME = "genie_agent_config.yaml"
 
 # COMMAND ----------
 
@@ -329,7 +329,8 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
         agent_config: Optional[Union[GenieAgentConfig, str]] = None,
     ):
         self.agent_config = load_config(
-            agent_config=agent_config, default_config_file_name=CONFIG_FILE_NAME
+            agent_config=agent_config,
+            default_config_file_name=GENIE_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
         )
         if not self.agent_config:
             raise ValueError("No agent config found")
@@ -365,11 +366,37 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
         # This avoids the need for this agent to maintain the genie converastion ID between turns - which is impracticle since this Agent is deployed as a stateless API.
         if len(self.chat_history) > 0:
             message = f"I will provide you a chat, where your name is 'assistant' and the user is 'user'. Please help with the user's last query.  DO NOT reference the query or context in your response.\n"
+            # message += f"Chat history length: {len(history_as_string)} characters\n"
 
             # Concatenate messages to form the chat history
-            message += concat_messages_array_to_string(messages)
+            # message += concat_messages_array_to_string(messages)
+
+            history_as_string = concat_messages_array_to_string(messages)
+
+            # Genie API has a character limit of 25,000
+            # Iteratively remove oldest messages to get it small enough
+            messages_copy = messages.copy()
+            while (
+                len(history_as_string) + len(message) > 25000 and len(messages_copy) > 1
+            ):
+
+                messages_copy = messages_copy[1:]
+                history_as_string = concat_messages_array_to_string(messages_copy)
+
+            # If we still exceed the limit with just one message, fall back to just the user query
+            if len(history_as_string) + len(message) > 25000:
+                message = user_query
+            else:
+                message += history_as_string
         else:
             message = user_query
+
+        # if the user's original message is too long (very unlikely), we just truncate the message
+        if len(message) > 25000:
+            message = message[:25000]
+            logging.warning(
+                f"Truncated message to {len(message)} characters; even with just 1 message it was still too long."
+            )
 
         # Send the message and wait for a response
         try:
@@ -430,7 +457,7 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
 
 
 # tell MLflow logging where to find the agent's code
-set_model(GenieAgent())
+set_model(GenieAgent)
 
 # COMMAND ----------
 

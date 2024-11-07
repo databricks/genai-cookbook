@@ -16,7 +16,14 @@ class GenieAgentConfig(SerializableConfig):
     genie_space_id: str
 
     # Used by MLflow to set the Agent's input schema
-    input_example: Any
+    input_example: Any = {
+        "messages": [
+            {
+                "role": "user",
+                "content": "What types of data can I query?",
+            },
+        ]
+    }
 
     encountered_error_user_message: str = (
         "I encountered an error trying to answer your question, please try again."

@@ -74,20 +74,26 @@ def load_config(
     Returns:
         SerializableModel: Loaded configuration object
     """
-    if isinstance(agent_config, str):
-        logging.info(
-            f"`agent_config` is a string, trying to load from YAML: {agent_config}"
-        )
-        return load_serializable_config_from_yaml_file(agent_config)
-
+    # happy path if we are passed an instantiated config class, just use that
     if isinstance(agent_config, SerializableConfig):
         logging.info("Passed instantiated config class, using that.")
         return agent_config
 
+    # otherwise, we try to look for the YAML file
+    # this logic accounts for the fact that the agent can be called from any working directory, so we have to search for the config folder to find the YAML.
+    config_paths = []
+    if isinstance(agent_config, str):
+        logging.info(
+            f"`agent_config` is a string, trying to load from YAML: {agent_config}"
+        )
+        config_paths.append(
+            agent_config
+        )  # will try to load from the passed file first.
+        # return load_serializable_config_from_yaml_file(agent_config)
+
     # Try to load from default config file first for inner dev loop
     # in serving env these files will not be present, so load the model's logged config e.g., the config from mlflow.pyfunc.log_model(model_config=...) via mlflow.ModelConfig()
     # in the shared logging utilities, we set TMP_CONFIG_FILE_PATH to the path of the config file that is dumped
-    config_paths = []
 
     if default_config_file_name:
         try:
@@ -123,19 +129,20 @@ def load_config(
         config_file = load_first_yaml_file(config_paths)
         return load_serializable_config_from_yaml(config_file)
     except ValueError as e:
-        logging.info(
-            f"No local config YAML found at {config_paths}, trying mlflow.ModelConfig()"
-        )
-        # TODO: replace with mlflow.ModelConfig().to_dict() once released
-        # model_config_as_yaml = yaml.dump(mlflow.models.ModelConfig()._read_config())
-        try:
-            model_config_as_yaml = yaml.dump(mlflow.models.ModelConfig()._read_config())
-            config = load_serializable_config_from_yaml(model_config_as_yaml)
-            logging.info(f"Loaded config from mlflow.ModelConfig(): {config}")
-            return config
-        except Exception as e:
-            logging.error(f"Error loading config from mlflow.ModelConfig(): {e}")
-            return None
+        logging.info(f"No local config YAML found at {config_paths}.")
+        # # TODO: replace with mlflow.ModelConfig().to_dict() once released
+        # # model_config_as_yaml = yaml.dump(mlflow.models.ModelConfig()._read_config())
+        # try:
+        #     model_config_as_yaml = yaml.dump(mlflow.models.ModelConfig()._read_config())
+        #     config = load_serializable_config_from_yaml(model_config_as_yaml)
+        #     logging.info(f"Loaded config from mlflow.ModelConfig(): {config}")
+        #     return config
+        # except Exception as e:
+        #     logging.error(f"Error loading config from mlflow.ModelConfig(): {e}")
+        #     return None
 
     # If no config is found, return None
+    logging.error(
+        "load_config could not find a config file.  Returning None.  Refer to your Agent's error message for next steps."
+    )
     return None
