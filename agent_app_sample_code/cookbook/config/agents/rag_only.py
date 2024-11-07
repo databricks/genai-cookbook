@@ -1,4 +1,4 @@
-from cookbook.config.common.llm import LLMConfig
+from cookbook.config.shared.llm import LLMConfig
 from cookbook.config.tools.vector_search_tool import VectorSearchRetrieverTool
 
 

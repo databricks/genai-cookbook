@@ -5,7 +5,7 @@ from cookbook.config.base import (
     SerializableConfig,
     serializable_config_to_yaml,
 )
-from cookbook.config.common.llm import LLMConfig, LLMParametersConfig
+from cookbook.config.shared.llm import LLMConfig, LLMParametersConfig
 from cookbook.config.base import (
     load_serializable_config_from_yaml,
 )

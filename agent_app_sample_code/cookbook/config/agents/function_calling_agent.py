@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from cookbook.config.base import (
     load_serializable_config_from_yaml,
 )
-from cookbook.config.common.llm import LLMConfig
+from cookbook.config.shared.llm import LLMConfig
 from cookbook.config.base import (
     SerializableConfig,
     serializable_config_to_yaml,
