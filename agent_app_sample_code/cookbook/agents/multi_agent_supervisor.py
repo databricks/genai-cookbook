@@ -333,6 +333,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                         + [FINISH_ROUTE_NAME],
                         NEXT_WORKER_OR_FINISH_PARAM=NEXT_WORKER_OR_FINISH_PARAM,
                         ROUTING_FUNCTION_NAME=ROUTING_FUNCTION_NAME,
+                        FINISH_ROUTE_NAME=FINISH_ROUTE_NAME,
                     ),
                 }
             ]

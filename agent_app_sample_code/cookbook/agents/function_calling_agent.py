@@ -128,11 +128,17 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         # Parse `messages` array into the user's query & the chat history
         with mlflow.start_span(name="parse_input", span_type="PARSER") as span:
             span.set_inputs({"messages": messages})
-            user_query = extract_user_query_string(messages)
+            # in a multi-agent setting, the last message can be from another assistant, not the user
+            last_message = extract_user_query_string(messages)
+            last_message_role = messages[-1]["role"]
             # Save the history inside the Agent's internal state
             self.chat_history = extract_chat_history(messages)
             span.set_outputs(
-                {"user_query": user_query, "chat_history": self.chat_history}
+                {
+                    "last_message": last_message,
+                    "chat_history": self.chat_history,
+                    "last_message_role": last_message_role,
+                }
             )
 
         ##############################################################################
@@ -144,7 +150,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         messages = (
             [{"role": "system", "content": system_prompt}]
             + self.chat_history  # append chat history for multi turn
-            + [{"role": "user", "content": user_query}]
+            + [{"role": last_message_role, "content": last_message}]
         )
 
         # Call the LLM to recursively calls tools and eventually deliver a generation to send back to the user

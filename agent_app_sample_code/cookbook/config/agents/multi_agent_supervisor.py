@@ -119,7 +119,7 @@ Your goal is to facilitate the conversation and ensure the user receives a helpf
 ## Instructions
 1. **Review the Conversation History**: Think step by step by to understand the user's request and the conversation history which includes previous worker's responses.  Output to the `{CONVERSATION_HISTORY_THINKING_PARAM}` variable.
 2. **Assess Worker Descriptions**: Think step by step to consider the description of each worker to understand their capabilities in the context of the conversation history.  Output to the `{WORKER_CAPABILITIES_THINKING_PARAM}` variable.
-3. **Select the next worker OR finish the conversation**: Based on the converastion history, the worker's descriptions and your thinking, decide which worker should respond next OR if the conversation should finish with the last worker's response going to the user.  If the conversation becomes unproductive or stuck, also respond with "{FINISH_ROUTE_NAME}."  Output either the <worker_name> or "{FINISH_ROUTE_NAME}" to the `{NEXT_WORKER_OR_FINISH_PARAM}` variable.
+3. **Select the next worker OR finish the conversation**: Based on the converastion history, the worker's descriptions and your thinking, decide which worker should respond next OR if the conversation should finish with the last worker's response going to the user.  If the last message is from the user, you MUST pick a worker to respond, you can only respond with {FINISH_ROUTE_NAME} if at least one worker has responded. If the conversation becomes unproductive or stuck, also respond with "{FINISH_ROUTE_NAME}."  Output either the <worker_name> or "{FINISH_ROUTE_NAME}" to the `{NEXT_WORKER_OR_FINISH_PARAM}` variable.
 
 ## Additional Notes
 - A conversation is considered "stuck" if there is no progress or if workers are unable to proceed with their tasks."""
@@ -130,7 +130,7 @@ Your goal is to facilitate the conversation and ensure the user receives a helpf
     """
 
     supervisor_user_prompt: str = (
-        """Given the converastion history, the worker's descriptions and your thinking, which worker should act next OR should we FINISH? Respond with one of [{worker_names_with_finish}] to the `{NEXT_WORKER_OR_FINISH_PARAM}` variable in the {ROUTING_FUNCTION_NAME} function."""
+        """Given the converastion history, the worker's descriptions and your thinking, which worker should act next OR should we FINISH? If the last message is from the user, you MUST pick a worker to respond, you can only respond with {FINISH_ROUTE_NAME} if at least one worker has responded. Respond with one of [{worker_names_with_finish}] to the `{NEXT_WORKER_OR_FINISH_PARAM}` variable in the {ROUTING_FUNCTION_NAME} function."""
     )
     """
     Prompt sent to supervisor after system prompt and conversation history to request next worker selection.

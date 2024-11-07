@@ -355,11 +355,17 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
         # Parse `messages` array into the user's query & the chat history
         with mlflow.start_span(name="parse_input", span_type="PARSER") as span:
             span.set_inputs({"messages": messages})
-            user_query = extract_user_query_string(messages)
+            # in a multi-agent setting, the last message can be from another assistant, not the user
+            last_message = extract_user_query_string(messages)
+            last_message_role = messages[-1]["role"]
             # Save the history inside the Agent's internal state
             self.chat_history = extract_chat_history(messages)
             span.set_outputs(
-                {"user_query": user_query, "chat_history": self.chat_history}
+                {
+                    "last_message": last_message,
+                    "chat_history": self.chat_history,
+                    "last_message_role": last_message_role,
+                }
             )
 
         # HACK: Since Genie API doesn't provide a stateless API that you can pass the chat history in, we "prompt hack" Genie by adding the chat history to the user's query.
@@ -385,11 +391,11 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
 
             # If we still exceed the limit with just one message, fall back to just the user query
             if len(history_as_string) + len(message) > 25000:
-                message = user_query
+                message = last_message
             else:
                 message += history_as_string
         else:
-            message = user_query
+            message = last_message
 
         # if the user's original message is too long (very unlikely), we just truncate the message
         if len(message) > 25000:
@@ -422,7 +428,7 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
             # only put the actual query in it
             message_log = convert_messages_to_open_ai_format(messages)
             # add a fake tool call version of genie so we can debug this in the MLflow UIs
-            message_log += self.get_faked_tool_calls(user_query, genie_response)
+            message_log += self.get_faked_tool_calls(last_message, genie_response)
             # add genie's text response
             message_log.append({"role": "assistant", "content": output_message})
             span.set_outputs(message_log)
