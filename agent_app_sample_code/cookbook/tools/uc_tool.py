@@ -1,4 +1,4 @@
-from cookbook.config.tools.base import Tool
+from cookbook.tools import Tool
 from cookbook.databricks_utils import get_function_url
 
 

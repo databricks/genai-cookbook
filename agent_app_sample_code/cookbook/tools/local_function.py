@@ -1,10 +1,10 @@
-from cookbook.config.tools.base import Tool
+from cookbook.tools import Tool
 
 
 from mlflow.models.resources import DatabricksResource
 from pydantic import BaseModel, Field, create_model
 from unitycatalog.ai.core.utils.docstring_utils import parse_docstring
-
+from typing import Optional
 
 import inspect
 from typing import Any, Callable, List, Type, get_type_hints

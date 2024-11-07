@@ -12,7 +12,7 @@ from pydantic import BaseModel, model_validator
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.vectorsearch import VectorIndexType
 from databricks.sdk.errors import ResourceDoesNotExist
-from cookbook.config.tools.base import Tool
+from cookbook.tools import Tool
 from dataclasses import asdict
 
 FilterDict = Dict[str, Union[str, int, float, List[Union[str, int, float]]]]
