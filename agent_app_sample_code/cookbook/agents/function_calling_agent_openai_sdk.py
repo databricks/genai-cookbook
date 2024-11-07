@@ -1,21 +1,9 @@
-# Databricks notebook source
-# MAGIC %md
-# MAGIC # Function Calling Agent w/ Retriever
-# MAGIC
-# MAGIC In this notebook, we construct a function-calling Agent with a Retriever tool using MLflow + the OpenAI SDK connected to Databricks Model Serving. This Agent is encapsulated in a MLflow PyFunc class called `FunctionCallingAgent()`.
+# In this file, we construct a function-calling Agent with a Retriever tool using MLflow + the OpenAI SDK connected to Databricks Model Serving. This Agent is encapsulated in a MLflow PyFunc class called `FunctionCallingAgent()`.
 
-# COMMAND ----------
+# import sys
 
-# # If running this notebook by itself, uncomment these.
-# %pip install --upgrade -qqqq databricks-agents databricks-vectorsearch "git+https://github.com/mlflow/mlflow.git" databricks-sdk[openai] pydantic "git+https://github.com/unitycatalog/unitycatalog.git#subdirectory=ai/core" "git+https://github.com/unitycatalog/unitycatalog.git#subdirectory=ai/integrations/openai"
-# dbutils.library.restartPython()
-
-# COMMAND ----------
-
-import sys
-
-# Add the parent directory to the path so we can import the `utils` modules
-sys.path.append("../..")
+# # Add the parent directory to the path so we can import the `utils` modules
+# sys.path.append("../..")
 
 import json
 import os
@@ -40,10 +28,6 @@ from cookbook.config.agents.function_calling_agent import (
 from cookbook.agents.utils.execute_function import execute_function
 from cookbook.agents.utils.load_config import load_config
 
-# COMMAND ----------
-
-
-# DBTITLE 1,Agent
 
 FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME = "function_calling_agent_config.yaml"
 
@@ -64,7 +48,9 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             default_config_file_name=FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
         )
         if not self.agent_config:
-            raise ValueError("No agent config found")
+            raise ValueError(
+                f"No agent config found.  If you are in your local development environment, make sure you either [1] are calling init(agent_config=...) with either an instance of FunctionCallingAgentConfig or the full path to a YAML config file or [2] have a YAML config file saved at ./configs/{FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME}."
+            )
 
         w = WorkspaceClient()
         self.model_serving_client = w.serving_endpoints.get_open_ai_client()
@@ -213,15 +199,9 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
 # tell MLflow logging where to find the agent's code
 set_model(FunctionCallingAgent)
 
-# COMMAND ----------
 
-# DBTITLE 1,debugging code
 # IMPORTANT: set this to False before logging the model to MLflow
 debug = False
-# import os
-
-# os.environ["MLFLOW_TRACKING_URI"] = "databricks"
-# mlflow.set_experiment("/Users/eric.peter@databricks.com/my_agent_mlflow_experiment")
 
 if debug:
     agent = FunctionCallingAgent()

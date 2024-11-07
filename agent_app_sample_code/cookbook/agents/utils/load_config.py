@@ -9,8 +9,42 @@ from cookbook.config.base import (
 from cookbook.config.base import (
     load_serializable_config_from_yaml,
 )
+import os
 
-TMP_CONFIG_FILE_NAME = "TMP_CONFIG_FILE_NAME"
+
+def find_project_root(marker_directory="configs"):
+    """Find the project root by looking for the "configs" directory."""
+    current = os.path.abspath(os.getcwd())
+    print(f"current: {current}")
+    while current != "/":
+        # Check current directory
+        marker_path = os.path.join(current, marker_directory)
+        print(f"marker_path: {marker_path}")
+        if os.path.exists(marker_path) and os.path.isdir(marker_path):
+            return current
+
+        # Check immediate subdirectories
+        for item in os.listdir(current):
+            item_path = os.path.join(current, item)
+            if os.path.isdir(item_path):
+                marker_in_subdir = os.path.join(item_path, marker_directory)
+                if os.path.exists(marker_in_subdir) and os.path.isdir(marker_in_subdir):
+                    return current
+
+                # Check one level deeper
+                for subitem in os.listdir(item_path):
+                    subitem_path = os.path.join(item_path, subitem)
+                    if os.path.isdir(subitem_path):
+                        marker_in_subsubdir = os.path.join(
+                            subitem_path, marker_directory
+                        )
+                        if os.path.exists(marker_in_subsubdir) and os.path.isdir(
+                            marker_in_subsubdir
+                        ):
+                            return current
+
+        current = os.path.dirname(current)
+    raise ValueError(f"Could not find project root containing {marker_directory}")
 
 
 def load_first_yaml_file(config_paths: List[str]) -> str:
@@ -56,20 +90,38 @@ def load_config(
     # in serving env these files will not be present, so load the model's logged config e.g., the config from mlflow.pyfunc.log_model(model_config=...) via mlflow.ModelConfig()
     # in the shared logging utilities, we set TMP_CONFIG_FILE_PATH to the path of the config file that is dumped
     config_paths = []
-    # tmp_config_file_path = globals().get(TMP_CONFIG_FILE_NAME, None)
-    # print(f"tmp_config_file_path: {tmp_config_file_path}")
-
-    # if tmp_config_file_path:
-    #     config_paths.append(tmp_config_file_path)
 
     if default_config_file_name:
-        config_paths.extend(
-            [
-                f"../../configs/{default_config_file_name}",
-                f"./configs/{default_config_file_name}",
-            ]
-        )
-
+        try:
+            project_root = find_project_root()
+            config_paths.extend(
+                [
+                    os.path.join(project_root, "configs", default_config_file_name),
+                    os.path.join(
+                        project_root,
+                        "agent_app_sample_code",
+                        "configs",
+                        default_config_file_name,
+                    ),
+                ]
+            )
+        except ValueError as e:
+            # could not find the project root, so keep trying the next options to load config
+            logging.info(
+                f"Could not find project root directory by looking for `configs` directory.  Trying to load config from current working directory {os.getcwd()}."
+            )
+            config_paths.extend(
+                [
+                    "./configs/" + default_config_file_name,
+                    "../configs/" + default_config_file_name,
+                    "../../configs/" + default_config_file_name,
+                    "../agent_app_sample_code/configs/" + default_config_file_name,
+                    "./agent_app_sample_code/configs/" + default_config_file_name,
+                ]
+            )
+            pass
+    logging.info(f"Trying to load from paths: {config_paths}")
+    print(config_paths)
     try:
         config_file = load_first_yaml_file(config_paths)
         return load_serializable_config_from_yaml(config_file)
@@ -79,14 +131,14 @@ def load_config(
         )
         # TODO: replace with mlflow.ModelConfig().to_dict() once released
         # model_config_as_yaml = yaml.dump(mlflow.models.ModelConfig()._read_config())
-        model_config_as_yaml = yaml.dump(
-            mlflow.models.ModelConfig(
-                development_config={"test": "test"}
-            )._read_config()
-        )
-        config = load_serializable_config_from_yaml(model_config_as_yaml)
-        logging.info(f"Loaded config from mlflow.ModelConfig(): {config}")
-        return config
+        try:
+            model_config_as_yaml = yaml.dump(mlflow.models.ModelConfig()._read_config())
+            config = load_serializable_config_from_yaml(model_config_as_yaml)
+            logging.info(f"Loaded config from mlflow.ModelConfig(): {config}")
+            return config
+        except Exception as e:
+            logging.error(f"Error loading config from mlflow.ModelConfig(): {e}")
+            return None
 
     # If no config is found, return None
     return None
