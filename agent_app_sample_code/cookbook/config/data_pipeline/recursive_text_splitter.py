@@ -1,4 +1,4 @@
-from cookbook.config.base import SerializableConfig
+from cookbook.config import SerializableConfig
 from cookbook.databricks_utils import (
     get_workspace_hostname,
 )

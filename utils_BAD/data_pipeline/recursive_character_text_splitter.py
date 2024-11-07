@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from cookbook.databricks_utils import get_workspace_hostname
 from databricks.sdk.service.serving import EndpointStateReady
 from databricks.sdk.errors.platform import ResourceDoesNotExist
-from cookbook.config.base import SerializableConfig
+from cookbook.config import SerializableConfig
 
 # %md
 # ##### `get_recursive_character_text_splitter`

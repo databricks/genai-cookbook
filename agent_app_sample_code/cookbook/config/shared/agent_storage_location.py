@@ -11,7 +11,7 @@ from pydantic import Field
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors.platform import ResourceDoesNotExist
 from databricks.sdk.errors import NotFound
-from cookbook.config.base import SerializableConfig
+from cookbook.config import SerializableConfig
 from databricks.sdk import WorkspaceClient
 
 

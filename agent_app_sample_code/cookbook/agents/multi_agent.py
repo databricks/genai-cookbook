@@ -1,12 +1,11 @@
+from cookbook.config import _CLASS_PATH_KEY, serializable_config_to_yaml
 from pydantic import BaseModel, field_validator
 from typing import Any, List, Literal, Dict
-from cookbook.config.base import (
-    _CLASS_PATH_KEY,
+from cookbook.config import (
     SerializableConfig,
-    serializable_config_to_yaml,
 )
 from cookbook.config.shared.llm import LLMConfig, LLMParametersConfig
-from cookbook.config.base import (
+from cookbook.config import (
     load_serializable_config_from_yaml,
 )
 import yaml

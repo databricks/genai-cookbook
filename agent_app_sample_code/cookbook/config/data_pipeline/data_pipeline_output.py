@@ -1,4 +1,4 @@
-from cookbook.config.base import SerializableConfig
+from cookbook.config import SerializableConfig
 from typing import Optional
 
 from databricks.sdk import WorkspaceClient

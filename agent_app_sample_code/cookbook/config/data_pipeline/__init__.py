@@ -1,8 +1,7 @@
+from cookbook.config import SerializableConfig, serializable_config_to_yaml
 import yaml
-from cookbook.config.base import (
-    SerializableConfig,
+from cookbook.config import (
     load_serializable_config_from_yaml,
-    serializable_config_to_yaml,
 )
 from cookbook.config.data_pipeline.data_pipeline_output import DataPipelineOuputConfig
 from cookbook.config.data_pipeline.recursive_text_splitter import (

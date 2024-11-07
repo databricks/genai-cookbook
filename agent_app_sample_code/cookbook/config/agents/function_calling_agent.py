@@ -1,14 +1,14 @@
 from typing import List, Any, Dict
+from cookbook.config import serializable_config_to_yaml
 import yaml
 import importlib
 from pydantic import BaseModel
-from cookbook.config.base import (
+from cookbook.config import (
     load_serializable_config_from_yaml,
 )
 from cookbook.config.shared.llm import LLMConfig
-from cookbook.config.base import (
+from cookbook.config import (
     SerializableConfig,
-    serializable_config_to_yaml,
 )
 from mlflow.models.resources import DatabricksResource, DatabricksServingEndpoint
 

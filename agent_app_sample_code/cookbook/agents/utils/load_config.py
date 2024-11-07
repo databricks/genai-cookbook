@@ -1,12 +1,12 @@
 import logging
 from typing import List
+from cookbook.config import SerializableConfig
 import yaml
 import mlflow
-from cookbook.config.base import (
-    SerializableConfig,
+from cookbook.config import (
     load_serializable_config_from_yaml_file,
 )
-from cookbook.config.base import (
+from cookbook.config import (
     load_serializable_config_from_yaml,
 )
 import os

@@ -1,3 +1,4 @@
+from cookbook.config import serializable_config_to_yaml
 from pydantic import Field, computed_field, field_validator
 from typing import Optional, Dict, Any
 from databricks.sdk import WorkspaceClient
@@ -11,11 +12,10 @@ from cookbook.config.data_pipeline.recursive_text_splitter import (
     RecursiveTextSplitterChunkingConfig,
 )
 import os
-from cookbook.config.base import (
+from cookbook.config import (
     SerializableConfig,
-    serializable_config_to_yaml,
 )
-from cookbook.config.base import (
+from cookbook.config import (
     load_serializable_config_from_yaml,
 )
 
