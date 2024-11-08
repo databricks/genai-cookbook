@@ -282,4 +282,4 @@ if debug:
     }
 
     output = agent.predict(model_input=vibe_check_query)
-    print(output)
+    print(output["content"])
