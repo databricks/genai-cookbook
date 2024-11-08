@@ -10,6 +10,7 @@ from databricks.sdk import WorkspaceClient
 import os
 from cookbook.agents.utils.chat import (
     remove_message_keys_with_null_values,
+    remove_tool_calls_from_messages,
 )
 from cookbook.agents.utils.load_config import load_config
 from cookbook.config.agents.multi_agent_supervisor import (
@@ -37,6 +38,9 @@ import mlflow.deployments
 
 MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME = "multi_agent_supervisor_config.yaml"
 
+AGENT_RAW_OUTPUT_KEY = "raw_agent_output"
+AGENT_NEW_MESSAGES_KEY = "new_messages"
+
 
 @dataclass
 class SupervisorState:
@@ -52,14 +56,23 @@ class SupervisorState:
     def append_new_message_to_history(self, message: Dict[str, str]) -> None:
         span = mlflow.get_current_active_span()
         span.set_inputs({"message": message})
-        message_with_no_null_values_for_keys = remove_message_keys_with_null_values(
-            message
-        )
+        with mlflow.start_span(
+            name="remove_message_keys_with_null_values"
+        ) as span_inner:
+            span_inner.set_inputs({"message": message})
+            message_with_no_null_values_for_keys = remove_message_keys_with_null_values(
+                message
+            )
+            span_inner.set_outputs(
+                {
+                    "message_with_no_null_values_for_keys": message_with_no_null_values_for_keys
+                }
+            )
         self.chat_history.append(message_with_no_null_values_for_keys)
         span.set_outputs(self.chat_history)
 
-    @mlflow.trace(span_type="FUNCTION", name="state.replace_chat_history")
-    def replace_chat_history(self, new_chat_history: List[Dict[str, str]]) -> None:
+    @mlflow.trace(span_type="FUNCTION", name="state.overwrite_chat_history")
+    def overwrite_chat_history(self, new_chat_history: List[Dict[str, str]]) -> None:
         span = mlflow.get_current_active_span()
         span.set_inputs(
             {
@@ -68,9 +81,18 @@ class SupervisorState:
             }
         )
         messages_with_no_null_values_for_keys = []
-        for message in new_chat_history:
-            messages_with_no_null_values_for_keys.append(
-                remove_message_keys_with_null_values(message)
+        with mlflow.start_span(
+            name="remove_message_keys_with_null_values"
+        ) as span_inner:
+            span_inner.set_inputs({"new_chat_history": new_chat_history})
+            for message in new_chat_history:
+                messages_with_no_null_values_for_keys.append(
+                    remove_message_keys_with_null_values(message)
+                )
+            span_inner.set_outputs(
+                {
+                    "messages_with_no_null_values_for_keys": messages_with_no_null_values_for_keys
+                }
             )
         self.chat_history = messages_with_no_null_values_for_keys.copy()
         span.set_outputs(self.chat_history)
@@ -128,7 +150,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         self.agents = {
             FINISH_ROUTE_NAME: {
                 "agent_fn": None,
-                "agent_description": "End the conversation, returning the last message to the user.",
+                "agent_description": self.agent_config.finish_agent_description,
             },
         }
 
@@ -253,16 +275,20 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
             return FINISH_ROUTE_NAME
 
     @mlflow.trace()
-    def _call_agent(
-        self, agent_name: str, messages: List[Dict[str, str]]
+    def _call_supervised_agent(
+        self, agent_name: str, input_messages: List[Dict[str, str]]
     ) -> Dict[str, Any]:
+        """
+        Calls a supervised agent and returns ONLY the new [messages] produced by that agent.
+        """
+        raw_agent_output = {}
         if self.agent_config.agent_loading_mode == "model_serving":
             endpoint_name = self.agents.get(agent_name).get("endpoint_name")
             if endpoint_name:
                 # this request will grab the mlflow trace from the endpoint
                 request = {
                     "databricks_options": {"return_trace": True},
-                    "messages": messages,
+                    "messages": input_messages.copy(),
                 }
                 completion = self.mlflow_serving_client.predict(
                     endpoint=endpoint_name, inputs=request
@@ -276,7 +302,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                     trace = Trace.from_dict(trace)
                     mlflow.add_trace(trace)
 
-                return completion
+                raw_agent_output = completion
             else:
                 raise ValueError(f"Invalid agent selected: {agent_name}")
         elif self.agent_config.agent_loading_mode == "local":
@@ -286,15 +312,39 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
             if agent_pyfunc_instance:
                 request = {
                     # "databricks_options": {"return_trace": True},
-                    "messages": messages,
+                    "messages": input_messages.copy(),
                 }
-                return agent_pyfunc_instance.predict(model_input=request)
+                raw_agent_output = agent_pyfunc_instance.predict(model_input=request)
             else:
                 raise ValueError(f"Invalid agent selected: {agent_name}")
         else:
             raise ValueError(
                 f"Invalid agent loading mode: {self.agent_config.agent_loading_mode}"
             )
+
+        # return only the net new messages produced by the agent
+        agent_output_messages = raw_agent_output.get("messages", [])
+        num_messages_previously = len(input_messages)
+        num_messages_after_agent = len(agent_output_messages)
+        if (
+            num_messages_after_agent == 0
+            or num_messages_after_agent == num_messages_previously
+        ):
+            raise Exception(
+                f"Agent {agent_name} either returned no messages at all or returned the same number of messages it received, indicating it did not produce any new messages."
+            )
+
+        else:
+            # Add the Agent's name to its messages
+            new_messages = agent_output_messages[num_messages_previously:].copy()
+            for new_message in new_messages:
+                new_message["name"] = agent_name
+            return {
+                # agent's raw output
+                AGENT_RAW_OUTPUT_KEY: raw_agent_output,
+                # new messages produced by the agent
+                AGENT_NEW_MESSAGES_KEY: new_messages,
+            }
 
     @mlflow.trace(name="agent", span_type="AGENT")
     def predict(
@@ -307,7 +357,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         # Initialize conversation state
         messages = get_messages_array(model_input)
         self.state = SupervisorState()
-        self.state.replace_chat_history(messages)
+        self.state.overwrite_chat_history(messages)
         self.state.num_messages_at_start = len(messages)
 
         # Run the supervisor loop up to self.agent_config.max_workers_called times
@@ -317,8 +367,12 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         ):
             with mlflow.start_span(name="supervisor_loop_iteration") as span:
                 self.state.number_of_supervisor_loops_completed += 1
-                routing_function_output = self._get_supervisor_routing_decision(
+
+                chat_history_without_tool_calls = remove_tool_calls_from_messages(
                     self.state.chat_history
+                )
+                routing_function_output = self._get_supervisor_routing_decision(
+                    chat_history_without_tool_calls
                 )
 
                 next_agent = routing_function_output.get(NEXT_WORKER_OR_FINISH_PARAM)
@@ -333,6 +387,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                         ),
                         "state.number_of_workers_called": self.state.number_of_supervisor_loops_completed,
                         "state.chat_history": self.state.chat_history,
+                        "chat_history_without_tool_calls": chat_history_without_tool_calls,
                     }
                 )
 
@@ -364,36 +419,23 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                 elif next_agent != self.state.last_agent_called:
                     # Call worker agent and update history
                     try:
-                        agent_output = self._call_agent(
-                            next_agent, self.state.chat_history
+                        agent_output = self._call_supervised_agent(
+                            next_agent, chat_history_without_tool_calls
                         )
-                        agent_produced_message_history = agent_output[
-                            "messages"
-                        ]  # includes the previous history too
-                        num_messages_previously = len(self.state.chat_history)
-                        num_messages_after_agent = len(agent_produced_message_history)
-                        num_new_messages = (
-                            num_messages_after_agent - num_messages_previously
-                        )
-                        message_history_updated_with_agent_name = (
-                            agent_produced_message_history.copy()
-                        )
-                        # for each new message (the agent won't / shouldn't modify the previous history)
-                        for new_message in message_history_updated_with_agent_name[
-                            num_messages_previously:
-                        ]:
-                            # add agent's name to its messages
-                            new_message["name"] = next_agent
+                        agent_new_messages = agent_output[AGENT_NEW_MESSAGES_KEY]
+                        agent_raw_output = agent_output[AGENT_RAW_OUTPUT_KEY]
 
-                        self.state.replace_chat_history(
-                            message_history_updated_with_agent_name
-                        )  # TODO: don't hard code the messages key
+                        self.state.overwrite_chat_history(
+                            self.state.chat_history + agent_new_messages
+                        )
                         self.state.last_agent_called = next_agent
                         span.set_outputs(
                             {
                                 "post_processed_decision": next_agent,
                                 "post_processing_reason": "Supervisor selected it.",
                                 "updated_chat_history": self.state.chat_history,
+                                f"called_agent.{AGENT_NEW_MESSAGES_KEY}": agent_new_messages,
+                                f"called_agent.{AGENT_RAW_OUTPUT_KEY}": agent_raw_output,
                             }
                         )
 
@@ -423,6 +465,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                     break  # finish by exiting the while loop
 
         # if the last message is not from the assistant, we need to add a fake assistant message
+        # TODO: add the name of the supervisor agent here
         if self.state.chat_history[-1]["role"] != "assistant":
             logging.warning(
                 "No assistant ended up replying, so we'll add an error response"
@@ -437,6 +480,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                     {
                         "role": "assistant",
                         "content": self.agent_config.supervisor_error_response,
+                        # "name": "supervisor",
                     }
                 )
                 span.set_outputs(

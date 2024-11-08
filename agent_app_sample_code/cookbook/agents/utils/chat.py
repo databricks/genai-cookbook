@@ -119,7 +119,6 @@ def concat_messages_array_to_string(messages):
     return concatenated_message
 
 
-@mlflow.trace()
 def remove_message_keys_with_null_values(message: Dict[str, str]) -> Dict[str, str]:
     """
     Remove any keys with None/null values from the message.
@@ -127,3 +126,20 @@ def remove_message_keys_with_null_values(message: Dict[str, str]) -> Dict[str, s
     Example: refusal key is set as None by OpenAI
     """
     return {k: v for k, v in message.items() if v is not None}
+
+
+@mlflow.trace(span_type="PARSER")
+def remove_tool_calls_from_messages(
+    messages: List[Dict[str, str]]
+) -> List[Dict[str, str]]:
+    modified_messages = messages.copy()
+    return [
+        msg
+        for msg in modified_messages
+        if not (
+            msg.get("role") == "tool"  # Remove tool messages
+            or (
+                msg.get("role") == "assistant" and "tool_calls" in msg
+            )  # Remove assistant messages with tool_calls
+        )
+    ]
