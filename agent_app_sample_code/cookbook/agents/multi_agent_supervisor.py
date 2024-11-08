@@ -240,7 +240,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                 function = tool_call.function
                 args = json.loads(function.arguments)
                 if function.name == ROUTING_FUNCTION_NAME:
-                    return args[NEXT_WORKER_OR_FINISH_PARAM]
+                    return args  # includes all keys from the function call
                 else:
                     logging.error(
                         f"Supervisor LLM failed to call the {ROUTING_FUNCTION_NAME}(...) function to determine the next step, so we will default to finishing.  It tried to call `{function.name}` with args `{function.arguments}`."
@@ -317,15 +317,30 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         ):
             with mlflow.start_span(name="supervisor_loop_iteration") as span:
                 self.state.number_of_supervisor_loops_completed += 1
-                next_agent = self._get_supervisor_routing_decision(
+                routing_function_output = self._get_supervisor_routing_decision(
                     self.state.chat_history
                 )
+
+                next_agent = routing_function_output.get(NEXT_WORKER_OR_FINISH_PARAM)
                 span.set_inputs(
                     {
-                        "supervisor_proposed_next_agent": next_agent,
+                        f"supervisor.{NEXT_WORKER_OR_FINISH_PARAM}": next_agent,
+                        f"supervisor.{CONVERSATION_HISTORY_THINKING_PARAM}": routing_function_output.get(
+                            CONVERSATION_HISTORY_THINKING_PARAM
+                        ),
+                        f"supervisor.{WORKER_CAPABILITIES_THINKING_PARAM}": routing_function_output.get(
+                            WORKER_CAPABILITIES_THINKING_PARAM
+                        ),
                         "state.number_of_workers_called": self.state.number_of_supervisor_loops_completed,
                     }
                 )
+
+                if next_agent is None:
+                    logging.error(
+                        f"Supervisor returned no next agent, so we will default to finishing."
+                    )
+                    next_agent = FINISH_ROUTE_NAME
+                    break
                 if next_agent == FINISH_ROUTE_NAME:
                     logging.info(
                         f"Supervisor called {FINISH_ROUTE_NAME} after {self.state.number_of_supervisor_loops_completed} workers being called."
