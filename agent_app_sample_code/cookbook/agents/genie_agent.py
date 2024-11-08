@@ -428,7 +428,7 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
             # only put the actual query in it
             message_log = convert_messages_to_open_ai_format(messages)
             # add a fake tool call version of genie so we can debug this in the MLflow UIs
-            message_log += self.get_faked_tool_calls(last_message, genie_response)
+            message_log += self.get_faked_tool_calls(message, genie_response)
             # add genie's text response
             message_log.append({"role": "assistant", "content": output_message})
             span.set_outputs(message_log)
@@ -441,14 +441,20 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
 
     @mlflow.trace()
     def get_faked_tool_calls(self, user_query, genie_response):
-        fake_id = str(uuid.uuid4().hex)
+        random_unique_id = str(uuid.uuid4().hex)
+        # openai expects a <=40 character id
+        tool_call_id = (
+            f"call_genie_space_{self.agent_config.genie_space_id}__{random_unique_id}"[
+                :40
+            ]
+        )
         args = {"query": user_query}
         return [
             {
                 "role": "assistant",
                 "tool_calls": [
                     {
-                        "id": f"call_{fake_id}",
+                        "id": tool_call_id,
                         "function": {"arguments": json.dumps(args), "name": "genie"},
                         "type": "function",
                     }
@@ -456,7 +462,7 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
             },
             {
                 "role": "tool",
-                "tool_call_id": f"call_{fake_id}",
+                "tool_call_id": tool_call_id,
                 "content": json.dumps(genie_response),
             },
         ]

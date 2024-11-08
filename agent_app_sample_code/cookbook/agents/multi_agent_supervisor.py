@@ -332,6 +332,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                             WORKER_CAPABILITIES_THINKING_PARAM
                         ),
                         "state.number_of_workers_called": self.state.number_of_supervisor_loops_completed,
+                        "state.chat_history": self.state.chat_history,
                     }
                 )
 
@@ -339,7 +340,13 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                     logging.error(
                         f"Supervisor returned no next agent, so we will default to finishing."
                     )
-                    next_agent = FINISH_ROUTE_NAME
+                    span.set_outputs(
+                        {
+                            "post_processed_decision": FINISH_ROUTE_NAME,
+                            "post_processing_reason": "Supervisor returned no next agent, so we will default to finishing.",
+                            "updated_chat_history": self.state.chat_history,
+                        }
+                    )
                     break
                 if next_agent == FINISH_ROUTE_NAME:
                     logging.info(
@@ -348,7 +355,8 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                     span.set_outputs(
                         {
                             "post_processed_decision": FINISH_ROUTE_NAME,
-                            "post_processing_reason": "Supervisor selected it & business logic agrees.",
+                            "post_processing_reason": "Supervisor selected it.",
+                            "updated_chat_history": self.state.chat_history,
                         }
                     )
                     break  # finish by exiting the while loop
@@ -384,7 +392,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                         span.set_outputs(
                             {
                                 "post_processed_decision": next_agent,
-                                "post_processing_reason": "Supervisor selected it & business logic agrees.",
+                                "post_processing_reason": "Supervisor selected it.",
                                 "updated_chat_history": self.state.chat_history,
                             }
                         )
@@ -396,7 +404,8 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                         span.set_outputs(
                             {
                                 "post_processed_decision": FINISH_ROUTE_NAME,
-                                "post_processing_reason": "Supervisor selected an invalid agent.",
+                                "post_processing_reason": "Supervisor selected an invalid agent, so defaulting to finishing.",
+                                "updated_chat_history": self.state.chat_history,
                             }
                         )
                         break  # finish by exiting the while loop
@@ -408,6 +417,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                         {
                             "post_processed_decision": FINISH_ROUTE_NAME,
                             "post_processing_reason": f"Supervisor selected {next_agent} twice in a row, so business logic decided to finish instead.",
+                            "updated_chat_history": self.state.chat_history,
                         }
                     )
                     break  # finish by exiting the while loop
@@ -417,36 +427,58 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
             logging.warning(
                 "No assistant ended up replying, so we'll add an error response"
             )
-            self.state.append_new_message_to_history(
-                {
-                    "role": "assistant",
-                    "content": self.agent_config.supervisor_error_response,
-                }
-            )
+            with mlflow.start_span(name="add_error_response_to_history") as span:
+                span.set_inputs(
+                    {
+                        "state.chat_history": self.state.chat_history,
+                    }
+                )
+                self.state.append_new_message_to_history(
+                    {
+                        "role": "assistant",
+                        "content": self.agent_config.supervisor_error_response,
+                    }
+                )
+                span.set_outputs(
+                    {
+                        "updated_chat_history": self.state.chat_history,
+                    }
+                )
 
         # Return the resulting conversation back to the user
-        if self.agent_config.playground_debug_mode is True:
-            return {
-                "response": (
-                    self.state.chat_history[-1]["content"]
-                    if self.state.chat_history
-                    else ""
-                ),
-                "messages": self.state.chat_history,
-                # only parse the new messages we added into playground format
-                "content": convert_messages_to_playground_tool_display_strings(
-                    self.state.chat_history[self.state.num_messages_at_start :]
-                ),
-            }
-        else:
-            return {
-                "content": (
-                    self.state.chat_history[-1]["content"]
-                    if self.state.chat_history
-                    else ""
-                ),
-                "messages": self.state.chat_history,
-            }
+        with mlflow.start_span(name="return_conversation_to_user") as span:
+            span.set_inputs(
+                {
+                    "state.chat_history": self.state.chat_history,
+                    "agent_config.playground_debug_mode": self.agent_config.playground_debug_mode,
+                }
+            )
+            if self.agent_config.playground_debug_mode is True:
+                return_value = {
+                    "response": (
+                        self.state.chat_history[-1]["content"]
+                        if self.state.chat_history
+                        else ""
+                    ),
+                    "messages": self.state.chat_history,
+                    # only parse the new messages we added into playground format
+                    "content": convert_messages_to_playground_tool_display_strings(
+                        self.state.chat_history[self.state.num_messages_at_start :]
+                    ),
+                }
+                span.set_outputs(return_value)
+                return return_value
+            else:
+                return_value = {
+                    "content": (
+                        self.state.chat_history[-1]["content"]
+                        if self.state.chat_history
+                        else ""
+                    ),
+                    "messages": self.state.chat_history,
+                }
+                span.set_outputs(return_value)
+                return return_value
 
     def chat_completion(self, messages: List[Dict[str, str]], tools: bool = False):
         endpoint_name = self.agent_config.llm_endpoint_name
@@ -489,8 +521,8 @@ if debug:
 
     vibe_check_query = {
         "messages": [
-            {"role": "user", "content": f"how does the CoolTech Elite 5500 work?"},
-            # {"role": "user", "content": f"calculate the value of 2+2?"},
+            # {"role": "user", "content": f"how does the CoolTech Elite 5500 work?"},
+            {"role": "user", "content": f"calculate the value of 2+2?"},
             # {
             #     "role": "user",
             #     "content": f"How does account age affect the likelihood of churn?",
@@ -501,17 +533,17 @@ if debug:
     output = agent.predict(model_input=vibe_check_query)
     print(output["content"])
 
-    input_2 = output["messages"].copy()
-    input_2.append(
-        {
-            "role": "user",
-            # "content": f"who is the user most likely to do this?",
-            "content": f"how do i turn it on?",
-        },
-    )
+    # input_2 = output["messages"].copy()
+    # input_2.append(
+    #     {
+    #         "role": "user",
+    #         "content": f"who is the user most likely to do this?",
+    #         # "content": f"how do i turn it on?",
+    #     },
+    # )
 
-    output_2 = agent.predict(model_input={"messages": input_2})
-    print(output_2["content"])
+    # output_2 = agent.predict(model_input={"messages": input_2})
+    # print(output_2["content"])
 
 # # COMMAND ----------
 
