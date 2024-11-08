@@ -34,69 +34,8 @@ import logging
 from mlflow.entities import Trace
 import mlflow.deployments
 
-from enum import Enum
-
-
-# MAGIC %md
-# MAGIC # MultiAgentSupervisor Flow Documentation
-# MAGIC
-# MAGIC The MultiAgentSupervisor implements a supervisor pattern to orchestrate multiple specialized agents.
-# MAGIC Here's how the control flow works:
-# MAGIC
-# MAGIC ## Entry Point
-# MAGIC The flow begins when `predict()` is called with a user message:
-# MAGIC 1. Initializes chat history with the user's message
-# MAGIC 2. Sets `next_route` to "SUPERVISOR"
-# MAGIC 3. Enters the main orchestration loop via `call_next_route()`
-# MAGIC
-# MAGIC ## Main Orchestration Loop
-# MAGIC The loop consists of these key functions working together:
-# MAGIC
-# MAGIC ### `call_next_route()`
-# MAGIC Central routing function that:
-# MAGIC - Checks `next_route` and directs to one of:
-# MAGIC   - `finish_agent()` if route is "FINISH"
-# MAGIC   - `supervisor_agent()` if route is "SUPERVISOR"
-# MAGIC   - `call_agent(agent_name)` for any other agent
-# MAGIC - After a worker agent completes, automatically sets `next_route` back to "SUPERVISOR"
-# MAGIC - Recursively calls itself to continue the loop
-# MAGIC
-# MAGIC ### `supervisor_agent()`
-# MAGIC The orchestrator that:
-# MAGIC 1. Assembles the supervisor LLM prompt:
-# MAGIC    - Supervisor system prompt
-# MAGIC    - Chat history (from the users' conversation)
-# MAGIC    - Supervisor routing prompt
-# MAGIC 2. Calls the LLM with function calling enabled
-# MAGIC 3. Processes the LLM's routing decision by parsing the function call to populate `next_route`
-# MAGIC 4. Calls `route_response()` with the next agent to invoke
-# MAGIC
-# MAGIC ### `route_response()`
-# MAGIC Simple connector that:
-# MAGIC 1. Inspects `next_route` to determine the next step take
-# MAGIC 2. Triggers `call_next_route()` to execute that route
-# MAGIC
-# MAGIC ### `finish_agent()`
-# MAGIC Exit point that:
-# MAGIC 1. Returns the final response and full conversation history
-# MAGIC 2. Optionally formats the conversation in playground style if debug mode is enabled
-# MAGIC
-# MAGIC ## Loop Termination
-# MAGIC The loop continues until either:
-# MAGIC 1. The supervisor selects "FINISH" as the next route
-# MAGIC 2. The maximum number of iterations (`max_workers_called`) is reached
-# MAGIC 3. An error occurs
-# MAGIC
-# MAGIC Each agent's response is added to the chat history, allowing the supervisor to maintain context and make informed routing decisions throughout the conversation.
-
 
 MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME = "multi_agent_supervisor_config.yaml"
-
-
-class ConversationStatus(Enum):
-    ACTIVE = "active"
-    FINISHED = "finished"
-    ERROR = "error"
 
 
 @dataclass
@@ -104,13 +43,12 @@ class SupervisorState:
     """Tracks essential conversation state"""
 
     chat_history: List[Dict[str, str]] = field(default_factory=list)
-    current_route: str = SUPERVISOR_ROUTE_NAME
-    number_of_workers_called: int = 0
+    last_agent_called: str = ""
+    number_of_supervisor_loops_completed: int = 0
     num_messages_at_start: int = 0
-    status: ConversationStatus = ConversationStatus.ACTIVE
-    error: Optional[str] = None
+    # error: Optional[str] = None
 
-    @mlflow.trace()
+    @mlflow.trace(span_type="FUNCTION", name="state.append_new_message_to_history")
     def append_new_message_to_history(self, message: Dict[str, str]) -> None:
         span = mlflow.get_current_active_span()
         span.set_inputs({"message": message})
@@ -120,7 +58,7 @@ class SupervisorState:
         self.chat_history.append(message_with_no_null_values_for_keys)
         span.set_outputs(self.chat_history)
 
-    @mlflow.trace()
+    @mlflow.trace(span_type="FUNCTION", name="state.replace_chat_history")
     def replace_chat_history(self, new_chat_history: List[Dict[str, str]]) -> None:
         span = mlflow.get_current_active_span()
         span.set_inputs(
@@ -136,10 +74,6 @@ class SupervisorState:
             )
         self.chat_history = messages_with_no_null_values_for_keys.copy()
         span.set_outputs(self.chat_history)
-
-    def finish(self, error: Optional[str] = None) -> None:
-        self.status = ConversationStatus.ERROR if error else ConversationStatus.FINISHED
-        self.error = error
 
 
 class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
@@ -177,10 +111,6 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         )
         if not self.agent_config:
             raise ValueError("No agent config found")
-
-        # Set core configuration values
-        self.MAX_LOOPS = self.agent_config.max_workers_called
-        self.debug = self.agent_config.playground_debug_mode
         logging.info("Initialized agent config")
 
     def _initialize_model_serving_clients(self):
@@ -197,12 +127,8 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         # Initialize base agents (finish and supervisor)
         self.agents = {
             FINISH_ROUTE_NAME: {
-                "agent_fn": self.finish_agent,
+                "agent_fn": None,
                 "agent_description": "End the conversation, returning the last message to the user.",
-            },
-            SUPERVISOR_ROUTE_NAME: {
-                "agent_fn": self.supervisor_agent,
-                "agent_description": "Controls the conversation, deciding which Agent to use next. It only makes decisions about which agent to call, and does not respond to the user.",
             },
         }
 
@@ -247,13 +173,22 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         workers_names_and_descriptions = "".join(agents_info)
 
         # Update system prompt with template variables
-        self.system_prompt = self.agent_config.supervisor_system_prompt.format(
-            ROUTING_FUNCTION_NAME=ROUTING_FUNCTION_NAME,
-            CONVERSATION_HISTORY_THINKING_PARAM=CONVERSATION_HISTORY_THINKING_PARAM,
-            WORKER_CAPABILITIES_THINKING_PARAM=WORKER_CAPABILITIES_THINKING_PARAM,
+        self.supervisor_system_prompt = (
+            self.agent_config.supervisor_system_prompt.format(
+                ROUTING_FUNCTION_NAME=ROUTING_FUNCTION_NAME,
+                CONVERSATION_HISTORY_THINKING_PARAM=CONVERSATION_HISTORY_THINKING_PARAM,
+                WORKER_CAPABILITIES_THINKING_PARAM=WORKER_CAPABILITIES_THINKING_PARAM,
+                NEXT_WORKER_OR_FINISH_PARAM=NEXT_WORKER_OR_FINISH_PARAM,
+                FINISH_ROUTE_NAME=FINISH_ROUTE_NAME,
+                workers_names_and_descriptions=workers_names_and_descriptions,
+            )
+        )
+
+        self.supervisor_user_prompt = self.agent_config.supervisor_user_prompt.format(
+            worker_names_with_finish=list(self.agents.keys()) + [FINISH_ROUTE_NAME],
             NEXT_WORKER_OR_FINISH_PARAM=NEXT_WORKER_OR_FINISH_PARAM,
+            ROUTING_FUNCTION_NAME=ROUTING_FUNCTION_NAME,
             FINISH_ROUTE_NAME=FINISH_ROUTE_NAME,
-            workers_names_and_descriptions=workers_names_and_descriptions,
         )
 
         # Initialize routing function schema
@@ -282,99 +217,52 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         }
         self.tool_json_schemas = [self.route_function]
 
-    @mlflow.trace()
-    def route_response(self, next_route):
-        # print("selected next: " + next_route)
-        self.state.current_route = next_route
-        return self.call_next_route()
-
-    @mlflow.trace()
-    def call_next_route(self):
-        span = mlflow.get_current_active_span()
-        span.set_attributes(asdict(self.state))
-        logging.info(f"Calling next route: {self.state.current_route}")
-        if self.state.current_route == FINISH_ROUTE_NAME:
-            return self.finish_agent()
-        elif self.state.current_route == SUPERVISOR_ROUTE_NAME:
-            return self.supervisor_agent()
-        else:
-            agent_output = self.call_agent(self.state.current_route)
-            # TODO: the agents by default return the enitre message history in their response, but they should provide a way to return only the new messages
-            self.state.replace_chat_history(agent_output["messages"])
-            self.state.current_route = SUPERVISOR_ROUTE_NAME
-            return self.call_next_route()
-
-    @mlflow.trace()
-    def append_to_chat_history(self, message: Dict[str, Any]):
-        self.state.append_new_message_to_history(message)
-        mlflow.get_current_active_span().set_outputs(self.state.chat_history)
-        # return self.state.messages  # hack to show in mlflow trace
-
-    @mlflow.trace()
-    def end_early(self):
-        return self.route_response(FINISH_ROUTE_NAME)
-
     @mlflow.trace(span_type="AGENT")
-    def supervisor_agent(self):
+    def _get_supervisor_routing_decision(self, messages: List[Dict[str, str]]) -> str:
 
-        if self.state.number_of_workers_called >= self.agent_config.max_workers_called:
-            # finish early
-            logging.warning("Finishing early due to exceeding max iterations.")
-            return self.end_early()
-
-        messages = (
-            [{"role": "system", "content": self.system_prompt}]
-            + self.state.chat_history
+        supervisor_messages = (
+            [{"role": "system", "content": self.supervisor_system_prompt}]
+            + messages
             + [
                 {
                     "role": "user",
-                    "content": self.agent_config.supervisor_user_prompt.format(
-                        worker_names_with_finish=list(self.agents.keys())
-                        + [FINISH_ROUTE_NAME],
-                        NEXT_WORKER_OR_FINISH_PARAM=NEXT_WORKER_OR_FINISH_PARAM,
-                        ROUTING_FUNCTION_NAME=ROUTING_FUNCTION_NAME,
-                        FINISH_ROUTE_NAME=FINISH_ROUTE_NAME,
-                    ),
+                    "content": self.supervisor_user_prompt,
                 }
             ]
         )
 
-        response = self.chat_completion(messages=messages, tools=True)
-        assistant_message = response.choices[0].message
-        tool_calls = assistant_message.tool_calls
+        response = self.chat_completion(messages=supervisor_messages, tools=True)
+        supervisor_llm_response = response.choices[0].message
+        supervisor_tool_calls = supervisor_llm_response.tool_calls
 
-        if tool_calls:
-            for tool_call in tool_calls:
+        if supervisor_tool_calls:
+            for tool_call in supervisor_tool_calls:
                 function = tool_call.function
                 args = json.loads(function.arguments)
                 if function.name == ROUTING_FUNCTION_NAME:
-                    self.state.number_of_workers_called += 1
-                    return self.route_response(
-                        next_route=args[NEXT_WORKER_OR_FINISH_PARAM]
-                    )
+                    return args[NEXT_WORKER_OR_FINISH_PARAM]
                 else:
                     logging.error(
                         f"Supervisor LLM failed to call the {ROUTING_FUNCTION_NAME}(...) function to determine the next step, so we will default to finishing.  It tried to call `{function.name}` with args `{function.arguments}`."
                     )
-                    self.state.current_route = FINISH_ROUTE_NAME
-                    return self.call_next_route()
+                    return FINISH_ROUTE_NAME
         else:
             logging.error(
-                f"Supervisor LLM failed to choose a tool at all, so we will default to finishing.  It said `{assistant_message}`."
+                f"Supervisor LLM failed to choose a tool at all, so we will default to finishing.  It said `{supervisor_llm_response}`."
             )
-            self.state.current_route = FINISH_ROUTE_NAME
-            return self.call_next_route()
+            return FINISH_ROUTE_NAME
 
     @mlflow.trace()
-    def call_agent(self, agent_name):
-        # print(agent_name)
+    def _call_agent(
+        self, agent_name: str, messages: List[Dict[str, str]]
+    ) -> Dict[str, Any]:
         if self.agent_config.agent_loading_mode == "model_serving":
             endpoint_name = self.agents.get(agent_name).get("endpoint_name")
             if endpoint_name:
                 # this request will grab the mlflow trace from the endpoint
                 request = {
                     "databricks_options": {"return_trace": True},
-                    "messages": self.state.chat_history,
+                    "messages": messages,
                 }
                 completion = self.mlflow_serving_client.predict(
                     endpoint=endpoint_name, inputs=request
@@ -390,12 +278,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
 
                 return completion
             else:
-                error_message = {
-                    "role": "assistant",
-                    "content": f"ERROR: This agent does not exist.  Please select one of: {list(self.agents.keys())}",
-                    "name": SUPERVISOR_ROUTE_NAME,
-                }
-                raise ValueError(f"Invalid agent selected: {self.state.current_route}")
+                raise ValueError(f"Invalid agent selected: {agent_name}")
         elif self.agent_config.agent_loading_mode == "local":
             agent_pyfunc_instance = self.agents.get(agent_name).get(
                 "agent_pyfunc_instance"
@@ -403,19 +286,130 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
             if agent_pyfunc_instance:
                 request = {
                     # "databricks_options": {"return_trace": True},
-                    "messages": self.state.chat_history,
+                    "messages": messages,
                 }
                 return agent_pyfunc_instance.predict(model_input=request)
             else:
-                raise ValueError(f"Invalid agent selected: {self.state.current_route}")
+                raise ValueError(f"Invalid agent selected: {agent_name}")
         else:
             raise ValueError(
                 f"Invalid agent loading mode: {self.agent_config.agent_loading_mode}"
             )
 
-    @mlflow.trace(span_type="PARSER")
-    def finish_agent(self):
-        # Update to use config debug mode
+    @mlflow.trace(name="agent", span_type="AGENT")
+    def predict(
+        self,
+        context: Any = None,
+        model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame] = None,
+        params: Any = None,
+    ) -> StringResponse:
+        # try:
+        # Initialize conversation state
+        messages = get_messages_array(model_input)
+        self.state = SupervisorState()
+        self.state.replace_chat_history(messages)
+        self.state.num_messages_at_start = len(messages)
+
+        # Run the supervisor loop up to self.agent_config.max_workers_called times
+        while (
+            self.state.number_of_supervisor_loops_completed
+            < self.agent_config.max_supervisor_loops
+        ):
+            with mlflow.start_span(name="supervisor_loop_iteration") as span:
+                self.state.number_of_supervisor_loops_completed += 1
+                next_agent = self._get_supervisor_routing_decision(
+                    self.state.chat_history
+                )
+                span.set_inputs(
+                    {
+                        "supervisor_proposed_next_agent": next_agent,
+                        "state.number_of_workers_called": self.state.number_of_supervisor_loops_completed,
+                    }
+                )
+                if next_agent == FINISH_ROUTE_NAME:
+                    logging.info(
+                        f"Supervisor called {FINISH_ROUTE_NAME} after {self.state.number_of_supervisor_loops_completed} workers being called."
+                    )
+                    span.set_outputs(
+                        {
+                            "post_processed_decision": FINISH_ROUTE_NAME,
+                            "post_processing_reason": "Supervisor selected it & business logic agrees.",
+                        }
+                    )
+                    break  # finish by exiting the while loop
+                # prevent the supervisor from calling an agent multiple times in a row
+                elif next_agent != self.state.last_agent_called:
+                    # Call worker agent and update history
+                    try:
+                        agent_output = self._call_agent(
+                            next_agent, self.state.chat_history
+                        )
+                        agent_produced_message_history = agent_output[
+                            "messages"
+                        ]  # includes the previous history too
+                        num_messages_previously = len(self.state.chat_history)
+                        num_messages_after_agent = len(agent_produced_message_history)
+                        num_new_messages = (
+                            num_messages_after_agent - num_messages_previously
+                        )
+                        message_history_updated_with_agent_name = (
+                            agent_produced_message_history.copy()
+                        )
+                        # for each new message (the agent won't / shouldn't modify the previous history)
+                        for new_message in message_history_updated_with_agent_name[
+                            num_messages_previously:
+                        ]:
+                            # add agent's name to its messages
+                            new_message["name"] = next_agent
+
+                        self.state.replace_chat_history(
+                            message_history_updated_with_agent_name
+                        )  # TODO: don't hard code the messages key
+                        self.state.last_agent_called = next_agent
+                        span.set_outputs(
+                            {
+                                "post_processed_decision": next_agent,
+                                "post_processing_reason": "Supervisor selected it & business logic agrees.",
+                                "updated_chat_history": self.state.chat_history,
+                            }
+                        )
+
+                    except ValueError as e:
+                        logging.error(
+                            f"Error calling agent {next_agent}: {e}.  We will default to finishing."
+                        )
+                        span.set_outputs(
+                            {
+                                "post_processed_decision": FINISH_ROUTE_NAME,
+                                "post_processing_reason": "Supervisor selected an invalid agent.",
+                            }
+                        )
+                        break  # finish by exiting the while loop
+                else:
+                    logging.warning(
+                        f"Supervisor called the same agent {next_agent} twice in a row.  We will default to finishing."
+                    )
+                    span.set_outputs(
+                        {
+                            "post_processed_decision": FINISH_ROUTE_NAME,
+                            "post_processing_reason": f"Supervisor selected {next_agent} twice in a row, so business logic decided to finish instead.",
+                        }
+                    )
+                    break  # finish by exiting the while loop
+
+        # if the last message is not from the assistant, we need to add a fake assistant message
+        if self.state.chat_history[-1]["role"] != "assistant":
+            logging.warning(
+                "No assistant ended up replying, so we'll add an error response"
+            )
+            self.state.append_new_message_to_history(
+                {
+                    "role": "assistant",
+                    "content": self.agent_config.supervisor_error_response,
+                }
+            )
+
+        # Return the resulting conversation back to the user
         if self.agent_config.playground_debug_mode is True:
             return {
                 "response": (
@@ -438,26 +432,6 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
                 ),
                 "messages": self.state.chat_history,
             }
-
-    @mlflow.trace(name="agent", span_type="AGENT")
-    def predict(
-        self,
-        context: Any = None,
-        model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame] = None,
-        params: Any = None,
-    ) -> StringResponse:
-        try:
-            messages = get_messages_array(model_input)
-            self.state = SupervisorState()
-            self.state.replace_chat_history(messages)
-            self.state.num_messages_at_start = len(messages)
-            result = self.call_next_route()
-            self.state.finish()
-            return result
-
-        except Exception as e:
-            self.state.finish(error=str(e))
-            raise
 
     def chat_completion(self, messages: List[Dict[str, str]], tools: bool = False):
         endpoint_name = self.agent_config.llm_endpoint_name
@@ -500,12 +474,12 @@ if debug:
 
     vibe_check_query = {
         "messages": [
-            # {"role": "user", "content": f"how does the CoolTech Elite 5500 work?"},
+            {"role": "user", "content": f"how does the CoolTech Elite 5500 work?"},
             # {"role": "user", "content": f"calculate the value of 2+2?"},
-            {
-                "role": "user",
-                "content": f"How does account age affect the likelihood of churn?",
-            },
+            # {
+            #     "role": "user",
+            #     "content": f"How does account age affect the likelihood of churn?",
+            # },
         ]
     }
 
@@ -516,7 +490,8 @@ if debug:
     input_2.append(
         {
             "role": "user",
-            "content": f"who is the user most likely to do this?",
+            # "content": f"who is the user most likely to do this?",
+            "content": f"how do i turn it on?",
         },
     )
 
