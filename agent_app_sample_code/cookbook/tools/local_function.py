@@ -1,6 +1,5 @@
 from cookbook.tools import Tool
 
-
 from mlflow.models.resources import DatabricksResource
 from pydantic import BaseModel, Field, create_model
 from unitycatalog.ai.core.utils.docstring_utils import parse_docstring
@@ -9,6 +8,7 @@ from typing import Optional
 import inspect
 from typing import Any, Callable, List, Type, get_type_hints
 import importlib
+import mlflow
 
 
 class LocalFunctionTool(Tool):
@@ -150,6 +150,7 @@ class LocalFunctionTool(Tool):
             module = importlib.import_module(module_name)
             self._loaded_callable = getattr(module, func_name)
 
+    @mlflow.trace(span_type="TOOL", name="local_function")
     def __call__(self, **kwargs) -> Any:
         """Execute the tool's function with validated inputs"""
         self.load_func()

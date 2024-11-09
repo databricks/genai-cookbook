@@ -10,7 +10,7 @@ from pydantic import Field, model_validator
 from pyspark.errors import SparkRuntimeException
 from unitycatalog.ai.core.databricks import DatabricksFunctionClient
 from unitycatalog.ai.openai.toolkit import UCFunctionToolkit
-
+from dataclasses import asdict
 
 import json
 from typing import Any, Dict, List
@@ -114,7 +114,7 @@ class UCTool(Tool):
             result = traced_exec_function(
                 function_name=self.uc_function_name, parameters=args_json
             )
-            return result.to_json()
+            return asdict(result)
 
         # Parse the error into a format that's easier for the LLM to understand w/ out any of the Spark runtime error noise
         except SparkRuntimeException as e:
