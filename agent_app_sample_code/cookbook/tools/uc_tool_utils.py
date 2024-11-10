@@ -79,7 +79,9 @@ def _parse_SparkException_from_tool_execution(
 
     except Exception as e:
         # 2nd attempt: that failed, let's try to parse the SparkException's raw formatting
-        logging.error(f"Error parsing: {e}, trying alternative approaches to parsing.")
+        logging.info(
+            f"Error parsing spark exception using its provided structured data: {e}, will now try to parse its string output..."
+        )
 
         logging.info(
             f"Trying to parse spark exception {tool_exception} using its raw string output."
@@ -89,8 +91,8 @@ def _parse_SparkException_from_tool_execution(
             return _parse_PySpark_exception_dumped_as_string(raw_error_msg)
         except Exception as e:
             # Last attempt: if that fails, just use the raw error
-            logging.error(
-                f"Error parsing spark exception using its raw string formatting: {e}, will return the raw error message."
+            logging.info(
+                f"Error parsing spark exception using its raw string formatting: {e}, will just return the raw error message."
             )
 
             logging.info(f"returning the raw error message: {str(tool_exception)}.")
