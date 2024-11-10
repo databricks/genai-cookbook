@@ -2,7 +2,10 @@ from cookbook.tools import Tool
 from cookbook.databricks_utils import get_function_url
 
 
-from cookbook.tools.uc_tool_utils import _parse_SparkException_from_tool_execution
+from cookbook.tools.uc_tool_utils import (
+    _parse_SparkException_from_tool_execution,
+    _parse_generic_tool_exception,
+)
 import mlflow
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import ResourceDoesNotExist
@@ -19,7 +22,6 @@ from dataclasses import asdict
 import json
 from typing import Any, Dict, List, Union
 
-ERROR_DETAILS_KEY = "error_details"
 ERROR_INSTRUCTIONS_KEY = "error_instructions"
 ERROR_STATUS_KEY = "error"
 
@@ -132,20 +134,17 @@ class UCTool(Tool):
 
         # Parse the error into a format that's easier for the LLM to understand w/ out any of the Spark runtime error noise
         except (SparkRuntimeException, SparkException) as tool_exception:
-            exception_info_dict = {}
-            # print(tool_exception)
-            exception_info_dict[ERROR_STATUS_KEY] = (
-                _parse_SparkException_from_tool_execution(tool_exception)
-            )
-            # exception_info_dict[ERROR_STATUS_KEY] = "ERROR"
-            exception_info_dict[ERROR_INSTRUCTIONS_KEY] = self.error_prompt
-            return exception_info_dict
-        except Exception as tool_exception:
-            # some other type of error that is unknwon, just return it
             return {
+                ERROR_STATUS_KEY: _parse_SparkException_from_tool_execution(
+                    tool_exception
+                ),
                 ERROR_INSTRUCTIONS_KEY: self.error_prompt,
-                # ERROR_STATUS_KEY: "ERROR",
-                ERROR_STATUS_KEY: str(tool_exception),
+            }
+        except Exception as tool_exception:
+            # some other type of error that is unknown, parse into the same format as the Spark exceptions
+            return {
+                ERROR_STATUS_KEY: _parse_generic_tool_exception(tool_exception),
+                ERROR_INSTRUCTIONS_KEY: self.error_prompt,
             }
 
     def model_dump(self, **kwargs) -> Dict[str, Any]:
@@ -162,12 +161,3 @@ class UCTool(Tool):
 
     def _remove_udfbody_from_stack_trace(self, stack_trace: str) -> str:
         return stack_trace.replace('File "<udfbody>",', "").strip()
-
-
-debug = __name__ == "__main__"
-if debug:
-    translate_sku_tool = UCTool(uc_function_name="ep.cookbook_local_test.translate_sku")
-    output = translate_sku_tool(old_sku="NEW-ABC-1234")
-    output = translate_sku_tool(old_sku="OLD-ABC-1234")
-
-    # print(output)

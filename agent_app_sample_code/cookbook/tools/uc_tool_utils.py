@@ -6,7 +6,7 @@ from pyspark.errors.exceptions.connect import SparkException
 import logging
 from typing import Dict, Union
 
-ERROR_KEY = "error"
+ERROR_KEY = "error_message"
 STACK_TRACE_KEY = "stack_trace"
 
 
@@ -45,6 +45,24 @@ def _parse_PySpark_exception_from_known_structure(
 
 
 @mlflow.trace(span_type="PARSER")
+def _parse_generic_tool_exception(tool_exception: Exception) -> Dict[str, str]:
+    return {
+        STACK_TRACE_KEY: None,
+        ERROR_KEY: str(tool_exception),
+    }
+
+
+@mlflow.trace(span_type="PARSER")
+def _return_raw_PySpark_exception(
+    tool_exception: Union[SparkRuntimeException, SparkException]
+):
+    return {
+        STACK_TRACE_KEY: None,
+        ERROR_KEY: str(tool_exception),
+    }
+
+
+@mlflow.trace(span_type="PARSER")
 def _parse_SparkException_from_tool_execution(
     tool_exception: Union[SparkRuntimeException, SparkException, Exception],
 ) -> Dict[str, str]:
@@ -57,39 +75,23 @@ def _parse_SparkException_from_tool_execution(
         )
         # remove the <udfbody> from the stack trace which the LLM knows nothing about
         # raw_stack_trace = tool_exception.getMessageParameters()["stack"]
-        error_info_to_return = _parse_PySpark_exception_from_known_structure(
-            tool_exception
-        )
+        return _parse_PySpark_exception_from_known_structure(tool_exception)
 
     except Exception as e:
-        logging.error(
-            f"Error parsing SparkRuntimeException: {e}, trying alternative approaches to parsing."
-        )
-        error_info_to_return = None
-        pass
+        # 2nd attempt: that failed, let's try to parse the SparkException's raw formatting
+        logging.error(f"Error parsing: {e}, trying alternative approaches to parsing.")
 
-    # 2nd attempt: that failed, let's try to parse the SparkException's raw formatting
-    if error_info_to_return is None:
         logging.info(
             f"Trying to parse spark exception {tool_exception} using its raw string output."
         )
         try:
             raw_error_msg = str(tool_exception)
-            error_info_to_return = _parse_PySpark_exception_dumped_as_string(
-                raw_error_msg
-            )
+            return _parse_PySpark_exception_dumped_as_string(raw_error_msg)
         except Exception as e:
+            # Last attempt: if that fails, just use the raw error
             logging.error(
-                f"Error parsing spark exception using its raw string formatting {e}, will return the raw error message."
+                f"Error parsing spark exception using its raw string formatting: {e}, will return the raw error message."
             )
-            error_info_to_return = None
-            pass
 
-    # Last attempt: if that fails, just use the raw error
-    if error_info_to_return is None:
-        logging.info(
-            f"Failed to parse spark exception {tool_exception}, returning the raw error message."
-        )
-        error_info_to_return = str(tool_exception)
-
-    return error_info_to_return
+            logging.info(f"returning the raw error message: {str(tool_exception)}.")
+            return _return_raw_PySpark_exception(tool_exception)
