@@ -2,18 +2,26 @@ from cookbook.tools import Tool
 from cookbook.databricks_utils import get_function_url
 
 
+from cookbook.tools.uc_tool_utils import _parse_SparkException_from_tool_execution
 import mlflow
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import ResourceDoesNotExist
 from mlflow.models.resources import DatabricksFunction, DatabricksResource
 from pydantic import Field, model_validator
 from pyspark.errors import SparkRuntimeException
+from pyspark.errors.exceptions.connect import SparkException
+
+# from pyspark.sql.utils import SparkException
 from unitycatalog.ai.core.databricks import DatabricksFunctionClient
 from unitycatalog.ai.openai.toolkit import UCFunctionToolkit
 from dataclasses import asdict
 
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
+
+ERROR_DETAILS_KEY = "error_details"
+ERROR_INSTRUCTIONS_KEY = "error_instructions"
+ERROR_STATUS_KEY = "error"
 
 
 class UCTool(Tool):
@@ -34,7 +42,12 @@ class UCTool(Tool):
     """Unity Catalog location of the function in format: catalog.schema.function_name."""
 
     error_prompt: str = (
-        "Error in generated code.  Please think step-by-step about how to fix the error and try calling this tool again with corrected inputs that reflect this thinking."
+        f"""The tool call generated an Exception, detailed in `{ERROR_STATUS_KEY}`. Think step-by-step following these instructions to determine your next step.\n"""
+        "[1] Is the error due to a problem with the input parameters?\n"
+        "[2] Could it succeed if retried with exactly the same inputs?\n"
+        "[3] Could it succeed if retried with modified parameters using the input we already have from the user?\n"
+        "[4] Could it succeed if retried with modified parameters informed by collecting additional input from the user?  What specific input would we need from the user?\n"
+        """Based on your thinking, if the error is due to a problem with the input parameters, either call this tool again in a way that avoids this exception or collect additional information from the user to modify the inputs to avoid this exception."""
     )
 
     # Optional b/c we set these automatically in model_post_init from the UC function itself.
@@ -110,6 +123,7 @@ class UCTool(Tool):
 
         # TODO: Add in Ben's code parser
 
+        # Try to execute the function & return its value as a dict
         try:
             result = traced_exec_function(
                 function_name=self.uc_function_name, parameters=args_json
@@ -117,23 +131,21 @@ class UCTool(Tool):
             return asdict(result)
 
         # Parse the error into a format that's easier for the LLM to understand w/ out any of the Spark runtime error noise
-        except SparkRuntimeException as e:
-            try:
-                error = (
-                    e.getMessageParameters()["error"]
-                    .replace('File "<string>",', "")
-                    .strip()
-                )
-            except Exception as e:
-                error = e.getMessageParameters()["error"]
+        except (SparkRuntimeException, SparkException) as tool_exception:
+            exception_info_dict = {}
+            # print(tool_exception)
+            exception_info_dict[ERROR_STATUS_KEY] = (
+                _parse_SparkException_from_tool_execution(tool_exception)
+            )
+            # exception_info_dict[ERROR_STATUS_KEY] = "ERROR"
+            exception_info_dict[ERROR_INSTRUCTIONS_KEY] = self.error_prompt
+            return exception_info_dict
+        except Exception as tool_exception:
+            # some other type of error that is unknwon, just return it
             return {
-                "status": self.error_prompt,
-                "error": error,
-            }
-        except Exception as e:
-            return {
-                "status": self.error_prompt,
-                "error": str(e),
+                ERROR_INSTRUCTIONS_KEY: self.error_prompt,
+                # ERROR_STATUS_KEY: "ERROR",
+                ERROR_STATUS_KEY: str(tool_exception),
             }
 
     def model_dump(self, **kwargs) -> Dict[str, Any]:
@@ -147,3 +159,15 @@ class UCTool(Tool):
 
     def get_resource_dependencies(self) -> List[DatabricksResource]:
         return [DatabricksFunction(function_name=self.uc_function_name)]
+
+    def _remove_udfbody_from_stack_trace(self, stack_trace: str) -> str:
+        return stack_trace.replace('File "<udfbody>",', "").strip()
+
+
+debug = __name__ == "__main__"
+if debug:
+    translate_sku_tool = UCTool(uc_function_name="ep.cookbook_local_test.translate_sku")
+    output = translate_sku_tool(old_sku="NEW-ABC-1234")
+    output = translate_sku_tool(old_sku="OLD-ABC-1234")
+
+    # print(output)
