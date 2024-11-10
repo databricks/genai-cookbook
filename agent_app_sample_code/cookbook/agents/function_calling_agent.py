@@ -265,11 +265,15 @@ if debug:
 
     vibe_check_query = {
         "messages": [
-            # {"role": "user", "content": f"what is agent evaluation?"},
-            {
-                "role": "user",
-                "content": f"find all docs from the section header 'Databricks documentation archive' or 'Work with files on Databricks'",
-            },
+            {"role": "user", "content": f"what is agent evaluation?"},
+            # {
+            #     "role": "user",
+            #     "content": f"find all docs from the section header 'Databricks documentation archive' or 'Work with files on Databricks'",
+            # },
+            # {
+            #     "role": "user",
+            #     "content": "Translate the sku `OLD-abs-1234` to the new format",
+            # }
             # {
             #     "role": "user",
             #     "content": f"convert sku 'OLD-XXX-1234' to the new format",
