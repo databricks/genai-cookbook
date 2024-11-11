@@ -1,12 +1,15 @@
 import pytest
 from cookbook.tools.uc_tool import UCTool
 
+CATALOG = "ep"
+SCHEMA = "cookbook_local_test"
+
 
 # Load the function from the UCTool versus locally
 @pytest.fixture
 def translate_sku():
     """Fixture to provide the translate_sku function from UCTool."""
-    translate_sku_tool = UCTool(uc_function_name="ep.cookbook_local_test.translate_sku")
+    translate_sku_tool = UCTool(uc_function_name=f"{CATALOG}.{SCHEMA}.translate_sku")
     return translate_sku_tool
 
 

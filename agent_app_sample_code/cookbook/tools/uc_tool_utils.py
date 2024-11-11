@@ -1,7 +1,7 @@
 import mlflow
 from pyspark.errors import SparkRuntimeException
-from pyspark.errors.exceptions.connect import SparkException
-
+from pyspark.errors.exceptions.connect import SparkException, ParseException
+import re
 
 import logging
 from typing import Dict, Union
@@ -97,3 +97,46 @@ def _parse_SparkException_from_tool_execution(
 
             logging.info(f"returning the raw error message: {str(tool_exception)}.")
             return _return_raw_PySpark_exception(tool_exception)
+
+
+# TODO: this might be over fit to python code execution tool, need to test it more
+@mlflow.trace(span_type="PARSER")
+def _parse_ParseException_from_tool_execution(
+    tool_exception: ParseException,
+) -> Dict[str, str]:
+    try:
+        error_msg = tool_exception.getMessage()
+        # Extract the main error message (remove SQLSTATE and position info)
+        error = error_msg.split("SQLSTATE:")[0].strip()
+        if "[PARSE_SYNTAX_ERROR]" in error:
+            error = error.split("[PARSE_SYNTAX_ERROR]")[1].strip()
+
+        # Pattern to match "line X, pos Y"
+        pattern = r"line (\d+), pos (\d+)"
+        match = re.search(pattern, error_msg)
+
+        if match:
+            line_num = match.group(1)
+            pos_num = match.group(2)
+            line_info = f"(line {line_num}, pos {pos_num})"
+            error = error + " " + line_info
+
+        # Extract the SQL section with the error pointer
+        sql_section = (
+            error_msg.split("== SQL ==")[1].split("JVM stacktrace:")[0].strip()
+            if "== SQL ==" in error_msg
+            else ""
+        )
+
+        # Remove the SELECT statement from the error message
+        select_pattern = r"SELECT\s+`[^`]+`\.`[^`]+`\.`[^`]+`\('"
+        # error_without_sql_parts = sql_section.replace(select_pattern, "").strip()
+        error_without_sql_parts = re.sub(select_pattern, "", sql_section).strip()
+
+        return {STACK_TRACE_KEY: error_without_sql_parts, ERROR_KEY: error}
+    except Exception as e:
+        logging.info(f"Error parsing ParseException: {e}")
+        return {
+            STACK_TRACE_KEY: None,
+            ERROR_KEY: str(tool_exception),
+        }

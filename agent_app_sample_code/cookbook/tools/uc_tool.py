@@ -5,6 +5,7 @@ from cookbook.databricks_utils import get_function_url
 from cookbook.tools.uc_tool_utils import (
     _parse_SparkException_from_tool_execution,
     _parse_generic_tool_exception,
+    _parse_ParseException_from_tool_execution,
 )
 import mlflow
 from databricks.sdk import WorkspaceClient
@@ -12,7 +13,7 @@ from databricks.sdk.errors import ResourceDoesNotExist
 from mlflow.models.resources import DatabricksFunction, DatabricksResource
 from pydantic import Field, model_validator
 from pyspark.errors import SparkRuntimeException
-from pyspark.errors.exceptions.connect import SparkException
+from pyspark.errors.exceptions.connect import SparkException, ParseException
 
 # from pyspark.sql.utils import SparkException
 from unitycatalog.ai.core.databricks import DatabricksFunctionClient
@@ -136,6 +137,13 @@ class UCTool(Tool):
         except (SparkRuntimeException, SparkException) as tool_exception:
             return {
                 ERROR_STATUS_KEY: _parse_SparkException_from_tool_execution(
+                    tool_exception
+                ),
+                ERROR_INSTRUCTIONS_KEY: self.error_prompt,
+            }
+        except ParseException as tool_exception:
+            return {
+                ERROR_STATUS_KEY: _parse_ParseException_from_tool_execution(
                     tool_exception
                 ),
                 ERROR_INSTRUCTIONS_KEY: self.error_prompt,
