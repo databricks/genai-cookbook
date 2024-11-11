@@ -28,6 +28,7 @@ pypandoc-binary = "1.13"
 iprogress = "^0.4"
 unitycatalog-ai = {git = "https://github.com/unitycatalog/unitycatalog.git", subdirectory = "ai/core"}
 unitycatalog-openai = {git = "https://github.com/unitycatalog/unitycatalog.git", subdirectory = "ai/integrations/openai"}
+pytest = "^8.3.3"
 
 
 [build-system]
