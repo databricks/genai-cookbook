@@ -49,11 +49,3 @@ def test_invalid_format():
             match="SKU format must be 'OLD-XXX-YYYY' where X is a letter and Y is a digit",
         ):
             translate_sku(sku)
-
-
-# def test_invalid_numeric_range():
-#     """Test numeric values outside the valid range."""
-#     with pytest.raises(ValueError, match="Numeric part must be between 0001 and 9999"):
-#         translate_sku("OLD-ABC-0000")
-#     with pytest.raises(ValueError, match="Numeric part must be between 0001 and 9999"):
-#         translate_sku("OLD-ABC-10000")
