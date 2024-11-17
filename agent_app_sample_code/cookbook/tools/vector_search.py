@@ -17,6 +17,10 @@ from dataclasses import asdict
 
 FilterDict = Dict[str, Union[str, int, float, List[Union[str, int, float]]]]
 
+# Change this to True to use the source table's metadata for the filterable columns.
+# This causes deployment to fail since the deployed model doesn't have access to the source table.
+USE_SOURCE_TABLE_FOR_FILTERS_METADATA = False
+
 
 class VectorSearchSchema(BaseModel):
     """Configuration for the schema used in the retriever's response.
@@ -173,21 +177,9 @@ class VectorSearchRetrieverTool(Tool):
                     f"Available columns: {', '.join(sorted(table_columns))}"
                 )
 
-    def _get_index_and_table_info(self):
-        """Helper method to get index and table information."""
+    def _get_index_info(self):
         w = WorkspaceClient()
-        index_info = w.vector_search_indexes.get_index(self.vector_search_index)
-
-        if index_info.index_type != VectorIndexType.DELTA_SYNC:
-            raise ValueError(
-                f"Unsupported index type: {index_info.index_type}. Only DELTA_SYNC is supported."
-            )
-
-        source_table = index_info.delta_sync_index_spec.source_table
-        table_info = w.tables.get(source_table)
-        table_columns = {col.name for col in table_info.columns}
-
-        return index_info, source_table, table_info, table_columns
+        return w.vector_search_indexes.get_index(self.vector_search_index)
 
     def _check_if_index_exists(self):
         w = WorkspaceClient()
@@ -200,9 +192,19 @@ class VectorSearchRetrieverTool(Tool):
     @property
     def filterable_columns_descriptions_for_llm(self) -> str:
         """Returns a formatted description of all filterable columns for use in prompts."""
-        try:
-            # Get index and table info using shared method
-            _, _, table_info, _ = self._get_index_and_table_info()
+        if USE_SOURCE_TABLE_FOR_FILTERS_METADATA:
+            # Present the LLM with the source table's metadata for the filterable columns.
+            # TODO: be able to get this data directly from the index's metadata
+            # Get source table info
+            index_info = self._get_index_info()
+            if index_info.index_type != VectorIndexType.DELTA_SYNC:
+                raise ValueError(
+                    f"Unsupported index type: {index_info.index_type}. Only DELTA_SYNC is supported."
+                )
+
+            w = WorkspaceClient()
+            source_table = index_info.delta_sync_index_spec.source_table
+            table_info = w.tables.get(source_table)
 
             # Create mapping of column name to description and type
             column_info = {
@@ -221,8 +223,8 @@ class VectorSearchRetrieverTool(Tool):
                 descriptions.append(formatted_desc)
             return ", ".join(descriptions)
 
-        except Exception as e:
-            # Fallback to simple formatting if there's any error
+        else:
+            # just use the column names as metadata
             return ", ".join(str(col) for col in self.filterable_columns)
 
     @model_validator(mode="after")
@@ -235,12 +237,7 @@ class VectorSearchRetrieverTool(Tool):
                 f"Vector search index {self.vector_search_index} does not exist."
             )
 
-        index_info, source_table, _, table_columns = self._get_index_and_table_info()
-
-        # Validate filterable columns
-        self._validate_columns_exist(
-            self.filterable_columns, source_table, table_columns, "filterable_columns"
-        )
+        index_info = self._get_index_info()
 
         # Set primary key from index if not already set
         if not self.vector_search_schema._primary_key:
@@ -251,18 +248,7 @@ class VectorSearchRetrieverTool(Tool):
                     f"Could not find primary key in index {self.vector_search_index}"
                 )
 
-        # Validate all configured schema columns exist in source table
-        columns_to_validate = [
-            (self.vector_search_schema.chunk_text, "chunk_text"),
-            (self.vector_search_schema.document_uri, "document_uri"),
-        ]
-
-        if self.vector_search_schema.additional_metadata_columns:
-            for field in self.vector_search_schema.additional_metadata_columns:
-                columns_to_validate.append((field, "additional_metadata_columns"))
-
-        for column, context in columns_to_validate:
-            self._validate_columns_exist([column], source_table, table_columns, context)
+        # TODO: Validate all configured schema columns exist in the index.  Currently, this data is not available in the index metadata.
 
         return self
 
@@ -450,7 +436,7 @@ class VectorSearchRetrieverTool(Tool):
         ]
 
         # Get the embedding model endpoint
-        index_info, _, _, _ = self._get_index_and_table_info()
+        index_info = self._get_index_info()
         if index_info.index_type == VectorIndexType.DELTA_SYNC:
             # Only DELTA_SYNC indexes have embedding model endpoints
             for (
