@@ -181,9 +181,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         while i < max_iter:
             response = self.chat_completion(messages=messages, tools=True)
             assistant_message = response.choices[0].message  # openai client
-            # assistant_message = response.choices[0]["message"] #mlflow client
             tool_calls = assistant_message.tool_calls  # openai
-            # tool_calls = assistant_message.get('tool_calls')#mlflow client
             if tool_calls is None:
                 # the tool execution finished, and we have a generation
                 return (response, messages)
@@ -191,19 +189,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             for tool_call in tool_calls:  # TODO: should run in parallel
                 function = tool_call.function  # openai
                 args = json.loads(function.arguments)  # openai
-                # args = json.loads(function['arguments']) #mlflow
-                # result = exec_uc_func(uc_func_name, **args)
-                # result = self.execute_function(function.name, args)  # openai
                 result = execute_function(self.tool_functions[function.name], args)
-
-                # result = self.execute_function(function['name'], args) #mlflow
-
-                # format for the LLM, will throw exception if not possible
-                # try:
-                #     result_for_llm = json.dumps(result)
-                # except Exception as e:
-                #     result_for_llm = str(result)
-
                 tool_message = {
                     "role": "tool",
                     "tool_call_id": tool_call.id,
@@ -212,7 +198,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
 
                 tool_messages.append(tool_message)
             assistant_message_dict = assistant_message.dict().copy()  # openai
-            # assistant_message_dict = assistant_message.copy() #mlflow
             del assistant_message_dict["content"]
             del assistant_message_dict["function_call"]  # openai only
             if "audio" in assistant_message_dict:
