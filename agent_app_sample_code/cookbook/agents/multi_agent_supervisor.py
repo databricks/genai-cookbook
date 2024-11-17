@@ -550,14 +550,14 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
 
 
 # tell MLflow logging where to find the agent's code
-set_model(MultiAgentSupervisor)
+set_model(MultiAgentSupervisor())
 
 
 # IMPORTANT: set this to False before logging the model to MLflow
 debug = (
     __name__ == "__main__"
 )  ## run in debug mode if being called by > python function_calling_agent.py
-
+debug = False
 
 if debug:
 

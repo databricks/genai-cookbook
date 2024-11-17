@@ -469,7 +469,7 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
 
 
 # tell MLflow logging where to find the agent's code
-set_model(GenieAgent)
+set_model(GenieAgent())
 
 # COMMAND ----------
 
