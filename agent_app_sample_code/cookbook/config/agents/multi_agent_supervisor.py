@@ -33,7 +33,7 @@ from typing import Optional
 FINISH_ROUTE_NAME = "FINISH"  # reserved name for the finish agent which is hardcoded logic to return the last worker's response to the user
 SUPERVISOR_ROUTE_NAME = "SUPERVISOR"  # reserved name for the supervisor agent which is the main agent that controls the conversation
 ROUTING_FUNCTION_NAME = "decide_next_worker_or_finish"  # function name presented to the supervisor LLM via OpenAI function calling.  Used by supervisor to return it's routing decision.
-WORKER_PROMPT_TEMPLATE = "<worker><worker_name>{worker_name}</worker_name><worker_description>{worker_description}</worker_description>"
+WORKER_PROMPT_TEMPLATE = "<worker><name>{worker_name}</name><description>{worker_description}</description></worker>\n"
 # Variable names in the ROUTING_FUNCTION_NAME for the supervisor agent's outputted thinking process and decision making
 CONVERSATION_HISTORY_THINKING_PARAM = "conversation_history_thinking"
 WORKER_CAPABILITIES_THINKING_PARAM = "worker_capabilities_thinking"
@@ -108,7 +108,7 @@ class MultiAgentSupervisorConfig(SerializableConfig):
     """
 
     supervisor_system_prompt: str = """## Role
-You are a supervisor responsible for managing a conversation between a user and the following workers.  You select the next worker to respond or end the conversation to return the last worker's response to the user.  Use the {ROUTING_FUNCTION_NAME} function to share your step-by-step reasoning and decision.
+You are a supervisor responsible for managing a conversation between a user and the following workers.  You select the next worker to respond or end the conversation to return the last worker's response to the user.  Use the `{ROUTING_FUNCTION_NAME}` function to share your step-by-step reasoning and decision.
 
 ## Workers
 <workers>{workers_names_and_descriptions}</workers>
@@ -130,7 +130,7 @@ Your goal is to facilitate the conversation and ensure the user receives a helpf
     """
 
     supervisor_user_prompt: str = (
-        """Given the converastion history, the worker's descriptions and your thinking, which worker should act next OR should we FINISH? Respond with one of [{worker_names_with_finish}] to the `{NEXT_WORKER_OR_FINISH_PARAM}` variable in the {ROUTING_FUNCTION_NAME} function."""
+        """Given the converastion history, the worker's descriptions and your thinking, which worker should act next OR should we FINISH? Respond with one of {worker_names_with_finish} to the `{NEXT_WORKER_OR_FINISH_PARAM}` variable in the `{ROUTING_FUNCTION_NAME}` function."""
     )
     """
     Prompt sent to supervisor after system prompt and conversation history to request next worker selection.

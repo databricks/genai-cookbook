@@ -107,8 +107,19 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         self, agent_config: Optional[Union[MultiAgentSupervisorConfig, str]] = None
     ):
         logging.info("Initializing MultiAgentSupervisor")
-        # Initialize core configuration
-        self._initialize_config(agent_config)
+
+        # load the Agent's configuration. See load_config() for details.
+        self.agent_config = load_config(
+            passed_agent_config=agent_config,
+            default_config_file_name=MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
+        )
+        if not self.agent_config:
+            raise ValueError(
+                f"No agent config found.  If you are in your local development environment, make sure you either [1] are calling init(agent_config=...) with either an instance of MultiAgentSupervisorConfig or the full path to a YAML config file or [2] have a YAML config file saved at {{your_project_root_folder}}/configs/{MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME}."
+            )
+        else:
+            logging.info("Successfully loaded agent config in __init__.")
+            logging.info(f"Loaded config: {self.agent_config.model_dump()}")
 
         # Initialize clients
         self._initialize_model_serving_clients()
@@ -123,18 +134,6 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         self.state = None  # Will be initialized per conversation
         logging.info("Initialized MultiAgentSupervisor")
 
-    def _initialize_config(
-        self, agent_config: Optional[Union[MultiAgentSupervisorConfig, str]]
-    ):
-        """Initialize and validate the agent configuration"""
-        self.agent_config = load_config(
-            agent_config=agent_config,
-            default_config_file_name=MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
-        )
-        if not self.agent_config:
-            raise ValueError("No agent config found")
-        logging.info("Initialized agent config")
-
     def _initialize_model_serving_clients(self):
         """Initialize API clients for model serving"""
         w = WorkspaceClient()
@@ -146,13 +145,7 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
 
     def _initialize_supervised_agents(self):
         """Initialize the agent registry and capabilities"""
-        # Initialize base agents (finish and supervisor)
-        self.agents = {
-            FINISH_ROUTE_NAME: {
-                "agent_fn": None,
-                "agent_description": self.agent_config.finish_agent_description,
-            },
-        }
+        self.agents = {}
 
         # Add configured worker agents
         if self.agent_config.agent_loading_mode == "model_serving":
@@ -554,19 +547,17 @@ set_model(MultiAgentSupervisor())
 
 
 # IMPORTANT: set this to False before logging the model to MLflow
-debug = (
-    __name__ == "__main__"
-)  ## run in debug mode if being called by > python function_calling_agent.py
 debug = False
 
 if debug:
 
-    agent = MultiAgentSupervisor(agent_config=MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME)
+    # agent = MultiAgentSupervisor(agent_config=MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME)
+    agent = MultiAgentSupervisor()
 
     vibe_check_query = {
         "messages": [
-            # {"role": "user", "content": f"how does the CoolTech Elite 5500 work?"},
-            {"role": "user", "content": f"calculate the value of 2+2?"},
+            {"role": "user", "content": f"how does the CoolTech Elite 5500 work?"},
+            # {"role": "user", "content": f"calculate the value of 2+2?"},
             # {
             #     "role": "user",
             #     "content": f"How does account age affect the likelihood of churn?",
@@ -576,6 +567,7 @@ if debug:
 
     output = agent.predict(model_input=vibe_check_query)
     print(output["content"])
+    # print(output)
 
     # input_2 = output["messages"].copy()
     # input_2.append(
