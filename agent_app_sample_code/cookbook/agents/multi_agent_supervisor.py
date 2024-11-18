@@ -1,6 +1,9 @@
 import json
 import os
 from typing import Any, Callable, Dict, List, Optional, Union
+from cookbook.config.agents.multi_agent_supervisor import (
+    MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
+)
 import mlflow
 from dataclasses import asdict, dataclass, field
 import pandas as pd
@@ -35,8 +38,6 @@ import logging
 from mlflow.entities import Trace
 import mlflow.deployments
 
-
-MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME = "multi_agent_supervisor_config.yaml"
 
 AGENT_RAW_OUTPUT_KEY = "raw_agent_output"
 AGENT_NEW_MESSAGES_KEY = "new_messages"
@@ -274,6 +275,10 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         """
         Calls a supervised agent and returns ONLY the new [messages] produced by that agent.
         """
+        span = mlflow.get_current_active_span()
+        span.set_attribute(
+            "self.agent_config.agent_loading_mode", self.agent_config.agent_loading_mode
+        )
         raw_agent_output = {}
         if self.agent_config.agent_loading_mode == "model_serving":
             endpoint_name = self.agents.get(agent_name).get("endpoint_name")
@@ -556,8 +561,8 @@ if debug:
 
     vibe_check_query = {
         "messages": [
-            {"role": "user", "content": f"how does the CoolTech Elite 5500 work?"},
-            # {"role": "user", "content": f"calculate the value of 2+2?"},
+            # {"role": "user", "content": f"how does the CoolTech Elite 5500 work?"},
+            {"role": "user", "content": f"calculate the value of 2+2?"},
             # {
             #     "role": "user",
             #     "content": f"How does account age affect the likelihood of churn?",

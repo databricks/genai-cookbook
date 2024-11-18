@@ -39,6 +39,8 @@ CONVERSATION_HISTORY_THINKING_PARAM = "conversation_history_thinking"
 WORKER_CAPABILITIES_THINKING_PARAM = "worker_capabilities_thinking"
 NEXT_WORKER_OR_FINISH_PARAM = "next_worker_or_finish"
 
+MULTI_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME = "multi_agent_supervisor_config.yaml"
+
 
 class MultiAgentSupervisorConfig(SerializableConfig):
     """
@@ -179,20 +181,18 @@ Your goal is to facilitate the conversation and ensure the user receives a helpf
 class SupervisedAgentConfig(SerializableConfig):
     name: str
     description: str
-    endpoint_name: str
-    agent_config: SerializableConfig
-    # code: Any
-
-    agent_class_path: str
+    endpoint_name: Optional[str] = None
+    agent_config: Optional[SerializableConfig] = None
+    agent_class_path: Optional[str] = None
 
     # TODO: check agent_class is a subclass of our Agent - need to refactor Agent to a common base class
     def __init__(
         self,
         name: str,
         description: str,
-        endpoint_name: str,
-        agent_config: SerializableConfig,
         *,
+        endpoint_name: Optional[str] = None,
+        agent_config: Optional[SerializableConfig] = None,
         agent_class: Optional[type] = None,
         agent_class_path: Optional[str] = None,
     ):
@@ -217,6 +217,14 @@ class SupervisedAgentConfig(SerializableConfig):
                 raise ValueError("agent_class must be a subclass of PythonModel")
 
             agent_class_path = f"{agent_class.__module__}.{agent_class.__name__}"
+
+        if (endpoint_name is None) and (
+            agent_config is None and agent_class_path is None
+        ):
+            raise ValueError(
+                "One of endpoint_name or agent_config/agent_class(_path) must be provided"
+            )
+
         super().__init__(
             name=name,
             description=description,
@@ -231,26 +239,28 @@ class SupervisedAgentConfig(SerializableConfig):
         Returns:
             Dict[str, Any]: Dictionary representation of the model excluding name and description.
         """
-        kwargs["exclude"] = {"agent_config"}.union(kwargs.get("exclude", set()))
-        model_dumped = super().model_dump(**kwargs)
 
-        # dump the config
-        model_dumped["agent_config"] = yaml.safe_load(
-            serializable_config_to_yaml(self.agent_config)
-        )
-
-        return model_dumped
+        # only modify the method if agent_config is present, otherwise, this is not needed
+        if self.agent_config is not None:
+            kwargs["exclude"] = {"agent_config"}.union(kwargs.get("exclude", set()))
+            model_dumped = super().model_dump(**kwargs)
+            model_dumped["agent_config"] = yaml.safe_load(
+                serializable_config_to_yaml(self.agent_config)
+            )
+            return model_dumped
+        else:
+            return super().model_dump(**kwargs)
 
     @classmethod
     def _load_class_from_dict(
         cls, class_object, data: Dict[str, Any]
     ) -> "SerializableConfig":
-        # Deserialize agent config
 
-        agent_config = load_serializable_config_from_yaml(
-            yaml.dump(data["agent_config"])
-        )
-        data["agent_config"] = agent_config
-        # del data["config"]
+        # Deserialize agent config but only if it is present
+        if data["agent_config"] is not None:
+            agent_config = load_serializable_config_from_yaml(
+                yaml.dump(data["agent_config"])
+            )
+            data["agent_config"] = agent_config
 
         return class_object(**data)
