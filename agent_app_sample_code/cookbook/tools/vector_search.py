@@ -342,7 +342,8 @@ class VectorSearchRetrieverTool(Tool):
             List of retrieved Documents.
         """
         span = mlflow.get_current_active_span()
-        span.set_attributes({"vector_search_index": self.vector_search_index})
+        if span:  # TODO: Hack, when mlflow tracing is disabled, span == None.
+            span.set_attributes({"vector_search_index": self.vector_search_index})
 
         w = WorkspaceClient()
 

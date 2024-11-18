@@ -4,50 +4,15 @@ from cookbook.config import SerializableConfig
 import yaml
 import mlflow
 from cookbook.config import (
-    load_serializable_config_from_yaml_file,
-)
-from cookbook.config import (
     load_serializable_config_from_yaml,
 )
 import os
 
 
-def find_project_root(marker_directory="configs"):
-    """Find the project root by looking for the "configs" directory."""
-    current = os.path.abspath(os.getcwd())
-    while current != "/":
-        # Check current directory
-        marker_path = os.path.join(current, marker_directory)
-        if os.path.exists(marker_path) and os.path.isdir(marker_path):
-            return current
-
-        # Check immediate subdirectories
-        for item in os.listdir(current):
-            item_path = os.path.join(current, item)
-            if os.path.isdir(item_path):
-                marker_in_subdir = os.path.join(item_path, marker_directory)
-                if os.path.exists(marker_in_subdir) and os.path.isdir(marker_in_subdir):
-                    return current
-
-                # Check one level deeper
-                for subitem in os.listdir(item_path):
-                    subitem_path = os.path.join(item_path, subitem)
-                    if os.path.isdir(subitem_path):
-                        marker_in_subsubdir = os.path.join(
-                            subitem_path, marker_directory
-                        )
-                        if os.path.exists(marker_in_subsubdir) and os.path.isdir(
-                            marker_in_subsubdir
-                        ):
-                            return current
-
-        current = os.path.dirname(current)
-    raise ValueError(f"Could not find project root containing {marker_directory}")
-
-
 def load_first_yaml_file(config_paths: List[str]) -> str:
     for path in config_paths:
         if os.path.exists(path):
+            logging.info(f"Found YAML config file at {path}")
             with open(path, "r") as handle:
                 return handle.read()
     raise ValueError(
@@ -56,92 +21,115 @@ def load_first_yaml_file(config_paths: List[str]) -> str:
     )
 
 
-def load_config(
-    agent_config: SerializableConfig | str | None = None,
-    default_config_file_name: str = None,
-) -> SerializableConfig:
-    """
-    Load configuration from various sources in order of precedence:
-    1. Passed config object
-    2. YAML file path
-    3. Temporary config file
-    4. Default config files
-    5. MLflow model config
+def load_config_from_mlflow_model_config() -> SerializableConfig:
+    try:
+        model_config_as_yaml = yaml.dump(mlflow.models.ModelConfig()._read_config())
+        loaded_config = load_serializable_config_from_yaml(model_config_as_yaml)
+        logging.info(f"Loaded config from mlflow.models.ModelConfig(): {loaded_config}")
+        return loaded_config
+    except Exception as e:
+        logging.info(f"Could not load config from mlflow.models.ModelConfig(): {e}")
+        return None
 
-    Args:
-        agent_config: Configuration object, path to YAML file, or None
 
-    Returns:
-        SerializableModel: Loaded configuration object
+def try_to_load_config_file(agent_config_file_or_path: str) -> SerializableConfig:
     """
-    # happy path if we are passed an instantiated config class, just use that
-    if isinstance(agent_config, SerializableConfig):
-        logging.info("Passed instantiated config class, using that.")
-        return agent_config
+    Try to load configuration from a local YAML file.
+    """
 
     # otherwise, we try to look for the YAML file
     # this logic accounts for the fact that the agent can be called from any working directory, so we have to search for the config folder to find the YAML.
     config_paths = []
-    if isinstance(agent_config, str):
-        logging.info(
-            f"`agent_config` is a string, trying to load from YAML: {agent_config}"
-        )
-        config_paths.append(
-            agent_config
-        )  # will try to load from the passed file first.
-        # return load_serializable_config_from_yaml_file(agent_config)
+    config_paths.append(
+        agent_config_file_or_path
+    )  # will try from the passed location first.
 
-    # Try to load from default config file first for inner dev loop
-    # in serving env these files will not be present, so load the model's logged config e.g., the config from mlflow.pyfunc.log_model(model_config=...) via mlflow.ModelConfig()
-    # in the shared logging utilities, we set TMP_CONFIG_FILE_PATH to the path of the config file that is dumped
+    # Then try a from a few common locations - these are set based on the common working directory locations for a notebook/shell.
+    config_paths.extend(
+        [
+            "./configs/" + agent_config_file_or_path,
+            "../configs/" + agent_config_file_or_path,
+            "../../configs/" + agent_config_file_or_path,
+            "../agent_app_sample_code/configs/" + agent_config_file_or_path,
+            "./agent_app_sample_code/configs/" + agent_config_file_or_path,
+        ]
+    )
 
-    if default_config_file_name:
-        try:
-            project_root = find_project_root()
-            config_paths.extend(
-                [
-                    os.path.join(project_root, "configs", default_config_file_name),
-                    os.path.join(
-                        project_root,
-                        "agent_app_sample_code",
-                        "configs",
-                        default_config_file_name,
-                    ),
-                ]
-            )
-        except ValueError as e:
-            # could not find the project root, so keep trying the next options to load config
-            logging.info(
-                f"Could not find project root directory by looking for `configs` directory.  Trying to load config from current working directory {os.getcwd()}."
-            )
-            config_paths.extend(
-                [
-                    "./configs/" + default_config_file_name,
-                    "../configs/" + default_config_file_name,
-                    "../../configs/" + default_config_file_name,
-                    "../agent_app_sample_code/configs/" + default_config_file_name,
-                    "./agent_app_sample_code/configs/" + default_config_file_name,
-                ]
-            )
-            pass
-    logging.info(f"Trying to load from paths: {config_paths}")
+    logging.info(
+        f"Trying to load YAML file {agent_config_file_or_path} from paths: {config_paths}"
+    )
     try:
         config_file = load_first_yaml_file(config_paths)
         return load_serializable_config_from_yaml(config_file)
-    except ValueError as e:
-        logging.info(f"No local config YAML found at {config_paths}.")
-        # # TODO: replace with mlflow.ModelConfig().to_dict() once released
-        # # model_config_as_yaml = yaml.dump(mlflow.models.ModelConfig()._read_config())
-        # try:
-        #     model_config_as_yaml = yaml.dump(mlflow.models.ModelConfig()._read_config())
-        #     config = load_serializable_config_from_yaml(model_config_as_yaml)
-        #     logging.info(f"Loaded config from mlflow.ModelConfig(): {config}")
-        #     return config
-        # except Exception as e:
-        #     logging.error(f"Error loading config from mlflow.ModelConfig(): {e}")
-        #     return None
+    except Exception as e:
+        logging.info(
+            f"YAML file {agent_config_file_or_path} NOT found at {config_paths}."
+        )
+        raise ValueError(
+            f"Could not load the provided YAML file {agent_config_file_or_path}."
+        )
 
-    # If no config is found, return None
+
+def load_config(
+    passed_agent_config: SerializableConfig | str | None = None,
+    default_config_file_name: str = None,
+) -> SerializableConfig:
+    """
+    Load configuration from various sources in order of precedence:
+    # load the Agent's configuration.  Priority order:
+    1. MLflow Model config
+    2. passed_agent_config
+    3. default_config_file_name
+
+    Returns:
+        SerializableModel: Loaded configuration object
+    """
+
+    # 1. Try to use MLflow ModelConfig
+    try:
+        logging.info("Trying to load config from mlflow.models.ModelConfig()")
+        model_config_as_yaml = yaml.dump(mlflow.models.ModelConfig()._read_config())
+        loaded_config = load_serializable_config_from_yaml(model_config_as_yaml)
+        logging.info(f"Loaded config from mlflow.models.ModelConfig(): {loaded_config}")
+        return loaded_config
+    except Exception as e:
+        logging.info(f"Could not load config from mlflow.models.ModelConfig(): {e}")
+
+    # 2a. passed_agent_config is an instantiated config class, use that
+    if isinstance(passed_agent_config, SerializableConfig):
+        logging.info(
+            "passed_agent_config` is an instantiated config class, using that."
+        )
+        return passed_agent_config
+
+    # 2b. passed_agent_config is a YAML file name or file path, try to load from that YAML file
+    # try_to_load_config_file logic accounts for the fact that the agent can be called from any working directory, so we will search for the config folder to find the YAML.
+    if isinstance(passed_agent_config, str):
+        logging.info(
+            f"`passed_agent_config` is a string, trying to load from YAML: {passed_agent_config}"
+        )
+        try:
+            loaded_config = try_to_load_config_file(passed_agent_config)
+            logging.info(
+                f"Loaded config from YAML file {passed_agent_config}: {loaded_config}"
+            )
+            return loaded_config
+        except ValueError as e:
+            logging.error(f"{passed_agent_config} was not found.")
+
+    # 3. Try to load from default config file
+    if default_config_file_name:
+        logging.info(f"Trying to load from YAML: {default_config_file_name}")
+        try:
+            loaded_config = try_to_load_config_file(default_config_file_name)
+            logging.info(
+                f"Loaded config from YAML file {default_config_file_name}: {loaded_config}"
+            )
+            return loaded_config
+        except ValueError as e:
+            logging.error(f"{default_config_file_name} was not found.")
+
+    # If no config is found so far, return None
     logging.error(
         "load_config could not find a config file.  Returning None.  Refer to your Agent's error message for next steps."
     )

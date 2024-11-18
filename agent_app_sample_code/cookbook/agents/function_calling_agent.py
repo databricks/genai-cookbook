@@ -6,15 +6,12 @@
 # sys.path.append("../..")
 
 import json
-import os
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 import mlflow
-from dataclasses import asdict, dataclass
 import pandas as pd
-from mlflow.models import set_model, ModelConfig
-from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest, Message
+from mlflow.models import set_model
+from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest
 from databricks.sdk import WorkspaceClient
-import os
 from cookbook.agents.utils.execute_function import execute_function
 
 from cookbook.agents.utils.chat import (
@@ -28,12 +25,6 @@ from cookbook.config.agents.function_calling_agent import (
 from cookbook.agents.utils.execute_function import execute_function
 from cookbook.agents.utils.load_config import load_config
 import logging
-import yaml
-from cookbook.config import (
-    load_serializable_config_from_yaml,
-)
-
-from mlflow.pyfunc import PythonModelContext
 
 FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME = "function_calling_agent_config.yaml"
 
@@ -43,32 +34,31 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
     Class representing an Agent that does function-calling with tools using OpenAI SDK
     """
 
-    def load_context(self, context: PythonModelContext):
-        # If context is not None, we are in the serving environment
-        if context is not None:
-            logging.info(
-                f"load_context received context.model_config: {context.model_config}"
-            )
-            # we intentioanlly don't catch any errors here so the full logs show in model serving logs
-            model_config_as_yaml = yaml.dump(context.model_config)
-            self.agent_config = load_serializable_config_from_yaml(model_config_as_yaml)
-            logging.info(
-                f"Loaded config from context.model_config: {self.agent_config}"
-            )
+    def __init__(
+        self, agent_config: Optional[Union[FunctionCallingAgentConfig, str]] = None
+    ):
+        super().__init__()
+        # Empty variables that will be initialized after loading the agent config.
+        self.model_serving_client = None
+        self.tool_functions = None
+        self.tool_json_schemas = None
+        self.chat_history = None
+        self.agent_config = None
 
-            if self.agent_config is None:
-                # we failed, so let's try with mlflow.ModelConfig._read_config()
-                model_config_as_yaml = yaml.dump(
-                    mlflow.models.ModelConfig()._read_config()
-                )
-                self.agent_config = load_serializable_config_from_yaml(
-                    model_config_as_yaml
-                )
-                logging.info(
-                    f"Loaded config from mlflow.models.ModelConfig(): {self.agent_config}"
-                )
+        # load the Agent's configuration. See load_config() for details.
+        self.agent_config = load_config(
+            passed_agent_config=agent_config,
+            default_config_file_name=FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
+        )
+        if not self.agent_config:
+            raise ValueError(
+                f"No agent config found.  If you are in your local development environment, make sure you either [1] are calling init(agent_config=...) with either an instance of FunctionCallingAgentConfig or the full path to a YAML config file or [2] have a YAML config file saved at {{your_project_root_folder}}/configs/{FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME}."
+            )
+        else:
+            logging.info("Successfully loaded agent config in __init__.")
+            logging.info(f"Loaded config: {self.agent_config.model_dump()}")
 
-        # Now, the config will be loaded - either by above (in serving), or by __init__ (in local dev)
+        # Now, initialize the rest of the Agent
         w = WorkspaceClient()
         self.model_serving_client = w.serving_endpoints.get_open_ai_client()
 
@@ -81,37 +71,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
 
         # Initialize the chat history to empty
         self.chat_history = []
-
-    def __init__(
-        self, agent_config: Optional[Union[FunctionCallingAgentConfig, str]] = None
-    ):
-        super().__init__()
-        # Empty variables that will be initialized in load_context
-        self.model_serving_client = None
-        self.tool_functions = None
-        self.tool_json_schemas = None
-        self.chat_history = None
-
-        # Load the agent config if it is provided as a parameter
-        # This will only happen in the local dev environment, in serving, load_context will load the config from the mlflow.ModelConfig.
-        # print(agent_config)
-        if "agent_config" in locals() and agent_config is not None:
-            self.agent_config = load_config(
-                agent_config=agent_config,
-                default_config_file_name=FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
-            )
-            if not self.agent_config:
-                raise ValueError(
-                    f"No agent config found.  If you are in your local development environment, make sure you either [1] are calling init(agent_config=...) with either an instance of FunctionCallingAgentConfig or the full path to a YAML config file or [2] have a YAML config file saved at ./configs/{FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME}."
-                )
-            else:
-                logging.info(
-                    "Successfully loaded agent config in __init__.  This will only happen in your local development environment.  In serving, the config will be loaded from mlflow.ModelConfig."
-                )
-                logging.info(f"Loaded config: {self.agent_config.model_dump()}")
-                # Now, call load_context to initialize the rest of the Agent
-                # HACK: We pass in None so the load_context method knows we are in the local dev environment and not serving
-                self.load_context(context=None)
 
     @mlflow.trace(name="agent", span_type="AGENT")
     def predict(
@@ -236,30 +195,34 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             return traced_create(model=endpoint_name, messages=messages, **llm_options)
 
 
+logging.basicConfig(level=logging.INFO)
+
 # tell MLflow logging where to find the agent's code
 set_model(FunctionCallingAgent())
 
 
 # IMPORTANT: set this to False before logging the model to MLflow
-debug = (
-    __name__ == "__main__"
-)  ## run in debug mode if being called by > python function_calling_agent.py
 debug = False
 
 if debug:
-    agent = FunctionCallingAgent(agent_config=FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME)
+    # logging.basicConfig(level=logging.INFO)
+    # print(find_config_folder_location())
+    # print(os.path.abspath(os.getcwd()))
+    # mlflow.tracing.disable()
+    agent = FunctionCallingAgent()
 
     vibe_check_query = {
         "messages": [
-            {"role": "user", "content": f"what is agent evaluation?"},
+            # {"role": "user", "content": f"what is agent evaluation?"},
+            # {"role": "user", "content": f"How does the blender work?"},
             # {
             #     "role": "user",
             #     "content": f"find all docs from the section header 'Databricks documentation archive' or 'Work with files on Databricks'",
             # },
-            # {
-            #     "role": "user",
-            #     "content": "Translate the sku `OLD-abs-1234` to the new format",
-            # }
+            {
+                "role": "user",
+                "content": "Translate the sku `OLD-abs-1234` to the new format",
+            }
             # {
             #     "role": "user",
             #     "content": f"convert sku 'OLD-XXX-1234' to the new format",
