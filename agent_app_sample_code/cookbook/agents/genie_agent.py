@@ -328,12 +328,18 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
         self,
         agent_config: Optional[Union[GenieAgentConfig, str]] = None,
     ):
+        # load the Agent's configuration. See load_config() for details.
         self.agent_config = load_config(
-            agent_config=agent_config,
+            passed_agent_config=agent_config,
             default_config_file_name=GENIE_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
         )
         if not self.agent_config:
-            raise ValueError("No agent config found")
+            raise ValueError(
+                f"No agent config found.  If you are in your local development environment, make sure you either [1] are calling init(agent_config=...) with either an instance of GenieAgentConfig or the full path to a YAML config file or [2] have a YAML config file saved at {{your_project_root_folder}}/configs/{GENIE_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME}."
+            )
+        else:
+            logging.info("Successfully loaded agent config in __init__.")
+            logging.info(f"Loaded config: {self.agent_config.model_dump()}")
 
         # Load the API wrapper
         self._genie_agent = GenieAPIWrapper(self.agent_config.genie_space_id)
