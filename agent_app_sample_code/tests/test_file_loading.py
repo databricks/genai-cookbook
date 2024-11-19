@@ -5,14 +5,13 @@ import pyspark
 import pandas as pd
 from typing import TypedDict
 
-from agent_app_sample_code.utils.file_loading import load_files_to_df, apply_parsing_udf
-from agent_app_sample_code.utils.typed_dicts_to_spark_schema import typed_dicts_to_spark_schema
+from utils.file_loading import load_files_to_df, apply_parsing_udf
+from utils.typed_dicts_to_spark_schema import typed_dicts_to_spark_schema
 
 @pytest.fixture(scope="module")
 def spark():
     return (
-        pyspark.sql.SparkSession.builder
-        .master("local[1]")
+        pyspark.sql.SparkSession.builder.master("local[1]")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.task.maxFailures", "1")  # avoid retry failed spark tasks
         .getOrCreate()

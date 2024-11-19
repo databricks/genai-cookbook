@@ -5,8 +5,8 @@ import pyspark
 import pandas as pd
 from typing import TypedDict
 
-from utils.file_loading import load_files_to_df, apply_parsing_udf
-from utils.typed_dicts_to_spark_schema import typed_dicts_to_spark_schema
+from cookbook.data_pipeline.parse_docs import load_files_to_df, apply_parsing_fn
+from cookbook.data_pipeline.utils.typed_dicts_to_spark_schema import typed_dicts_to_spark_schema
 
 
 @pytest.fixture(scope="module")
@@ -73,7 +73,7 @@ class ParserReturnValue(TypedDict):
     doc_uri: str  # do not change this name
 
 
-def test_apply_parsing_udf(spark, example_files_dir):
+def test_apply_parsing_fn(spark, example_files_dir):
     def _mock_file_parser(
         raw_doc_contents_bytes: bytes,
         doc_path: str,
@@ -88,7 +88,7 @@ def test_apply_parsing_udf(spark, example_files_dir):
 
     temp_dir, file_1, file_2 = example_files_dir
     raw_files_df = load_files_to_df(spark, str(temp_dir)).orderBy("path")
-    parsed_df = apply_parsing_udf(
+    parsed_df = apply_parsing_fn(
         raw_files_df,
         _mock_file_parser,
         parsed_df_schema=typed_dicts_to_spark_schema(ParserReturnValue),

@@ -1,5 +1,10 @@
 import pytest
 from cookbook.tools.uc_tool import UCTool
+import os
+
+if os.getenv("GITHUB_ACTIONS") == "true":
+    pytest.skip("Skipping all tests in this module in CI, as "
+                "Databricks auth is not available there", allow_module_level=True)
 
 # Load the function from the UCTool versus locally
 @pytest.fixture
