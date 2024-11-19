@@ -8,4 +8,5 @@ git+https://github.com/unitycatalog/unitycatalog.git#subdirectory=ai/core
 git+https://github.com/unitycatalog/unitycatalog.git#subdirectory=ai/integrations/openai
 tabulate
 pandas
+pyspark
 databricks-connect==15.1.0

@@ -24,6 +24,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r dev/dev_requirements.txt
-      - name: Test with pytest
+      - name: Test agent app sample code
         run: |
+          cd agent_app_sample_code 
           pytest
+      - name: Test OpenAI SDK sample code
+        run: |
+          cd openai_sdk_agent_app_sample_code 
+          pytest          

@@ -15,3 +15,4 @@ mlruns/
 _scratch_pad/
 openai_sdk_agent_app_sample_code/_scratch_pad/
 .vscode/
+*poetry.lock
