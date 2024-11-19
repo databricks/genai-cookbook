@@ -130,7 +130,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             "messages": messages_log_with_tool_calls,
         }
 
-    @mlflow.trace(span_type="AGENT")
+    @mlflow.trace(span_type="CHAIN")
     def recursively_call_and_run_tools(self, max_iter=10, **kwargs):
         messages = kwargs["messages"]
         del kwargs["messages"]
