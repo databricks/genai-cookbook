@@ -1,4 +1,5 @@
-def translate_sku(old_sku: str) -> str:
+
+def sku_sample_translator(old_sku: str) -> str:
     """
     Translates a pre-2024 SKU formatted as "OLD-XXX-YYYY" to the new SKU format "NEW-YYYY-XXX".
 
