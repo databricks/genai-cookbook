@@ -8,7 +8,7 @@ packages = [{include = "cookbook"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-databricks-connect = "~15.2"
+databricks-connect = "15.1.0"
 pydantic = "^2.9.2"
 pyyaml = "^6.0.2"
 databricks-vectorsearch = "^0.42"

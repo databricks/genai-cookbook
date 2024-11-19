@@ -1,6 +1,6 @@
 pydantic>=2.9.2
 databricks-agents
-mlflow>=2.17.2
+mlflow>=2.18.0
 databricks-sdk[openai]
 databricks-vectorsearch
 pyyaml
@@ -8,3 +8,4 @@ git+https://github.com/unitycatalog/unitycatalog.git#subdirectory=ai/core
 git+https://github.com/unitycatalog/unitycatalog.git#subdirectory=ai/integrations/openai
 tabulate
 pandas
+databricks-connect==15.1.0

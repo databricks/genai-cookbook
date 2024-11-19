@@ -1,6 +1,6 @@
 import mlflow
 from pyspark.errors import SparkRuntimeException
-from pyspark.errors.exceptions.connect import SparkException, ParseException
+from pyspark.errors.exceptions.connect import ParseException
 import re
 
 import logging
@@ -35,7 +35,7 @@ def _parse_PySpark_exception_dumped_as_string(error_msg: str) -> Dict[str, str]:
 
 @mlflow.trace(span_type="PARSER")
 def _parse_PySpark_exception_from_known_structure(
-    tool_exception: Union[SparkRuntimeException, SparkException]
+    tool_exception: SparkRuntimeException,
 ) -> Dict[str, str]:
     raw_stack_trace = tool_exception.getMessageParameters()["stack"]
     return {
@@ -53,18 +53,8 @@ def _parse_generic_tool_exception(tool_exception: Exception) -> Dict[str, str]:
 
 
 @mlflow.trace(span_type="PARSER")
-def _return_raw_PySpark_exception(
-    tool_exception: Union[SparkRuntimeException, SparkException]
-):
-    return {
-        STACK_TRACE_KEY: None,
-        ERROR_KEY: str(tool_exception),
-    }
-
-
-@mlflow.trace(span_type="PARSER")
 def _parse_SparkException_from_tool_execution(
-    tool_exception: Union[SparkRuntimeException, SparkException, Exception],
+    tool_exception: Union[SparkRuntimeException, Exception],
 ) -> Dict[str, str]:
     error_info_to_return: Union[Dict, str] = None
 
@@ -96,7 +86,7 @@ def _parse_SparkException_from_tool_execution(
             )
 
             logging.info(f"returning the raw error message: {str(tool_exception)}.")
-            return _return_raw_PySpark_exception(tool_exception)
+            return _parse_generic_tool_exception(tool_exception)
 
 
 # TODO: this might be over fit to python code execution tool, need to test it more

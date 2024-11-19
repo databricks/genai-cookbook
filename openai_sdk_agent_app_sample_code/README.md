@@ -1,26 +1,39 @@
 # How to use local IDE
 
-TODO
-
 - databricks auth profile DEFAULT is set up
-- set up your .env to point to mlflow exp + dbx tracking uri (if you want to run any agent code from the terminal and have it logged to mlflow)
-- point to a cluster_id in ~/.databrickscfg (if you want to use Spark code)
-- install poetry env
+```
+databricks auth profile login
+```
+- add a cluster_id in ~/.databrickscfg (if you want to use Spark code)
+- add `openai_sdk_agent_app_sample_code/.env` to point to mlflow exp + dbx tracking uri (if you want to run any agent code from the terminal and have it logged to mlflow).  Make sure this mlflow experiment maps to the one in 02_agent_setup.ipynb.
+```
+MLFLOW_TRACKING_URI=databricks
+MLFLOW_EXPERIMENT_NAME=/Users/your.name@company.com/my_agent_mlflow_experiment
+```
+- install poetry env & activate in your IDE
+```
+poetry install
+```
 
+if you want to use the data pipeline code in spark, you need to build the cookbook wheel and install it in the cluster
 - build cookbook wheel
+```
+poetry build
+```
 - install cookbook wheel in cluster
+    - Copy the wheel file to a UC Volume or Workspace folder
+    - Go to the cluster's Libraries page and install the wheel file as a new library
 
 
-
-# NOTES:
-- Deployment worked for tool calling agent with vector search.  
-- Not tested deployments
-    - with UC tool
+# NOTES/what doesn't work:
+- Works locally & once deployed:
+    - Tool calling agent with vector search, UC tool
+- Works locally, deployment not tested.
     - Genie Agent
-    - Multi-Agent supervisor
-- Not tested locally
-    - Multi-agent supervisor with endpoint
+    - Multi-Agent supervisor w/ "local" mode
+    - Multi-Agent supervisor w/ "endpoint" mode
 
+# TODO:
 - Refactor the cookbook folder to 
     - make it easy to add as `code_path` without putting all agent code + data pipeline code into the agent mlflow model
     - make the data pipeline competely seperate
@@ -30,12 +43,9 @@ TODO
     - test with deployed endpoints
     - make deployed endpoint optional if model = local, otherwise, make class/config optional.
 
-
-
-
-
-# TODO:
 - Create a version of each of these Agents with LangGraph, LlamaIndex, and AutoGen.
+
+# Docs
 
 This cookbook contains example Agents built using Python code + the OpenAI SDK to call Databricks Model Serving/External Models.  Each Agent is configurable via a Pydantic-based configuration classes and is wrapped in an MLflow PyFunc class for logging and deployment.
 

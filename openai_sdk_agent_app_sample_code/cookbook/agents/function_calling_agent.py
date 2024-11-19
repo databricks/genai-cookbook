@@ -1,9 +1,9 @@
 # In this file, we construct a function-calling Agent with a Retriever tool using MLflow + the OpenAI SDK connected to Databricks Model Serving. This Agent is encapsulated in a MLflow PyFunc class called `FunctionCallingAgent()`.
 
+# Add the parent directory to the path so we can import the `cookbook` modules
 # import sys
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-# # Add the parent directory to the path so we can import the `utils` modules
-# sys.path.append("../..")
 
 import json
 from typing import Any, Dict, List, Optional, Union
@@ -51,26 +51,25 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             default_config_file_name=FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
         )
         if not self.agent_config:
-            raise ValueError(
+            logging.error(
                 f"No agent config found.  If you are in your local development environment, make sure you either [1] are calling init(agent_config=...) with either an instance of FunctionCallingAgentConfig or the full path to a YAML config file or [2] have a YAML config file saved at {{your_project_root_folder}}/configs/{FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME}."
             )
         else:
             logging.info("Successfully loaded agent config in __init__.")
-            logging.info(f"Loaded config: {self.agent_config.model_dump()}")
 
-        # Now, initialize the rest of the Agent
-        w = WorkspaceClient()
-        self.model_serving_client = w.serving_endpoints.get_open_ai_client()
+            # Now, initialize the rest of the Agent
+            w = WorkspaceClient()
+            self.model_serving_client = w.serving_endpoints.get_open_ai_client()
 
-        # Initialize the tools
-        self.tool_functions = {}
-        self.tool_json_schemas = []
-        for tool in self.agent_config.tools:
-            self.tool_functions[tool.name] = tool
-            self.tool_json_schemas.append(tool.get_json_schema())
+            # Initialize the tools
+            self.tool_functions = {}
+            self.tool_json_schemas = []
+            for tool in self.agent_config.tools:
+                self.tool_functions[tool.name] = tool
+                self.tool_json_schemas.append(tool.get_json_schema())
 
-        # Initialize the chat history to empty
-        self.chat_history = []
+            # Initialize the chat history to empty
+            self.chat_history = []
 
     @mlflow.trace(name="agent", span_type="AGENT")
     def predict(
@@ -79,6 +78,9 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame] = None,
         params: Any = None,
     ) -> StringResponse:
+        if not self.agent_config:
+            raise RuntimeError("Agent config not loaded. Cannot call predict()")
+
         ##############################################################################
         # Extract `messages` key from the `model_input`
         messages = get_messages_array(model_input)

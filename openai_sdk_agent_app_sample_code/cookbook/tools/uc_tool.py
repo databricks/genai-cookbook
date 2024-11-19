@@ -4,7 +4,6 @@ from cookbook.databricks_utils import get_function_url
 
 from cookbook.tools.uc_tool_utils import (
     _parse_SparkException_from_tool_execution,
-    _parse_generic_tool_exception,
     _parse_ParseException_from_tool_execution,
 )
 import mlflow
@@ -13,9 +12,7 @@ from databricks.sdk.errors import ResourceDoesNotExist
 from mlflow.models.resources import DatabricksFunction, DatabricksResource
 from pydantic import Field, model_validator
 from pyspark.errors import SparkRuntimeException
-from pyspark.errors.exceptions.connect import SparkException, ParseException
-
-# from pyspark.sql.utils import SparkException
+from pyspark.errors.exceptions.connect import ParseException
 from unitycatalog.ai.core.databricks import DatabricksFunctionClient
 from unitycatalog.ai.openai.toolkit import UCFunctionToolkit
 from dataclasses import asdict
@@ -135,7 +132,7 @@ class UCTool(Tool):
             return asdict(result)
 
         # Parse the error into a format that's easier for the LLM to understand w/ out any of the Spark runtime error noise
-        except (SparkRuntimeException, SparkException) as tool_exception:
+        except SparkRuntimeException as tool_exception:
             return {
                 ERROR_STATUS_KEY: _parse_SparkException_from_tool_execution(
                     tool_exception
@@ -151,8 +148,11 @@ class UCTool(Tool):
             }
         except Exception as tool_exception:
             # some other type of error that is unknown, parse into the same format as the Spark exceptions
+            # will first try to parse using the SparkException parsing code, if that fails, will then try the generic one
             return {
-                ERROR_STATUS_KEY: _parse_generic_tool_exception(tool_exception),
+                ERROR_STATUS_KEY: _parse_SparkException_from_tool_execution(
+                    tool_exception
+                ),
                 ERROR_INSTRUCTIONS_KEY: self.error_prompt,
             }
 
