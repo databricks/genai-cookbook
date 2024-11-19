@@ -122,20 +122,19 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
             )
         else:
             logging.info("Successfully loaded agent config in __init__.")
-            logging.info(f"Loaded config: {self.agent_config.model_dump()}")
 
-        # Initialize clients
-        self._initialize_model_serving_clients()
+            # Initialize clients
+            self._initialize_model_serving_clients()
 
-        # Set up agents and routing
-        self._initialize_supervised_agents()
+            # Set up agents and routing
+            self._initialize_supervised_agents()
 
-        # Set up prompts and tools
-        self._initialize_supervisor_prompts_and_tools()
+            # Set up prompts and tools
+            self._initialize_supervisor_prompts_and_tools()
 
-        # Initialize state
-        self.state = None  # Will be initialized per conversation
-        logging.info("Initialized MultiAgentSupervisor")
+            # Initialize state
+            self.state = None  # Will be initialized per conversation
+            logging.info("Initialized MultiAgentSupervisor")
 
     def _initialize_model_serving_clients(self):
         """Initialize API clients for model serving"""
@@ -355,6 +354,9 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame] = None,
         params: Any = None,
     ) -> StringResponse:
+        # Check here to allow the Agent class to be initialized without a configuration file, which is required to import the class as a module in other files.
+        if not self.agent_config:
+            raise RuntimeError("Agent config not loaded. Cannot call predict()")
         # try:
         # Initialize conversation state
         messages = get_messages_array(model_input)

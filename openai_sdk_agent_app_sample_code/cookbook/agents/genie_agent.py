@@ -339,12 +339,10 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
             )
         else:
             logging.info("Successfully loaded agent config in __init__.")
-            logging.info(f"Loaded config: {self.agent_config.model_dump()}")
+            # Load the API wrapper
+            self._genie_agent = GenieAPIWrapper(self.agent_config.genie_space_id)
 
-        # Load the API wrapper
-        self._genie_agent = GenieAPIWrapper(self.agent_config.genie_space_id)
-
-        self.chat_history = []
+            self.chat_history = []
 
     @mlflow.trace(name="genie_orchestator", span_type="AGENT")
     def predict(
@@ -353,6 +351,9 @@ class GenieAgent(mlflow.pyfunc.PythonModel):
         model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame] = None,
         params: Any = None,
     ) -> StringResponse:
+        # Check here to allow the Agent class to be initialized without a configuration file, which is required to import the class as a module in other files.
+        if not self.agent_config:
+            raise RuntimeError("Agent config not loaded. Cannot call predict()")
         ##############################################################################
         # Extract `messages` key from the `model_input`
         messages = get_messages_array(model_input)

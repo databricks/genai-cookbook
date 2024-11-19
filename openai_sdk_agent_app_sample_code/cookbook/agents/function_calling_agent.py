@@ -78,6 +78,7 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame] = None,
         params: Any = None,
     ) -> StringResponse:
+        # Check here to allow the Agent class to be initialized without a configuration file, which is required to import the class as a module in other files.
         if not self.agent_config:
             raise RuntimeError("Agent config not loaded. Cannot call predict()")
 
