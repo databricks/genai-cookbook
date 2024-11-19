@@ -213,7 +213,7 @@ set_model(FunctionCallingAgent())
 
 
 # IMPORTANT: set this to False before logging the model to MLflow
-debug = True
+debug = False
 
 if debug:
     # logging.basicConfig(level=logging.INFO)
