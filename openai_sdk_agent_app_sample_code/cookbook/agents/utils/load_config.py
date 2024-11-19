@@ -92,7 +92,7 @@ def load_config(
         loaded_config = load_serializable_config_from_yaml(model_config_as_yaml)
         logging.info(f"Loaded config from mlflow.models.ModelConfig(): {loaded_config}")
         return loaded_config
-    except Exception as e:
+    except FileNotFoundError as e:
         logging.info(f"Could not load config from mlflow.models.ModelConfig(): {e}")
 
     # 2a. passed_agent_config is an instantiated config class, use that
@@ -115,7 +115,7 @@ def load_config(
             )
             return loaded_config
         except ValueError as e:
-            logging.error(f"{passed_agent_config} was not found.")
+            logging.info(f"{passed_agent_config} was not found.")
 
     # 3. Try to load from default config file
     if default_config_file_name:
@@ -127,7 +127,7 @@ def load_config(
             )
             return loaded_config
         except ValueError as e:
-            logging.error(f"{default_config_file_name} was not found.")
+            logging.info(f"{default_config_file_name} was not found.")
 
     # If no config is found so far, return None
     logging.error(
