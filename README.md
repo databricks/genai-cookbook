@@ -1,20 +1,3 @@
-
-
-
-# How to use locally
-
-TODO
-
-- databricks auth profile DEFAULT is set up
-- set up your .env to point to mlflow exp + dbx tracking uri (if you want to run any agent code from the terminal and have it logged to mlflow)
-- point to a cluster_id in ~/.databrickscfg (if you want to use Spark code)
-
-- install poetry env
-- build utils wheel
-- start databricks sync job
-- install utils wheel in cluster
-- profit!!!
-
 # Retrieval Augmented Generation
 
 Please visit http://ai-cookbook.io for the accompanying documentation for this repo.

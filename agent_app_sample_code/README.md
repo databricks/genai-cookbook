@@ -1,3 +1,16 @@
+# How to use local IDE
+
+TODO
+
+- databricks auth profile DEFAULT is set up
+- set up your .env to point to mlflow exp + dbx tracking uri (if you want to run any agent code from the terminal and have it logged to mlflow)
+- point to a cluster_id in ~/.databrickscfg (if you want to use Spark code)
+- install poetry env
+
+- build cookbook wheel
+- install cookbook wheel in cluster
+
+
 
 # NOTES:
 - Deployment worked for tool calling agent with vector search.  
