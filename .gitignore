@@ -13,3 +13,4 @@ dist/
 mlruns/
 
 _scratch_pad/
+.vscode/
