@@ -63,7 +63,7 @@ def try_to_load_config_file(agent_config_file_or_path: str) -> SerializableConfi
         return load_serializable_config_from_yaml(config_file)
     except Exception as e:
         logging.info(
-            f"YAML file {agent_config_file_or_path} NOT found at {config_paths}."
+            f"Exception loading YAML file {agent_config_file_or_path} at {config_paths}: {e}"
         )
         raise ValueError(
             f"Could not load the provided YAML file {agent_config_file_or_path}."
