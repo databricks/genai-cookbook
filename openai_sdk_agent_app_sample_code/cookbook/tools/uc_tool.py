@@ -114,7 +114,8 @@ class UCTool(Tool):
     def __call__(self, **kwargs) -> Dict[str, str]:
         # annotate the span with the tool name
         span = mlflow.get_current_active_span()
-        span.set_attributes({"uc_tool_name": self.uc_function_name})
+        if span:  # TODO: Hack, when mlflow tracing is disabled, span == None.
+            span.set_attributes({"uc_tool_name": self.uc_function_name})
 
         # trace the function call
         traced_exec_function = mlflow.trace(

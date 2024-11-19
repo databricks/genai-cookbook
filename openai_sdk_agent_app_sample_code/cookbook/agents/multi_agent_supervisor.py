@@ -56,7 +56,8 @@ class SupervisorState:
     @mlflow.trace(span_type="FUNCTION", name="state.append_new_message_to_history")
     def append_new_message_to_history(self, message: Dict[str, str]) -> None:
         span = mlflow.get_current_active_span()
-        span.set_inputs({"message": message})
+        if span:  # TODO: Hack, when mlflow tracing is disabled, span == None.
+            span.set_inputs({"message": message})
         with mlflow.start_span(
             name="remove_message_keys_with_null_values"
         ) as span_inner:
@@ -75,12 +76,13 @@ class SupervisorState:
     @mlflow.trace(span_type="FUNCTION", name="state.overwrite_chat_history")
     def overwrite_chat_history(self, new_chat_history: List[Dict[str, str]]) -> None:
         span = mlflow.get_current_active_span()
-        span.set_inputs(
-            {
-                "new_chat_history": new_chat_history,
-                "current_chat_history": self.chat_history,
-            }
-        )
+        if span:  # TODO: Hack, when mlflow tracing is disabled, span == None.
+            span.set_inputs(
+                {
+                    "new_chat_history": new_chat_history,
+                    "current_chat_history": self.chat_history,
+                }
+            )
         messages_with_no_null_values_for_keys = []
         with mlflow.start_span(
             name="remove_message_keys_with_null_values"
@@ -276,9 +278,11 @@ class MultiAgentSupervisor(mlflow.pyfunc.PythonModel):
         Calls a supervised agent and returns ONLY the new [messages] produced by that agent.
         """
         span = mlflow.get_current_active_span()
-        span.set_attribute(
-            "self.agent_config.agent_loading_mode", self.agent_config.agent_loading_mode
-        )
+        if span:  # TODO: Hack, when mlflow tracing is disabled, span == None.
+            span.set_attribute(
+                "self.agent_config.agent_loading_mode",
+                self.agent_config.agent_loading_mode,
+            )
         raw_agent_output = {}
         if self.agent_config.agent_loading_mode == "model_serving":
             endpoint_name = self.agents.get(agent_name).get("endpoint_name")
