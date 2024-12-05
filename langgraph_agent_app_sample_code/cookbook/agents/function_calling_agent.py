@@ -1,208 +1,152 @@
-# In this file, we construct a function-calling Agent with a Retriever tool using MLflow + the OpenAI SDK connected to Databricks Model Serving. This Agent is encapsulated in a MLflow PyFunc class called `FunctionCallingAgent()`.
+# In this file, we construct a function-calling Agent with a Retriever tool using MLflow + langgraph.
 
-# Add the parent directory to the path so we can import the `cookbook` modules
-# import sys
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
-
-import json
-from typing import Any, Dict, List, Optional, Union
-import mlflow
-import pandas as pd
-from mlflow.models import set_model
-from mlflow.models.rag_signatures import StringResponse, ChatCompletionRequest
-from databricks.sdk import WorkspaceClient
-from cookbook.agents.utils.execute_function import execute_function
-
-from cookbook.agents.utils.chat import (
-    get_messages_array,
-    extract_user_query_string,
-    extract_chat_history,
-)
-from cookbook.config.agents.function_calling_agent import (
-    FunctionCallingAgentConfig,
-)
-from cookbook.agents.utils.execute_function import execute_function
-from cookbook.agents.utils.load_config import load_config
 import logging
+from dataclasses import asdict
+from functools import reduce
+from typing import Iterator, Dict, List
+
+from databricks_langchain import ChatDatabricks
+from databricks_langchain import DatabricksVectorSearch
+from langchain_core.messages import (
+    AIMessage,
+    MessageLikeRepresentation,
+)
+from langchain_core.runnables import RunnableGenerator
+from langchain_core.runnables.base import RunnableSequence
+from langchain_core.tools import tool, Tool
+from langgraph.prebuilt import create_react_agent
+from mlflow.models import set_model
+from mlflow.models.rag_signatures import ChatCompletionResponse, ChainCompletionChoice, \
+    Message
+from mlflow.models.resources import DatabricksResource, DatabricksServingEndpoint, \
+    DatabricksVectorSearchIndex, DatabricksFunction
+from pydantic import BaseModel
+from unitycatalog.ai.core.databricks import DatabricksFunctionClient
+from unitycatalog.ai.langchain.toolkit import UCFunctionToolkit
+
+from cookbook.agents.utils.load_config import load_config
+from cookbook.config.agents.function_calling_agent import FunctionCallingAgentConfig
+from cookbook.config.shared.llm import LLMConfig
+from cookbook.config.shared.tool import ToolConfig, VectorSearchToolConfig, \
+    UCFunctionToolConfig
 
 FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME = "function_calling_agent_config.yaml"
 
+def create_tool(tool_config: ToolConfig) -> Tool:
+    if type(tool_config) == VectorSearchToolConfig:
+        vector_search_as_retriever = DatabricksVectorSearch(
+            endpoint=tool_config.endpoint,
+            index_name=tool_config.index_name,
+            columns=tool_config.columns,
+        ).as_retriever(search_kwargs=tool_config.search_kwargs)
 
-class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
+        @tool
+        def search_product_docs(question: str):
+            """Use this tool to search for databricks product documentation."""
+            relevant_docs = vector_search_as_retriever.get_relevant_documents(question)
+            chunk_template = "Passage: {chunk_text}\n"
+            chunk_contents = [
+                chunk_template.format(
+                    chunk_text=d.page_content,
+                )
+                for d in relevant_docs
+            ]
+            return "".join(chunk_contents)
+
+        return search_product_docs
+    elif type(tool_config) == UCFunctionToolConfig:
+        client = DatabricksFunctionClient()
+        toolkit = UCFunctionToolkit(
+            client=client,
+            function_names=[tool_config.function_name]
+        )
+        return toolkit.tools[-1]
+    else:
+        raise ValueError(f"Unknown tool type: {tool_config.type}")
+
+
+def create_chat_completion_response(content: str) -> Dict:
+    return asdict(ChatCompletionResponse(
+        choices=[ChainCompletionChoice(
+            message=Message(role="assistant", content=content + "\n\n"))],
+    ))
+
+
+def wrap_output(stream: Iterator[MessageLikeRepresentation]) -> Iterator[Dict]:
     """
-    Class representing an Agent that does function-calling with tools using OpenAI SDK
+    Process and yield formatted outputs from the message stream.
+    The invoke and stream langchain functions produce different output formats.
+    This function handles both cases.
     """
-
-    def __init__(
-        self, agent_config: Optional[Union[FunctionCallingAgentConfig, str]] = None
-    ):
-        super().__init__()
-        # Empty variables that will be initialized after loading the agent config.
-        self.model_serving_client = None
-        self.tool_functions = None
-        self.tool_json_schemas = None
-        self.chat_history = None
-        self.agent_config = None
-
-        # load the Agent's configuration. See load_config() for details.
-        self.agent_config = load_config(
-            passed_agent_config=agent_config,
-            default_config_file_name=FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
-        )
-        if not self.agent_config:
-            logging.error(
-                f"No agent config found.  If you are in your local development environment, make sure you either [1] are calling init(agent_config=...) with either an instance of FunctionCallingAgentConfig or the full path to a YAML config file or [2] have a YAML config file saved at {{your_project_root_folder}}/configs/{FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME}."
-            )
+    for event in stream:
+        # the agent was called with invoke()
+        if "messages" in event:
+            output_content = ""
+            for msg in event["messages"]:
+                output_content += msg.content
+            # Note: you can pass additional fields from your LangGraph nodes to the output here
+            yield create_chat_completion_response(content=output_content)
+        # the agent was called with stream()
         else:
-            logging.info("Successfully loaded agent config in __init__.")
+            for node in event:
+                for key, messages in event[node].items():
+                    if isinstance(messages, list):
+                        for msg in messages:
+                            if isinstance(msg, AIMessage) and len(
+                                    msg.tool_calls) == 0:  # final result
+                                # Note: you can pass additional fields from your LangGraph nodes to the output here
+                                yield create_chat_completion_response(
+                                    content=msg.content)
+                    else:
+                        logging.warning(
+                            "Unexpected value {messages} for key {key}. Expected a list of `MessageLikeRepresentation`'s")
+                        yield create_chat_completion_response(content=str(messages))
 
-            # Now, initialize the rest of the Agent
-            w = WorkspaceClient()
-            self.model_serving_client = w.serving_endpoints.get_open_ai_client()
 
-            # Initialize the tools
-            self.tool_functions = {}
-            self.tool_json_schemas = []
-            for tool in self.agent_config.tools:
-                self.tool_functions[tool.name] = tool
-                self.tool_json_schemas.append(tool.get_json_schema())
+def create_resource_dependency(config: BaseModel) -> List[DatabricksResource]:
+    if type(config) == LLMConfig:
+        return [DatabricksServingEndpoint(endpoint_name=config.llm_endpoint_name)]
+    elif type(config) == VectorSearchToolConfig:
+        return [DatabricksVectorSearchIndex(index_name=config.index_name), DatabricksServingEndpoint(config.embedding_endpoint)]
+    elif type(config) == UCFunctionToolConfig:
+        return [DatabricksFunction(function_name=config.function_name)]
+    else:
+        raise ValueError(f"Unknown config type: {config.type}")
 
-            # Initialize the chat history to empty
-            self.chat_history = []
+def get_resource_dependencies(agent_config: FunctionCallingAgentConfig) -> List[DatabricksResource]:
+    configs = [agent_config.llm_config] + agent_config.tool_configs
+    dependencies = reduce(lambda x, y: x + y, map(create_resource_dependency, configs))
+    return dependencies
 
-    @mlflow.trace(name="agent", span_type="AGENT")
-    def predict(
-        self,
-        context: Any = None,
-        model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame] = None,
-        params: Any = None,
-    ) -> StringResponse:
-        # Check here to allow the Agent class to be initialized without a configuration file, which is required to import the class as a module in other files.
-        if not self.agent_config:
-            raise RuntimeError("Agent config not loaded. Cannot call predict()")
+def create_function_calling_agent(
+        agent_conig: FunctionCallingAgentConfig) -> RunnableSequence:
+    tool_configs = agent_conig.tool_configs
+    tools = list(map(create_tool, tool_configs))
 
-        ##############################################################################
-        # Extract `messages` key from the `model_input`
-        messages = get_messages_array(model_input)
+    chat_model = ChatDatabricks(endpoint=agent_conig.llm_config.llm_endpoint_name,
+                                temerature=agent_conig.llm_config.llm_parameters.temperature,
+                                max_tokens=agent_conig.llm_config.llm_parameters.max_tokens)
 
-        ##############################################################################
-        # Parse `messages` array into the user's query & the chat history
-        with mlflow.start_span(name="parse_input", span_type="PARSER") as span:
-            span.set_inputs({"messages": messages})
-            # in a multi-agent setting, the last message can be from another assistant, not the user
-            last_message = extract_user_query_string(messages)
-            last_message_role = messages[-1]["role"]
-            # Save the history inside the Agent's internal state
-            self.chat_history = extract_chat_history(messages)
-            span.set_outputs(
-                {
-                    "last_message": last_message,
-                    "chat_history": self.chat_history,
-                    "last_message_role": last_message_role,
-                }
-            )
+    react_agent = create_react_agent(
+        chat_model,
+        tools,
+        messages_modifier=agent_conig.llm_config.llm_system_prompt_template
+    ) | RunnableGenerator(wrap_output)
 
-        ##############################################################################
-        # Call LLM
+    return react_agent
 
-        # messages to send the model
-        # For models with shorter context length, you will need to trim this to ensure it fits within the model's context length
-        system_prompt = self.agent_config.llm_config.llm_system_prompt_template
-        messages = (
-            [{"role": "system", "content": system_prompt}]
-            + self.chat_history  # append chat history for multi turn
-            + [{"role": last_message_role, "content": last_message}]
-        )
 
-        # Call the LLM to recursively calls tools and eventually deliver a generation to send back to the user
-        (
-            model_response,
-            messages_log_with_tool_calls,
-        ) = self.recursively_call_and_run_tools(messages=messages)
-
-        # If your front end keeps of converastion history and automatically appends the bot's response to the messages history, remove this line.
-        messages_log_with_tool_calls.append(
-            model_response.choices[0].message.to_dict()
-        )  # OpenAI client
-
-        # remove the system prompt - this should not be exposed to the Agent caller
-        messages_log_with_tool_calls = messages_log_with_tool_calls[1:]
-
-        return {
-            "content": model_response.choices[0].message.content,
-            # messages should be returned back to the Review App (or any other front end app) and stored there so it can be passed back to this stateless agent with the next turns of converastion.
-            "messages": messages_log_with_tool_calls,
-        }
-
-    @mlflow.trace(span_type="AGENT")
-    def recursively_call_and_run_tools(self, max_iter=10, **kwargs):
-        messages = kwargs["messages"]
-        del kwargs["messages"]
-        i = 0
-        while i < max_iter:
-            response = self.chat_completion(messages=messages, tools=True)
-            assistant_message = response.choices[0].message  # openai client
-            tool_calls = assistant_message.tool_calls  # openai
-            if tool_calls is None:
-                # the tool execution finished, and we have a generation
-                return (response, messages)
-            tool_messages = []
-            for tool_call in tool_calls:  # TODO: should run in parallel
-                function = tool_call.function  # openai
-                args = json.loads(function.arguments)  # openai
-                result = execute_function(self.tool_functions[function.name], args)
-                tool_message = {
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "content": result,
-                }  # openai
-
-                tool_messages.append(tool_message)
-            assistant_message_dict = assistant_message.dict().copy()  # openai
-            del assistant_message_dict["content"]
-            del assistant_message_dict["function_call"]  # openai only
-            if "audio" in assistant_message_dict:
-                del assistant_message_dict["audio"]  # llama70b hack
-            messages = (
-                messages
-                + [
-                    assistant_message_dict,
-                ]
-                + tool_messages
-            )
-            i += 1
-        # TODO: Handle more gracefully
-        raise "ERROR: max iter reached"
-
-    def chat_completion(self, messages: List[Dict[str, str]], tools: bool = False):
-        endpoint_name = self.agent_config.llm_config.llm_endpoint_name
-        llm_options = self.agent_config.llm_config.llm_parameters.dict()
-
-        # # Trace the call to Model Serving - openai versio
-        traced_create = mlflow.trace(
-            self.model_serving_client.chat.completions.create,
-            name="chat_completions_api",
-            span_type="CHAT_MODEL",
-        )
-
-        if tools:
-            return traced_create(
-                model=endpoint_name,
-                messages=messages,
-                tools=self.tool_json_schemas,
-                parallel_tool_calls=False,
-                **llm_options,
-            )
-        else:
-            return traced_create(model=endpoint_name, messages=messages, **llm_options)
 
 
 logging.basicConfig(level=logging.INFO)
 
-# tell MLflow logging where to find the agent's code
-set_model(FunctionCallingAgent())
+agent_conf = load_config(
+            passed_agent_config=None,
+            default_config_file_name=FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
+        )
 
+# tell MLflow logging where to find the agent's code
+set_model(create_function_calling_agent(agent_conf))
 
 # IMPORTANT: set this to False before logging the model to MLflow
 debug = False
@@ -212,7 +156,7 @@ if debug:
     # print(find_config_folder_location())
     # print(os.path.abspath(os.getcwd()))
     # mlflow.tracing.disable()
-    agent = FunctionCallingAgent()
+    agent = create_function_calling_agent()
 
     vibe_check_query = {
         "messages": [
@@ -239,3 +183,6 @@ if debug:
 
     output = agent.predict(model_input=vibe_check_query)
     print(output["content"])
+
+
+

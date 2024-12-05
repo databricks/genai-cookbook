@@ -9,7 +9,10 @@ from cookbook.config.shared.llm import LLMConfig
 from cookbook.config import (
     SerializableConfig,
 )
-from mlflow.models.resources import DatabricksResource, DatabricksServingEndpoint
+from mlflow.models.resources import DatabricksResource, DatabricksServingEndpoint, \
+    DatabricksVectorSearchIndex
+
+from cookbook.config.shared.tool import ToolConfig
 
 
 class FunctionCallingAgentConfig(SerializableConfig):
@@ -32,21 +35,8 @@ class FunctionCallingAgentConfig(SerializableConfig):
             },
         ]
     }
+    tool_configs: List[ToolConfig]
 
     # name: str
     # description: str
     # endpoint_name: str
-
-    def get_resource_dependencies(self) -> List[DatabricksResource]:
-        dependencies = [
-            DatabricksServingEndpoint(endpoint_name=self.llm_config.llm_endpoint_name),
-            DatabricksServingEndpoint(endpoint_name="databricks-gte-large-en"),
-            DatabricksVectorSearchIndex(
-                index_name="shared.cookbook_local_test_udhay.test_product_docs_docs_chunked_index__v2"
-            ),
-            DatabricksFunction(
-                function_name="shared.cookbook_local_test_udhay.python_exec"
-            ),
-        ]
-
-        return dependencies
