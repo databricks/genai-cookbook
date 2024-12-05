@@ -1,3 +1,4 @@
+
 import pytest
 from .code_exec import python_exec
 
@@ -56,9 +57,8 @@ def test_multiline_string_manipulation():
     expected = "Hello\nWorld"
     assert python_exec(code).strip() == expected
 
-
 # Will not fail locally, but will fail in UC.
-# def test_unauthorized_flaskxx():
+# def test_unauthorized_flask():
 #     code = "from flask import Flask\n" "app = Flask(__name__)\n" "print(app)"
 #     with pytest.raises(ImportError):
 #         python_exec(code)

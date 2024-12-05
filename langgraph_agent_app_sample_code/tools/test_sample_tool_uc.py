@@ -1,16 +1,14 @@
 import pytest
 from cookbook.tools.uc_tool import UCTool
-import os
 
-if os.getenv("GITHUB_ACTIONS") == "true":
-    pytest.skip("Skipping all tests in this module in CI, as "
-                "Databricks auth is not available there", allow_module_level=True)
+CATALOG = "shared"  # Change me!
+SCHEMA = "cookbook_langgraph_udhay"  # Change me if you want
 
 # Load the function from the UCTool versus locally
 @pytest.fixture
 def uc_tool():
     """Fixture to translate a UC tool into a local function."""
-    UC_FUNCTION_NAME = "ep.cookbook_local_test.sku_sample_translator"
+    UC_FUNCTION_NAME = f"{CATALOG}.{SCHEMA}.sku_sample_translator"
     loaded_tool = UCTool(uc_function_name=UC_FUNCTION_NAME)
     return loaded_tool
 

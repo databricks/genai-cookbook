@@ -22,7 +22,6 @@ class FunctionCallingAgentConfig(SerializableConfig):
         tools (List[BaseTool]): List of tools used by the agent.
     """
 
-    tools: List[Any]
     llm_config: LLMConfig
     # Used by MLflow to set the Agent's input schema
     input_example: Any = {
@@ -38,38 +37,16 @@ class FunctionCallingAgentConfig(SerializableConfig):
     # description: str
     # endpoint_name: str
 
-    def model_dump(self, **kwargs) -> Dict[str, Any]:
-        """Override model_dump to exclude name and description fields.
-
-        Returns:
-            Dict[str, Any]: Dictionary representation of the model excluding name and description.
-        """
-        model_dumped = super().model_dump(**kwargs)
-        model_dumped["tools"] = [
-            yaml.safe_load(serializable_config_to_yaml(tool)) for tool in self.tools
-        ]
-        return model_dumped
-
-    @classmethod
-    def _load_class_from_dict(
-        cls, class_object, data: Dict[str, Any]
-    ) -> "SerializableConfig":
-        # Deserialize tools, dynamically reconstructing each tool
-        tools = []
-        for tool_dict in data["tools"]:
-            tool_yml = yaml.dump(tool_dict)
-            tools.append(load_serializable_config_from_yaml(tool_yml))
-
-        # Replace tools with deserialized instances
-        data["tools"] = tools
-        return class_object(**data)
-
     def get_resource_dependencies(self) -> List[DatabricksResource]:
         dependencies = [
             DatabricksServingEndpoint(endpoint_name=self.llm_config.llm_endpoint_name),
+            DatabricksServingEndpoint(endpoint_name="databricks-gte-large-en"),
+            DatabricksVectorSearchIndex(
+                index_name="shared.cookbook_local_test_udhay.test_product_docs_docs_chunked_index__v2"
+            ),
+            DatabricksFunction(
+                function_name="shared.cookbook_local_test_udhay.python_exec"
+            ),
         ]
 
-        # Add the Databricks resources for the retriever's vector indexes
-        for tool in self.tools:
-            dependencies.extend(tool.get_resource_dependencies())
         return dependencies

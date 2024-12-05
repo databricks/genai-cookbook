@@ -1,14 +1,10 @@
+
 import pytest
 from cookbook.tools.uc_tool import UCTool
-import os
 
-CATALOG = "ep"
-SCHEMA = "cookbook_local_test"
+CATALOG = "shared"  # Change me!
+SCHEMA = "cookbook_langgraph_udhay"  # Change me if you want
 
-
-if os.getenv("GITHUB_ACTIONS") == "true":
-    pytest.skip("Skipping all tests in this module in CI, as "
-                "Databricks auth is not available there", allow_module_level=True)
 
 @pytest.fixture
 def python_exec():
