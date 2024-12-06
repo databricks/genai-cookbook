@@ -1,14 +1,20 @@
 from databricks.sdk import WorkspaceClient
 from openai import OpenAI
+import openai
 import pandas as pd
-from typing import Any, Union, Dict, List
+from typing import Any, Union, Dict, List, Optional
 import mlflow
-from mlflow.models.rag_signatures import ChatCompletionResponse, ChatCompletionRequest
+from mlflow.pyfunc import ChatModel
+from mlflow.types.llm import ChatResponse, ChatMessage, ChatParams, ChatChoice
+from dataclasses import asdict
 import dataclasses
 import json
+import backoff  # for exponential backoff on LLM rate limits
 
+
+# Default configuration for the agent.
 DEFAULT_CONFIG = {
-    'endpoint_name': "agents-demo-gpt4o",
+    'endpoint_name': "databricks-meta-llama-3-1-70b-instruct",
     'temperature': 0.01,
     'max_tokens': 1000,
     'system_prompt': """You are a helpful assistant that answers questions about Databricks. Questions unrelated to Databricks are irrelevant.
@@ -18,6 +24,7 @@ DEFAULT_CONFIG = {
     'max_context_chars': 4096 * 4
 }
 
+# OpenAI-formatted function for the retriever tool
 RETRIEVER_TOOL_SPEC = [{
     "type": "function",
     "function": {
@@ -29,7 +36,7 @@ RETRIEVER_TOOL_SPEC = [{
             "additionalProperties": False,
             "properties": {
                 "query": {
-                    "description": "a set of individual keywords to find relevant docs for.  each item of the array must be a single word.",
+                    "description": "a set of individual keywords to find relevant docs for. each item of the array must be a single word.",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -40,24 +47,25 @@ RETRIEVER_TOOL_SPEC = [{
     },
 }]
 
-class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
+class FunctionCallingAgent(mlflow.pyfunc.ChatModel):
     """
-    Class representing a function-calling Agent that has one tool: a retriever w/ keyword-based search.
+    Class representing a function-calling agent that has one tool: a retriever using keyword-based search.
     """
 
     def __init__(self):
         """
         Initialize the OpenAI SDK client connected to Model Serving.
-        Load the Agent's configuration from MLflow Model Config.
+        Load the agent's configuration from MLflow Model Config.
         """
         # Initialize OpenAI SDK connected to Model Serving
         w = WorkspaceClient()
         self.model_serving_client: OpenAI = w.serving_endpoints.get_open_ai_client()
 
         # Load config
+        # When this agent is deployed to Model Serving, the configuration loaded here is replaced with the config passed to mlflow.pyfunc.log_model(model_config=...)
         self.config = mlflow.models.ModelConfig(development_config=DEFAULT_CONFIG)
 
-        # Configure playground & review app & agent evaluation to display / see the chunks from the retriever 
+        # Configure playground, review app, and agent evaluation to display the chunks from the retriever 
         mlflow.models.set_retriever_schema(
             name="db_docs",
             primary_key="chunk_id",
@@ -76,35 +84,37 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
 
     @mlflow.trace(name="rag_agent", span_type="AGENT")
     def predict(
-        self,
-        context: Any = None,
-        model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame] = None,
-        params: Any = None,
-    ) -> ChatCompletionResponse:
+        self, context=None, messages: List[ChatMessage]=None, params: Optional[ChatParams] = None
+    ) -> ChatResponse:
         """
         Primary function that takes a user's request and generates a response.
         """
-        # Convert the user's request to a dict
-        request = self.get_request_dict(model_input)
+        if messages is None:
+            raise ValueError("predict(...) called without `messages` parameter.")
+        
+        # Convert all input messages to dict from ChatMessage
+        messages = convert_chat_messages_to_dict(messages)
 
         # Add system prompt
         request = {
-                **request,
                 "messages": [
                     {"role": "system", "content": self.config.get('system_prompt')},
-                    *request["messages"],
+                    *messages,
                 ],
             }
-
-        # Ask the LLM to call tools & generate the response
-        return self.recursively_call_and_run_tools(
+            
+        # Ask the LLM to call tools and generate the response
+        output= self.recursively_call_and_run_tools(
             **request
         )
+        
+        # Convert response to ChatResponse dataclass
+        return ChatResponse.from_dict(output)
     
     @mlflow.trace(span_type="RETRIEVER")
     def search_product_docs(self, query: list[str]) -> list[dict]:
         """
-        Retriever tool.  Simple keyword-based retriever - would be replaced with a Vector Index
+        Retriever tool. Simple keyword-based retriever - would be replaced with a Vector Index
         """
         keywords = query
         if len(keywords) == 0:
@@ -144,17 +154,24 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
     ##
     # Helper functions below
     ##
-    def chat_completion(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
+    @backoff.on_exception(backoff.expo, openai.RateLimitError)
+    def completions_with_backoff(self, **kwargs):
         """
-        Helpers: Call the LLM configured via the ModelConfig using the OpenAI SDK
+        Helper: exponetially backoff if the LLM's rate limit is exceeded.
         """
         traced_chat_completions_create_fn = mlflow.trace(
             self.model_serving_client.chat.completions.create,
             name="chat_completions_api",
             span_type="CHAT_MODEL",
         )
-        request = {**request, "temperature": self.config.get("temperature"), "max_tokens": self.config.get("max_tokens"),  "tools": RETRIEVER_TOOL_SPEC} #, "parallel_tool_calls":False}
-        return traced_chat_completions_create_fn(
+        return traced_chat_completions_create_fn(**kwargs)
+
+    def chat_completion(self, messages: List[ChatMessage]) -> ChatResponse:
+        """
+        Helper: Call the LLM configured via the ModelConfig using the OpenAI SDK
+        """
+        request = {"messages": messages, "temperature": self.config.get("temperature"), "max_tokens": self.config.get("max_tokens"),  "tools": RETRIEVER_TOOL_SPEC}
+        return self.completions_with_backoff(
             model=self.config.get("endpoint_name"), **request,
                 
         )
@@ -162,14 +179,14 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
     @mlflow.trace(span_type="CHAIN")
     def recursively_call_and_run_tools(self, max_iter=10, **kwargs):
         """
-        Recursively calls the LLM w/ the tools in the prompt.  Either executes the tools and recalls the LLM or returns the LLM's generation.
+        Helper: Recursively calls the LLM using the tools in the prompt. Either executes the tools and recalls the LLM or returns the LLM's generation.
         """
         messages = kwargs["messages"]
         del kwargs["messages"]
         i = 0
         while i < max_iter:
             with mlflow.start_span(name=f"iteration_{i}", span_type="CHAIN") as span:
-                response = self.chat_completion(request={'messages': messages})
+                response = self.chat_completion(messages=messages)
                 assistant_message = response.choices[0].message  # openai client
                 tool_calls = assistant_message.tool_calls  # openai
                 if tool_calls is None:
@@ -222,28 +239,17 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         """
         result = tool(**args)
         return json.dumps(result)
-
-    @mlflow.trace(span_type="PARSER")
-    def get_request_dict(self, 
-        model_input: Union[ChatCompletionRequest, Dict, pd.DataFrame, List]
-    ) -> List[Dict[str, str]]:
-        """
-        Since the PyFunc model can get either a dict, list, or pd.DataFrame depending on where it is called from (locally, evaluation, or model serving), unify all requests to a dictionary.
-        """
-        if type(model_input) == list:
-            # get the first row
-            model_input = list[0]
-        elif type(model_input) == pd.DataFrame:
-            # return the first row, this model doesn't support batch input
-            return model_input.to_dict(orient="records")[0]
         
-        # now, try to unpack the single item or first row of batch input
-        if type(model_input) == ChatCompletionRequest:
-            return asdict(model_input)
-        elif type(model_input) == dict:
-            return model_input
-        
-
+def convert_chat_messages_to_dict(messages: List[ChatMessage]):
+    new_messages = []
+    for message in messages:
+        if type(message) == ChatMessage:
+            # Remove any keys with None values
+            new_messages.append({k: v for k, v in asdict(message).items() if v is not None})
+        else:
+            new_messages.append(message)
+    return new_messages
+    
 
 # tell MLflow logging where to find the agent's code
 mlflow.models.set_model(FunctionCallingAgent())
