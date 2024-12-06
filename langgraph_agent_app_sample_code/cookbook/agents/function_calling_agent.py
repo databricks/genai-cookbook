@@ -84,6 +84,10 @@ def create_tool(tool_config: ToolConfig) -> Tool:
     else:
         raise ValueError(f"Unknown tool type: {tool_config.type}")
 
+def create_chat_completion_response(message: Message) -> Dict:
+    return asdict(ChatCompletionResponse(
+        choices=[ChainCompletionChoice(message=message)],
+    ))
 
 def stringify_tool_call(tool_call: Dict[str, Any]) -> str:
     """Convert a raw tool call into a formatted string that the playground UI expects"""
@@ -116,21 +120,23 @@ def stringify_tool_result(tool_msg: ToolMessage) -> str:
         return str(tool_msg)
 
 
-def parse_message(msg) -> str:
+def parse_message(msg) -> Message:
     """Parse different message types into their string representations"""
     # tool call result
     if isinstance(msg, ToolMessage):
-        return stringify_tool_result(msg)
+        return Message(role="tool", content=stringify_tool_result(msg))
     # tool call
     elif isinstance(msg, AIMessage) and msg.tool_calls:
         tool_call_results = [stringify_tool_call(call) for call in msg.tool_calls]
-        return "".join(tool_call_results)
+        return Message(role="system", content="".join(tool_call_results))
     # normal HumanMessage or AIMessage (reasoning or final answer)
-    elif isinstance(msg, (AIMessage, HumanMessage)):
-        return msg.content
+    elif isinstance(msg, AIMessage):
+        return Message(role="system", content=msg.content)
+    elif isinstance(msg, HumanMessage):
+        return Message(role="user", content=msg.content)
     else:
         print(f"Unexpected message type: {type(msg)}")
-        return str(msg)
+        return Message(role="unknown", content=str(msg))
 
 
 def wrap_output(stream: Iterator[MessageLikeRepresentation]) -> Iterator[Dict]:
@@ -146,19 +152,19 @@ def wrap_output(stream: Iterator[MessageLikeRepresentation]) -> Iterator[Dict]:
             # output_content = ""
             # for msg in event["messages"]:
             #     output_content += parse_message(msg) + "\n\n"
-            yield {"content": parse_message(messages[-1])}
+            yield create_chat_completion_response(parse_message(messages[-1]))
         # the agent was called with stream()
         else:
             for node in event:
                 for key, messages in event[node].items():
                     if isinstance(messages, list):
                         for msg in messages:
-                            yield {"content": parse_message(msg) + "\n\n"}
+                            yield create_chat_completion_response(parse_message(msg))
                     else:
                         print(
                             "Unexpected value {messages} for key {key}. Expected a list of `MessageLikeRepresentation`'s"
                         )
-                        yield {"content": str(messages)}
+                        yield create_chat_completion_response(Message(content=str(messages)))
 
 
 def create_resource_dependency(config: BaseModel) -> List[DatabricksResource]:
