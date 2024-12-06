@@ -52,6 +52,7 @@ def try_to_load_config_file(agent_config_file_or_path: str) -> SerializableConfi
             "../../configs/" + agent_config_file_or_path,
             "../openai_sdk_agent_app_sample_code/configs/" + agent_config_file_or_path,
             "./openai_sdk_agent_app_sample_code/configs/" + agent_config_file_or_path,
+            "./langgraph_agent_app_sample_code/configs/" + agent_config_file_or_path,
         ]
     )
 
