@@ -53,18 +53,13 @@ from databricks.sdk import WorkspaceClient
 
 # Get current user's name & email to ensure each user doesn't over-write other user's outputs
 w = WorkspaceClient()
-user_email = w.current_user.me().user_name
-user_name = user_email.split("@")[0].replace(".", "_")
-
-print(f"User name: {user_name}")
 
 # COMMAND ----------
 
 ########################
 # #### ✅✏️ CONFIGURE THE UC MODEL NAME HERE
 ########################
-#UC_MODEL_NAME = f"<ENTER_YOUR_CATALOG_NAME>.<ENTER_YOUR_SCHEMA_NAME>.db_docs__{user_name}"
-UC_MODEL_NAME = f"yz_agent_demo.playground.db_docs__{user_name}"
+UC_MODEL_NAME = "catalog.schema.my_demo_agent"
 
 # COMMAND ----------
 
@@ -190,7 +185,7 @@ display(evals)
 # MAGIC import json
 # MAGIC
 # MAGIC DEFAULT_CONFIG = {
-# MAGIC     'endpoint_name': "agents-demo-gpt4o",
+# MAGIC     'endpoint_name': "databricks-meta-llama-3-1-70b-instruct",
 # MAGIC     'temperature': 0.01,
 # MAGIC     'max_tokens': 1000,
 # MAGIC     'system_prompt': """You are a helpful assistant that answers questions about Databricks. Questions unrelated to Databricks are irrelevant.
@@ -458,7 +453,7 @@ from fc_agent import FunctionCallingAgent
 fc_agent = FunctionCallingAgent()
 
 dev_config = {
-    'endpoint_name': "agents-demo-gpt4o",
+    'endpoint_name': "databricks-meta-llama-3-1-70b-instruct",
     'temperature': 0.01,
     'max_tokens': 1000,
     'system_prompt': """You are a helpful assistant that answers questions about Databricks. Questions unrelated to Databricks are irrelevant.
