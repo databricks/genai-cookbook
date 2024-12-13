@@ -1,0 +1,2652 @@
+{
+    "datasets": [
+        {
+            "name": "b3e86a40",
+            "displayName": "sampled_request_logs_eval",
+            "query": "with eval_log as (\n    select \n        *,\n        case\n            when `response/overall_assessment/rating` = \"yes\" then \"no_quality_issue\"\n            when `response/overall_assessment/rating` = \"no\" then \"has_quality_issue\"\n            else null\n        end as overall_assessment,\n        execution_duration_ms / 1000 as execution_time_s,\n        concat(\n            '/ml/experiments/',\n            experiment_id,\n            '/runs/',\n            run_id,\n            '/evaluations?searchQuery=',\n            databricks_request_id\n        ) as eval_details\n    from ml.{{eval_requests_log_table_name}}\n    where \n        run_id is not null \n        and run_id != \"skipped\"\n)\nselect eval_log.*\nfrom eval_log"
+        },
+        {
+            "name": "f31542f7",
+            "displayName": "full_assessment_logs",
+            "query": "with eval_log as (\n    select \n        *,\n        case\n            when `response/overall_assessment/rating` = \"yes\" then \"no_quality_issue\"\n            when `response/overall_assessment/rating` = \"no\" then \"has_quality_issue\"\n            else null\n        end as overall_assessment,\n        execution_duration_ms / 1000 as execution_time_s,\n        case \n            when run_id is not null and run_id != \"skipped\" then concat(\n                '/ml/experiments/',\n                experiment_id,\n                '/runs/',\n                run_id,\n                '/evaluations?searchQuery=',\n                databricks_request_id\n            )\n            else null\n        end as eval_details\n    from {{eval_requests_log_table_name}}\n)\nselect\n    eval_log.*\nfrom eval_log"
+        }
+    ],
+    "pages": [
+        {
+            "name": "ddfbf277",
+            "displayName": "New Page",
+            "layout": [
+                {
+                    "widget": {
+                        "name": "913aa033",
+                        "textbox_spec": "\n# Monitoring dashboard for {{inference_table_name}}\n"
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 6,
+                        "height": 2
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "60079d49",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "daily(timestamp)",
+                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
+                                        },
+                                        {
+                                            "name": "min(execution_time_s)",
+                                            "expression": "MIN(`execution_time_s`)"
+                                        },
+                                        {
+                                            "name": "q1(execution_time_s)",
+                                            "expression": "PERCENTILE(`execution_time_s`, 0.25)"
+                                        },
+                                        {
+                                            "name": "median(execution_time_s)",
+                                            "expression": "MEDIAN(`execution_time_s`)"
+                                        },
+                                        {
+                                            "name": "q3(execution_time_s)",
+                                            "expression": "PERCENTILE(`execution_time_s`, 0.75)"
+                                        },
+                                        {
+                                            "name": "max(execution_time_s)",
+                                            "expression": "MAX(`execution_time_s`)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 3,
+                            "widgetType": "box",
+                            "encodings": {
+                                "x": {
+                                    "fieldName": "daily(timestamp)",
+                                    "scale": {
+                                        "type": "temporal"
+                                    },
+                                    "axis": {
+                                        "title": "Date"
+                                    },
+                                    "displayName": "90th percentile latency (seconds)"
+                                },
+                                "y": {
+                                    "whiskerStart": {
+                                        "fieldName": "min(execution_time_s)",
+                                        "displayName": "Minimum execution_time_s"
+                                    },
+                                    "boxStart": {
+                                        "fieldName": "q1(execution_time_s)",
+                                        "displayName": "First Quartile of execution_time_s"
+                                    },
+                                    "boxMid": {
+                                        "fieldName": "median(execution_time_s)",
+                                        "displayName": "Median of execution_time_s"
+                                    },
+                                    "boxEnd": {
+                                        "fieldName": "q3(execution_time_s)",
+                                        "displayName": "Third Quartile of execution_time_s"
+                                    },
+                                    "whiskerEnd": {
+                                        "fieldName": "max(execution_time_s)",
+                                        "displayName": "Maximum execution_time_s"
+                                    },
+                                    "axis": {
+                                        "title": "Latency (seconds)"
+                                    },
+                                    "scale": {
+                                        "type": "quantitative",
+                                        "domain": {
+                                            "min": 0
+                                        }
+                                    },
+                                    "format": {
+                                        "type": "number-plain",
+                                        "abbreviation": "compact",
+                                        "decimalPlaces": {
+                                            "type": "exact",
+                                            "places": 2
+                                        }
+                                    }
+                                }
+                            },
+                            "frame": {
+                                "title": "Latency",
+                                "showTitle": true,
+                                "showDescription": true,
+                                "description": "What is the latency (in seconds) per request?"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 3,
+                        "y": 5,
+                        "width": 3,
+                        "height": 5
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "e3ae086d",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "response/llm_judged/safety/rating",
+                                            "expression": "`response/llm_judged/safety/rating`"
+                                        },
+                                        {
+                                            "name": "daily(timestamp)",
+                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
+                                        },
+                                        {
+                                            "name": "count(*)",
+                                            "expression": "COUNT(`*`)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 3,
+                            "widgetType": "bar",
+                            "encodings": {
+                                "x": {
+                                    "fieldName": "daily(timestamp)",
+                                    "scale": {
+                                        "type": "temporal"
+                                    },
+                                    "axis": {
+                                        "title": "Date"
+                                    },
+                                    "displayName": "Date"
+                                },
+                                "y": {
+                                    "fieldName": "count(*)",
+                                    "scale": {
+                                        "type": "quantitative"
+                                    },
+                                    "axis": {
+                                        "title": "# of Requests"
+                                    },
+                                    "displayName": "# of Requests"
+                                },
+                                "color": {
+                                    "fieldName": "response/llm_judged/safety/rating",
+                                    "scale": {
+                                        "type": "categorical",
+                                        "mappings": [
+                                            {
+                                                "value": null,
+                                                "color": "#077A9D"
+                                            },
+                                            {
+                                                "value": "no",
+                                                "color": "#FFAB00"
+                                            },
+                                            {
+                                                "value": "yes",
+                                                "color": "#00A972"
+                                            }
+                                        ]
+                                    },
+                                    "legend": {
+                                        "hideTitle": true
+                                    },
+                                    "displayName": "response/llm_judged/safety/rating"
+                                },
+                                "label": {
+                                    "show": true
+                                }
+                            },
+                            "frame": {
+                                "showTitle": true,
+                                "title": "Is the Agent's response safe?",
+                                "showDescription": true,
+                                "description": "A response is safe (yes) if it does not include harmful content."
+                            },
+                            "mark": {
+                                "layout": "stack"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 33,
+                        "width": 3,
+                        "height": 6
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "91a7b3ba",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "response/llm_judged/relevance_to_query/rating",
+                                            "expression": "`response/llm_judged/relevance_to_query/rating`"
+                                        },
+                                        {
+                                            "name": "daily(timestamp)",
+                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
+                                        },
+                                        {
+                                            "name": "count(*)",
+                                            "expression": "COUNT(`*`)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 3,
+                            "widgetType": "bar",
+                            "encodings": {
+                                "x": {
+                                    "fieldName": "daily(timestamp)",
+                                    "scale": {
+                                        "type": "temporal"
+                                    },
+                                    "axis": {
+                                        "title": "Date"
+                                    },
+                                    "displayName": "Date"
+                                },
+                                "y": {
+                                    "fieldName": "count(*)",
+                                    "scale": {
+                                        "type": "quantitative"
+                                    },
+                                    "axis": {
+                                        "title": "# of Requests"
+                                    },
+                                    "displayName": "# of Requests"
+                                },
+                                "color": {
+                                    "fieldName": "response/llm_judged/relevance_to_query/rating",
+                                    "scale": {
+                                        "type": "categorical",
+                                        "mappings": [
+                                            {
+                                                "value": "no",
+                                                "color": "#FF3621"
+                                            },
+                                            {
+                                                "value": "yes",
+                                                "color": "#00A972"
+                                            },
+                                            {
+                                                "value": null,
+                                                "color": "#077A9D"
+                                            }
+                                        ]
+                                    },
+                                    "legend": {
+                                        "hide": false,
+                                        "hideTitle": true
+                                    },
+                                    "displayName": "response/llm_judged/relevance_to_query/rating"
+                                },
+                                "label": {
+                                    "show": true
+                                }
+                            },
+                            "frame": {
+                                "showTitle": true,
+                                "title": "Is the Agent's response relevant?",
+                                "showDescription": true,
+                                "description": "A relevant response (yes) addresses the user's request."
+                            },
+                            "mark": {
+                                "layout": "stack"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 3,
+                        "y": 33,
+                        "width": 3,
+                        "height": 6
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "f0fd68a2",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "status_code",
+                                            "expression": "`status_code`"
+                                        },
+                                        {
+                                            "name": "daily(timestamp)",
+                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
+                                        },
+                                        {
+                                            "name": "count(*)",
+                                            "expression": "COUNT(`*`)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 3,
+                            "widgetType": "bar",
+                            "encodings": {
+                                "x": {
+                                    "fieldName": "daily(timestamp)",
+                                    "axis": {
+                                        "title": "Date",
+                                        "hideLabels": false
+                                    },
+                                    "scale": {
+                                        "type": "temporal"
+                                    },
+                                    "displayName": "Date"
+                                },
+                                "y": {
+                                    "fieldName": "count(*)",
+                                    "scale": {
+                                        "type": "quantitative"
+                                    },
+                                    "axis": {
+                                        "title": "# of Requests"
+                                    },
+                                    "format": {
+                                        "type": "number-plain",
+                                        "abbreviation": "compact",
+                                        "decimalPlaces": {
+                                            "type": "max",
+                                            "places": 2
+                                        }
+                                    },
+                                    "displayName": "# of Requests"
+                                },
+                                "color": {
+                                    "fieldName": "status_code",
+                                    "scale": {
+                                        "type": "categorical",
+                                        "mappings": [
+                                            {
+                                                "value": 200,
+                                                "color": "#077A9D"
+                                            }
+                                        ]
+                                    },
+                                    "legend": {
+                                        "title": "Status Code",
+                                        "position": "right"
+                                    },
+                                    "displayName": "Status Code"
+                                },
+                                "label": {
+                                    "show": true
+                                }
+                            },
+                            "frame": {
+                                "title": "Request Volume",
+                                "showTitle": true,
+                                "showDescription": true,
+                                "description": "How many requests did the model receive?"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 5,
+                        "width": 3,
+                        "height": 5
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "f3cd0aff",
+                        "textbox_spec": "## Usage Summary\nThese charts include **ALL** traffic, not just the percent sampled for analysis with the LLM judges. **Clicking on the individual bars in the graphs will filter all other charts, including the table of requests shown below.** "
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 3,
+                        "width": 6,
+                        "height": 2
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "9eed5525",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "overall_assessment",
+                                            "expression": "`overall_assessment`"
+                                        },
+                                        {
+                                            "name": "daily(timestamp)",
+                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
+                                        },
+                                        {
+                                            "name": "count(*)",
+                                            "expression": "COUNT(`*`)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 3,
+                            "widgetType": "bar",
+                            "encodings": {
+                                "x": {
+                                    "fieldName": "daily(timestamp)",
+                                    "scale": {
+                                        "type": "temporal"
+                                    },
+                                    "displayName": "Date"
+                                },
+                                "y": {
+                                    "fieldName": "count(*)",
+                                    "scale": {
+                                        "type": "quantitative"
+                                    },
+                                    "axis": {
+                                        "title": "# of Requests"
+                                    },
+                                    "displayName": "# of Requests"
+                                },
+                                "color": {
+                                    "fieldName": "overall_assessment",
+                                    "scale": {
+                                        "type": "categorical",
+                                        "mappings": [
+                                            {
+                                                "value": null,
+                                                "color": "#077A9D"
+                                            },
+                                            {
+                                                "value": "no",
+                                                "color": "#FFAB00"
+                                            },
+                                            {
+                                                "value": "yes",
+                                                "color": "#00A972"
+                                            },
+                                            {
+                                                "value": "has_quality_issue",
+                                                "color": "#FF3621"
+                                            },
+                                            {
+                                                "value": "no_quality_issue",
+                                                "color": "#00A972"
+                                            }
+                                        ]
+                                    },
+                                    "legend": {
+                                        "hideTitle": true
+                                    },
+                                    "displayName": "overall_assessment"
+                                },
+                                "label": {
+                                    "show": true
+                                }
+                            },
+                            "frame": {
+                                "title": "Overall quality",
+                                "showTitle": true,
+                                "showDescription": true,
+                                "description": "Considering the analysis of every judge, which requests have a high quality response?"
+                            },
+                            "mark": {
+                                "layout": "stack"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 27,
+                        "width": 3,
+                        "height": 6
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "cf0fc2a5",
+                        "queries": [
+                            {
+                                "name": "dashboards/01efb8e38dd01090af1e4571de117a60/datasets/01efb8e38dd0134db599725b6fe15584_daily(timestamp)",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "daily(timestamp)",
+                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
+                                        },
+                                        {
+                                            "name": "daily(timestamp)_associativity",
+                                            "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 2,
+                            "widgetType": "filter-date-range-picker",
+                            "encodings": {
+                                "fields": [
+                                    {
+                                        "fieldName": "daily(timestamp)",
+                                        "displayName": "timestamp",
+                                        "queryName": "dashboards/01efb8e38dd01090af1e4571de117a60/datasets/01efb8e38dd0134db599725b6fe15584_daily(timestamp)"
+                                    }
+                                ]
+                            },
+                            "selection": {
+                                "defaultSelection": {
+                                    "range": {
+                                        "dataType": "DATE",
+                                        "min": {
+                                            "value": "now-7d/d"
+                                        },
+                                        "max": {
+                                            "value": "now-1d/d"
+                                        }
+                                    }
+                                }
+                            },
+                            "frame": {
+                                "showTitle": true,
+                                "showDescription": true,
+                                "title": "Date range"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 2,
+                        "width": 6,
+                        "height": 1
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "96a6c425",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "topic",
+                                            "expression": "`topic`"
+                                        },
+                                        {
+                                            "name": "daily(timestamp)",
+                                            "expression": "DATE_TRUNC(\"DAY\", `timestamp`)"
+                                        },
+                                        {
+                                            "name": "count(*)",
+                                            "expression": "COUNT(`*`)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 3,
+                            "widgetType": "bar",
+                            "encodings": {
+                                "x": {
+                                    "fieldName": "daily(timestamp)",
+                                    "scale": {
+                                        "type": "temporal"
+                                    },
+                                    "displayName": "Date"
+                                },
+                                "y": {
+                                    "fieldName": "count(*)",
+                                    "scale": {
+                                        "type": "quantitative"
+                                    },
+                                    "format": {
+                                        "type": "number-plain",
+                                        "abbreviation": "compact",
+                                        "decimalPlaces": {
+                                            "type": "max",
+                                            "places": 2
+                                        }
+                                    },
+                                    "axis": {
+                                        "title": "# of Requests"
+                                    },
+                                    "displayName": "# of Requests"
+                                },
+                                "color": {
+                                    "fieldName": "topic",
+                                    "scale": {
+                                        "type": "categorical",
+                                        "mappings": [
+                                            {
+                                                "value": null,
+                                                "color": "#077A9D"
+                                            },
+                                            {
+                                                "value": "no",
+                                                "color": "#FFAB00"
+                                            },
+                                            {
+                                                "value": "yes",
+                                                "color": "#00A972"
+                                            }
+                                        ]
+                                    },
+                                    "legend": {
+                                        "hideTitle": true
+                                    },
+                                    "displayName": "topic"
+                                },
+                                "label": {
+                                    "show": true
+                                }
+                            },
+                            "frame": {
+                                "title": "Topics discussed",
+                                "showTitle": true,
+                                "showDescription": true,
+                                "description": "How many requests are about each topic?"
+                            },
+                            "mark": {
+                                "layout": "stack"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 3,
+                        "y": 27,
+                        "width": 3,
+                        "height": 6
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "ec695816",
+                        "textbox_spec": "-----------------------------------"
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 23,
+                        "width": 6,
+                        "height": 1
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "5013ca16",
+                        "textbox_spec": "## LLM Judge-based Quality Analysis\nThese charts **ONLY** show the percent of traffic sampled for analysis with LLM judges. [Learn more](https://docs.databricks.com/en/generative-ai/agent-evaluation/llm-judge-metrics.html#use-agent-metrics--llm-judges-to-evaluate-app-performance) about the quality metrics computed from the Databricks documentation."
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 24,
+                        "width": 6,
+                        "height": 2
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "2a216fa6",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "f31542f7",
+                                    "fields": [
+                                        {
+                                            "name": "timestamp",
+                                            "expression": "`timestamp`"
+                                        },
+                                        {
+                                            "name": "request",
+                                            "expression": "`request`"
+                                        },
+                                        {
+                                            "name": "response",
+                                            "expression": "`response`"
+                                        },
+                                        {
+                                            "name": "eval_details",
+                                            "expression": "`eval_details`"
+                                        },
+                                        {
+                                            "name": "topic",
+                                            "expression": "`topic`"
+                                        },
+                                        {
+                                            "name": "run_id",
+                                            "expression": "`run_id`"
+                                        },
+                                        {
+                                            "name": "overall_assessment",
+                                            "expression": "`overall_assessment`"
+                                        },
+                                        {
+                                            "name": "response/llm_judged/relevance_to_query/rating",
+                                            "expression": "`response/llm_judged/relevance_to_query/rating`"
+                                        },
+                                        {
+                                            "name": "response/llm_judged/relevance_to_query/rationale",
+                                            "expression": "`response/llm_judged/relevance_to_query/rationale`"
+                                        },
+                                        {
+                                            "name": "response/llm_judged/safety/rating",
+                                            "expression": "`response/llm_judged/safety/rating`"
+                                        },
+                                        {
+                                            "name": "execution_time_s",
+                                            "expression": "`execution_time_s`"
+                                        },
+                                        {
+                                            "name": "databricks_request_id",
+                                            "expression": "`databricks_request_id`"
+                                        }
+                                    ],
+                                    "disaggregated": true
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 1,
+                            "widgetType": "table",
+                            "encodings": {
+                                "columns": [
+                                    {
+                                        "fieldName": "timestamp",
+                                        "dateTimeFormat": "YYYY-MM-DD HH:mm:ss",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "datetime",
+                                        "displayAs": "datetime",
+                                        "visible": true,
+                                        "order": 0,
+                                        "title": "Timestamp",
+                                        "allowSearch": false,
+                                        "alignContent": "right",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "displayName": "timestamp"
+                                    },
+                                    {
+                                        "fieldName": "request",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 10,
+                                        "title": "User's query",
+                                        "allowSearch": true,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "",
+                                        "displayName": "request"
+                                    },
+                                    {
+                                        "fieldName": "response",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 11,
+                                        "title": "Agent's response",
+                                        "allowSearch": true,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "",
+                                        "displayName": "response"
+                                    },
+                                    {
+                                        "fieldName": "eval_details",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "See details in MLFlow UI",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "link",
+                                        "visible": true,
+                                        "order": 12,
+                                        "title": "LLM Judge details",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "Empty values indicate the LLM judge was not run for this request",
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "eval_details",
+                                                        "fn": "is null",
+                                                        "literal": "null"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#ffffff"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "displayName": "eval_details"
+                                    },
+                                    {
+                                        "fieldName": "topic",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 13,
+                                        "title": "Detected topic",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "topic",
+                                                        "fn": "is null",
+                                                        "literal": ""
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#f9f9f9"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "displayName": "topic"
+                                    },
+                                    {
+                                        "fieldName": "run_id",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": false,
+                                        "order": 16,
+                                        "title": "run_id",
+                                        "allowSearch": true,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "displayName": "run_id"
+                                    },
+                                    {
+                                        "fieldName": "overall_assessment",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 25,
+                                        "title": "LLM Judge: Overall",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "Considering the analysis of every judge, does this request have a high quality response?",
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "overall_assessment",
+                                                        "fn": "=",
+                                                        "literal": "no_quality_issue"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#3BD973"
+                                                    }
+                                                },
+                                                {
+                                                    "if": {
+                                                        "column": "overall_assessment",
+                                                        "fn": "=",
+                                                        "literal": "has_quality_issue"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#E92828"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "displayName": "overall_assessment"
+                                    },
+                                    {
+                                        "fieldName": "response/llm_judged/relevance_to_query/rating",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 30,
+                                        "title": "LLM Judge: Response Relevance",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "Based on the LLM judge, does the response address the user's query?",
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "response/llm_judged/relevance_to_query/rating",
+                                                        "fn": "=",
+                                                        "literal": "yes"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#3BD973"
+                                                    }
+                                                },
+                                                {
+                                                    "if": {
+                                                        "column": "response/llm_judged/relevance_to_query/rating",
+                                                        "fn": "=",
+                                                        "literal": "no"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#E92828"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "displayName": "response/llm_judged/relevance_to_query/rating"
+                                    },
+                                    {
+                                        "fieldName": "response/llm_judged/relevance_to_query/rationale",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 31,
+                                        "title": "LLM Judge: Response Relevance rationale",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "Explanation of the LLM judge's answer",
+                                        "displayName": "response/llm_judged/relevance_to_query/rationale"
+                                    },
+                                    {
+                                        "fieldName": "response/llm_judged/safety/rating",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 32,
+                                        "title": "LLM Judge: Safety",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "Based on the LLM judge, does response NOT include any harmful content?",
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "response/llm_judged/safety/rating",
+                                                        "fn": "=",
+                                                        "literal": "yes"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#3BD973"
+                                                    }
+                                                },
+                                                {
+                                                    "if": {
+                                                        "column": "response/llm_judged/safety/rating",
+                                                        "fn": "=",
+                                                        "literal": "no"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#E92828"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "displayName": "response/llm_judged/safety/rating"
+                                    },
+                                    {
+                                        "fieldName": "execution_time_s",
+                                        "numberFormat": "0.00",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "float",
+                                        "displayAs": "number",
+                                        "visible": true,
+                                        "order": 33,
+                                        "title": "Latency (seconds)",
+                                        "allowSearch": false,
+                                        "alignContent": "right",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "displayName": "execution_time_s"
+                                    },
+                                    {
+                                        "fieldName": "databricks_request_id",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 41,
+                                        "title": "Databricks Request ID",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "displayName": "databricks_request_id"
+                                    }
+                                ]
+                            },
+                            "invisibleColumns": [
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "client_request_id",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 1,
+                                    "title": "client_request_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "status_code",
+                                    "type": "integer",
+                                    "displayAs": "number",
+                                    "order": 4,
+                                    "title": "status_code",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "request_raw",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 6,
+                                    "title": "request_raw",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response_raw",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 7,
+                                    "title": "response_raw",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0.00",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "sampling_fraction",
+                                    "type": "float",
+                                    "displayAs": "number",
+                                    "order": 8,
+                                    "title": "sampling_fraction",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response/overall_assessment/rating",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 24,
+                                    "title": "LLM Judge: Overall",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false,
+                                    "description": "Considering the analysis of every judge, does this request have a high quality response?",
+                                    "cellFormat": {
+                                        "default": {
+                                            "foregroundColor": null
+                                        },
+                                        "rules": [
+                                            {
+                                                "if": {
+                                                    "column": "response/overall_assessment/rating",
+                                                    "fn": "=",
+                                                    "literal": "yes"
+                                                },
+                                                "value": {
+                                                    "foregroundColor": "#3BD973"
+                                                }
+                                            },
+                                            {
+                                                "if": {
+                                                    "column": "response/overall_assessment/rating",
+                                                    "fn": "=",
+                                                    "literal": "no"
+                                                },
+                                                "value": {
+                                                    "foregroundColor": "#E92828"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response/llm_judged/safety/rationale",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 34,
+                                    "title": "response/llm_judged/safety/rationale",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "experiment_id",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 40,
+                                    "title": "experiment_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "dateTimeFormat": "DD/MM/YY",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "request_date",
+                                    "type": "date",
+                                    "displayAs": "datetime",
+                                    "order": 100005,
+                                    "title": "request_date",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "dateTimeFormat": "DD/MM/YY HH:mm:ss.SSS",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "request_time",
+                                    "type": "datetime",
+                                    "displayAs": "datetime",
+                                    "order": 100007,
+                                    "title": "request_time",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "execution_duration_ms",
+                                    "type": "integer",
+                                    "displayAs": "number",
+                                    "order": 100010,
+                                    "title": "execution_duration_ms",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "served_entity_id",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 100012,
+                                    "title": "served_entity_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "logging_error_codes",
+                                    "type": "complex",
+                                    "displayAs": "json",
+                                    "order": 100013,
+                                    "title": "logging_error_codes",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "requester",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 100014,
+                                    "title": "requester",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response/llm_judged/groundedness/error_message",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 100017,
+                                    "title": "response/llm_judged/groundedness/error_message",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                }
+                            ],
+                            "allowHTMLByDefault": false,
+                            "itemsPerPage": 25,
+                            "paginationSize": "default",
+                            "condensed": true,
+                            "withRowNumber": false,
+                            "frame": {
+                                "showTitle": true,
+                                "title": "Click on the bars in the graphs above to filter the table of requests.",
+                                "showDescription": true,
+                                "description": "Note that some LLM judge assessments are shown as null because not all requests were sampled for LLM judge analysis."
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 17,
+                        "width": 6,
+                        "height": 6
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "d7790285",
+                        "queries": [
+                            {
+                                "name": "dashboards/01ef872e0f8f194698ac08d6b6b3b8d1/datasets/01ef872e0f931c6ea31c4a0b3504c6b9_topic",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "topic",
+                                            "expression": "`topic`"
+                                        },
+                                        {
+                                            "name": "topic_associativity",
+                                            "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                                        }
+                                    ],
+                                    "disaggregated": false
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 2,
+                            "widgetType": "filter-single-select",
+                            "encodings": {
+                                "fields": [
+                                    {
+                                        "fieldName": "topic",
+                                        "displayName": "topic",
+                                        "queryName": "dashboards/01ef872e0f8f194698ac08d6b6b3b8d1/datasets/01ef872e0f931c6ea31c4a0b3504c6b9_topic"
+                                    }
+                                ]
+                            },
+                            "frame": {
+                                "showTitle": true,
+                                "title": "Select a topic to filter by"
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 26,
+                        "width": 6,
+                        "height": 1
+                    }
+                },
+                {
+                    "widget": {
+                        "name": "b3e914cb",
+                        "queries": [
+                            {
+                                "name": "main_query",
+                                "query": {
+                                    "datasetName": "b3e86a40",
+                                    "fields": [
+                                        {
+                                            "name": "timestamp",
+                                            "expression": "`timestamp`"
+                                        },
+                                        {
+                                            "name": "request",
+                                            "expression": "`request`"
+                                        },
+                                        {
+                                            "name": "response",
+                                            "expression": "`response`"
+                                        },
+                                        {
+                                            "name": "eval_details",
+                                            "expression": "`eval_details`"
+                                        },
+                                        {
+                                            "name": "topic",
+                                            "expression": "`topic`"
+                                        },
+                                        {
+                                            "name": "run_id",
+                                            "expression": "`run_id`"
+                                        },
+                                        {
+                                            "name": "overall_assessment",
+                                            "expression": "`overall_assessment`"
+                                        },
+                                        {
+                                            "name": "response/llm_judged/relevance_to_query/rating",
+                                            "expression": "`response/llm_judged/relevance_to_query/rating`"
+                                        },
+                                        {
+                                            "name": "response/llm_judged/relevance_to_query/rationale",
+                                            "expression": "`response/llm_judged/relevance_to_query/rationale`"
+                                        },
+                                        {
+                                            "name": "response/llm_judged/safety/rating",
+                                            "expression": "`response/llm_judged/safety/rating`"
+                                        },
+                                        {
+                                            "name": "execution_time_s",
+                                            "expression": "`execution_time_s`"
+                                        },
+                                        {
+                                            "name": "databricks_request_id",
+                                            "expression": "`databricks_request_id`"
+                                        }
+                                    ],
+                                    "disaggregated": true
+                                }
+                            }
+                        ],
+                        "spec": {
+                            "version": 1,
+                            "widgetType": "table",
+                            "encodings": {
+                                "columns": [
+                                    {
+                                        "fieldName": "timestamp",
+                                        "dateTimeFormat": "YYYY-MM-DD HH:mm:ss",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "datetime",
+                                        "visible": true,
+                                        "order": 0,
+                                        "title": "Timestamp",
+                                        "allowSearch": false,
+                                        "alignContent": "right",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "displayName": "timestamp"
+                                    },
+                                    {
+                                        "fieldName": "request",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 10,
+                                        "title": "User's query",
+                                        "allowSearch": true,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "",
+                                        "displayName": "request"
+                                    },
+                                    {
+                                        "fieldName": "response",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 11,
+                                        "title": "Agent's response",
+                                        "allowSearch": true,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "",
+                                        "displayName": "response"
+                                    },
+                                    {
+                                        "fieldName": "eval_details",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "See details in MLFlow UI",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "link",
+                                        "visible": true,
+                                        "order": 12,
+                                        "title": "LLM Judge details",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "null values indicate the LLM judge was not run for this request",
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "eval_details",
+                                                        "fn": "is null",
+                                                        "literal": "null"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#ffffff"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "displayName": "eval_details"
+                                    },
+                                    {
+                                        "fieldName": "topic",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 13,
+                                        "title": "Detected topic",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "displayName": "topic"
+                                    },
+                                    {
+                                        "fieldName": "run_id",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": false,
+                                        "order": 16,
+                                        "title": "run_id",
+                                        "allowSearch": true,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "displayName": "run_id"
+                                    },
+                                    {
+                                        "fieldName": "overall_assessment",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 21,
+                                        "title": "LLM Judge: Overall",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "Considering the analysis of every judge, does this request have a high quality response?",
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "overall_assessment",
+                                                        "fn": "=",
+                                                        "literal": "no_quality_issue"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#3BD973"
+                                                    }
+                                                },
+                                                {
+                                                    "if": {
+                                                        "column": "overall_assessment",
+                                                        "fn": "=",
+                                                        "literal": "has_quality_issue"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#E92828"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "displayName": "overall_assessment"
+                                    },
+                                    {
+                                        "fieldName": "response/llm_judged/relevance_to_query/rating",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 26,
+                                        "title": "LLM Judge: Response Relevance",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "Based on the LLM judge, does the response address the user's query?",
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "response/llm_judged/relevance_to_query/rating",
+                                                        "fn": "=",
+                                                        "literal": "yes"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#3BD973"
+                                                    }
+                                                },
+                                                {
+                                                    "if": {
+                                                        "column": "response/llm_judged/relevance_to_query/rating",
+                                                        "fn": "=",
+                                                        "literal": "no"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#E92828"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "displayName": "response/llm_judged/relevance_to_query/rating"
+                                    },
+                                    {
+                                        "fieldName": "response/llm_judged/relevance_to_query/rationale",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 27,
+                                        "title": "LLM Judge: Response Relevance rationale",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "Explanation of the LLM judge's answer",
+                                        "displayName": "response/llm_judged/relevance_to_query/rationale"
+                                    },
+                                    {
+                                        "fieldName": "response/llm_judged/safety/rating",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 28,
+                                        "title": "LLM Judge: Safety",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "description": "Based on the LLM judge, does response NOT include any harmful content?",
+                                        "cellFormat": {
+                                            "default": {
+                                                "foregroundColor": null
+                                            },
+                                            "rules": [
+                                                {
+                                                    "if": {
+                                                        "column": "response/llm_judged/safety/rating",
+                                                        "fn": "=",
+                                                        "literal": "yes"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#3BD973"
+                                                    }
+                                                },
+                                                {
+                                                    "if": {
+                                                        "column": "response/llm_judged/safety/rating",
+                                                        "fn": "=",
+                                                        "literal": "no"
+                                                    },
+                                                    "value": {
+                                                        "foregroundColor": "#E92828"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "displayName": "response/llm_judged/safety/rating"
+                                    },
+                                    {
+                                        "fieldName": "execution_time_s",
+                                        "numberFormat": "0.00",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "float",
+                                        "displayAs": "number",
+                                        "visible": true,
+                                        "order": 29,
+                                        "title": "Latency (seconds)",
+                                        "allowSearch": false,
+                                        "alignContent": "right",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "displayName": "execution_time_s"
+                                    },
+                                    {
+                                        "fieldName": "databricks_request_id",
+                                        "booleanValues": [
+                                            "false",
+                                            "true"
+                                        ],
+                                        "imageUrlTemplate": "{{ @ }}",
+                                        "imageTitleTemplate": "{{ @ }}",
+                                        "imageWidth": "",
+                                        "imageHeight": "",
+                                        "linkUrlTemplate": "{{ @ }}",
+                                        "linkTextTemplate": "{{ @ }}",
+                                        "linkTitleTemplate": "{{ @ }}",
+                                        "linkOpenInNewTab": true,
+                                        "type": "string",
+                                        "displayAs": "string",
+                                        "visible": true,
+                                        "order": 38,
+                                        "title": "Databricks Request ID",
+                                        "allowSearch": false,
+                                        "alignContent": "left",
+                                        "allowHTML": false,
+                                        "highlightLinks": false,
+                                        "useMonospaceFont": false,
+                                        "preserveWhitespace": false,
+                                        "displayName": "databricks_request_id"
+                                    }
+                                ]
+                            },
+                            "invisibleColumns": [
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "client_request_id",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 1,
+                                    "title": "client_request_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "status_code",
+                                    "type": "integer",
+                                    "displayAs": "number",
+                                    "order": 4,
+                                    "title": "status_code",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "request_raw",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 6,
+                                    "title": "request_raw",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response_raw",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 7,
+                                    "title": "response_raw",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0.00",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "sampling_fraction",
+                                    "type": "float",
+                                    "displayAs": "number",
+                                    "order": 8,
+                                    "title": "sampling_fraction",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response/overall_assessment/rating",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 20,
+                                    "title": "LLM Judge: Overall",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false,
+                                    "description": "Considering the analysis of every judge, does this request have a high quality response?",
+                                    "cellFormat": {
+                                        "default": {
+                                            "foregroundColor": null
+                                        },
+                                        "rules": [
+                                            {
+                                                "if": {
+                                                    "column": "response/overall_assessment/rating",
+                                                    "fn": "=",
+                                                    "literal": "yes"
+                                                },
+                                                "value": {
+                                                    "foregroundColor": "#3BD973"
+                                                }
+                                            },
+                                            {
+                                                "if": {
+                                                    "column": "response/overall_assessment/rating",
+                                                    "fn": "=",
+                                                    "literal": "no"
+                                                },
+                                                "value": {
+                                                    "foregroundColor": "#E92828"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response/llm_judged/safety/rationale",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 32,
+                                    "title": "response/llm_judged/safety/rationale",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "experiment_id",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 36,
+                                    "title": "experiment_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "response/llm_judged/groundedness/error_message",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 49,
+                                    "title": "response/llm_judged/groundedness/error_message",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "dateTimeFormat": "DD/MM/YY",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "request_date",
+                                    "type": "date",
+                                    "displayAs": "datetime",
+                                    "order": 100005,
+                                    "title": "request_date",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "dateTimeFormat": "DD/MM/YY HH:mm:ss.SSS",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "request_time",
+                                    "type": "datetime",
+                                    "displayAs": "datetime",
+                                    "order": 100007,
+                                    "title": "request_time",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "numberFormat": "0",
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "execution_duration_ms",
+                                    "type": "integer",
+                                    "displayAs": "number",
+                                    "order": 100010,
+                                    "title": "execution_duration_ms",
+                                    "allowSearch": false,
+                                    "alignContent": "right",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "served_entity_id",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 100012,
+                                    "title": "served_entity_id",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "logging_error_codes",
+                                    "type": "complex",
+                                    "displayAs": "json",
+                                    "order": 100013,
+                                    "title": "logging_error_codes",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                },
+                                {
+                                    "booleanValues": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "imageUrlTemplate": "{{ @ }}",
+                                    "imageTitleTemplate": "{{ @ }}",
+                                    "imageWidth": "",
+                                    "imageHeight": "",
+                                    "linkUrlTemplate": "{{ @ }}",
+                                    "linkTextTemplate": "{{ @ }}",
+                                    "linkTitleTemplate": "{{ @ }}",
+                                    "linkOpenInNewTab": true,
+                                    "name": "requester",
+                                    "type": "string",
+                                    "displayAs": "string",
+                                    "order": 100014,
+                                    "title": "requester",
+                                    "allowSearch": false,
+                                    "alignContent": "left",
+                                    "allowHTML": false,
+                                    "highlightLinks": false,
+                                    "useMonospaceFont": false,
+                                    "preserveWhitespace": false
+                                }
+                            ],
+                            "allowHTMLByDefault": false,
+                            "itemsPerPage": 25,
+                            "paginationSize": "default",
+                            "condensed": true,
+                            "withRowNumber": false,
+                            "frame": {
+                                "showTitle": true,
+                                "title": "Click on the bars in the graphs above to filter the table of requests.",
+                                "showDescription": false,
+                                "description": ""
+                            }
+                        }
+                    },
+                    "position": {
+                        "x": 0,
+                        "y": 51,
+                        "width": 6,
+                        "height": 6
+                    }
+                }
+            ]
+        }
+    ]
+}
