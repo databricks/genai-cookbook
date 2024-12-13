@@ -3,7 +3,7 @@
         {
             "name": "b3e86a40",
             "displayName": "sampled_request_logs_eval",
-            "query": "with eval_log as (\n    select \n        *,\n        case\n            when `response/overall_assessment/rating` = \"yes\" then \"no_quality_issue\"\n            when `response/overall_assessment/rating` = \"no\" then \"has_quality_issue\"\n            else null\n        end as overall_assessment,\n        execution_duration_ms / 1000 as execution_time_s,\n        concat(\n            '/ml/experiments/',\n            experiment_id,\n            '/runs/',\n            run_id,\n            '/evaluations?searchQuery=',\n            databricks_request_id\n        ) as eval_details\n    from ml.{{eval_requests_log_table_name}}\n    where \n        run_id is not null \n        and run_id != \"skipped\"\n)\nselect eval_log.*\nfrom eval_log"
+            "query": "with eval_log as (\n    select \n        *,\n        case\n            when `response/overall_assessment/rating` = \"yes\" then \"no_quality_issue\"\n            when `response/overall_assessment/rating` = \"no\" then \"has_quality_issue\"\n            else null\n        end as overall_assessment,\n        execution_duration_ms / 1000 as execution_time_s,\n        concat(\n            '/ml/experiments/',\n            experiment_id,\n            '/runs/',\n            run_id,\n            '/evaluations?searchQuery=',\n            databricks_request_id\n        ) as eval_details\n    from {{eval_requests_log_table_name}}\n    where \n        run_id is not null \n        and run_id != \"skipped\"\n)\nselect eval_log.*\nfrom eval_log"
         },
         {
             "name": "f31542f7",
@@ -35,7 +35,7 @@
                             {
                                 "name": "main_query",
                                 "query": {
-                                    "datasetName": "b3e86a40",
+                                    "datasetName": "f31542f7",
                                     "fields": [
                                         {
                                             "name": "daily(timestamp)",
@@ -335,7 +335,7 @@
                             {
                                 "name": "main_query",
                                 "query": {
-                                    "datasetName": "b3e86a40",
+                                    "datasetName": "f31542f7",
                                     "fields": [
                                         {
                                             "name": "status_code",
