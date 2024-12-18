@@ -1,0 +1,19 @@
+chunking_config:
+  chunk_overlap_tokens: 256
+  chunk_size_tokens: 1024
+  class_path: cookbook.config.data_pipeline.recursive_text_splitter.RecursiveTextSplitterChunkingConfig
+  embedding_model_endpoint: databricks-gte-large-en
+class_path: cookbook.config.data_pipeline.DataPipelineConfig
+output:
+  chunked_docs_table: casaman_ssa.demos.test_product_docs_docs_chunked__v2
+  class_path: cookbook.config.data_pipeline.data_pipeline_output.DataPipelineOuputConfig
+  parsed_docs_table: casaman_ssa.demos.test_product_docs_docs__v2
+  vector_index: casaman_ssa.demos.test_product_docs_docs_chunked_index__v2
+  vector_search_endpoint: dbdemos_vs_endpoint
+source:
+  class_path: cookbook.config.data_pipeline.uc_volume_source.UCVolumeSourceConfig
+  uc_catalog_name: casaman_ssa
+  uc_schema_name: demos
+  uc_volume_name: volume_databricks_documentation
+  volume_path: /Volumes/casaman_ssa/demos/volume_databricks_documentation
+  volume_uc_fqn: casaman_ssa.demos.volume_databricks_documentation
