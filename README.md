@@ -12,49 +12,30 @@ This repository provides [learning materials](https://ai-cookbook.io/) and code 
 
 ## TL;DR:
 
+This repository is a monorepo - each directory contains a standalone "recipe". 
+
 Choose the recipe that best matches your needs:
 
 - **For RAG Applications:**
   - [RAG Getting Started](./rag_app_sample_code/README.md)
   - Start with `agent_app_sample_code/A_POC_app` to build a proof of concept
   - Then explore `agent_app_sample_code/B_quality_iteration` to improve quality
-  - Uses Databricks' Mosaic AI Agent Framework for enterprise features
+  - Uses Databricks Agent Framework + Evaluation for enterprise features
+    - Ingest, process and automatically index documents with Spark + Databricks Vector Search
+    - Experiment and version RAG models with MLflow and Unity Catalog
+    - Autoscaling model deployment with Model Serving
+    - Iterate on quality with Agent Evals and SME Review UI
+    - Monitor real-time performance
 
 - **For an agent that uses a retriever tool:**
   - Check out `agent_app_sample_code`
 
-- **For OpenAI SDK Integration:**
+- **For Agent Application in pure Python + OpenAI SDK:**
   - [OpenAI SDK Getting Started](./openai_sdk_agent_app_sample_code/README.md)
   - Navigate to `openai_sdk_agent_app_sample_code`
   - Examples of building agents using OpenAI SDK with MLflow PyFunc Models
 
-## Repository Structure
-
-```
-├── agent_app_sample_code/             # Sample code for agent applications
-│   ├── agents/                        # Agent code
-│   ├── 03_agent_proof_of_concept.py   # Example of a proof of concept agent
-│   └── ...                            # Additional directories and files
-├── openai_sdk_agent_app_sample_code/  # Sample code using OpenAI SDK
-│   └── ...                            # Directories and files
-├── rag_app_sample_code/               # Sample code for RAG applications
-│   ├── A_POC_app/                     # Proof-of-Concept applications
-│   ├── pdf_uc_volume/                 # Example of a RAG application using a PDFs
-│   ├── B_quality_iteration/           # Code for quality iteration
-│   └── ...                            # Additional directories and files
-├── genai_cookbook/                    # Documentation and learning materials
-├── data/                              # Sample data for testing and development
-├── dev/                               # Development tools and scripts
-└── README.md                          # This README file
-```
-
-The `agent_app_sample_code` directory contains sample code for building agent applications using the Databricks platform.
-
-The `openai_sdk_agent_app_sample_code` directory contains sample code that uses the OpenAI SDK + MLFlow PyFunc Models for building agents.
-
-The `rag_app_sample_code` directory contains sample code for Retrieval-Augmented Generation (RAG) applications.
-
-The `genai_cookbook` directory contains a 10 minute getting started guide.
+## How to use this repository
 
 The provided code is intended for use with the Databricks platform.  Specifically:
 - [Mosaic AI Agent Framework](https://docs.databricks.com/generative-ai/agent-framework/build-genai-apps.html) which provides a fast developer workflow with enterprise-ready LLMops & governance
@@ -62,7 +43,12 @@ The provided code is intended for use with the Databricks platform.  Specificall
 
 ![Alt text](rag_app_sample_code/dbxquality.png)
 
-## Getting Started
+Specific instructions for each recipe are provided in the README.md file of each subdirectory.
+
+### Prerequisites
+
+- Your Databricks workspace must have [Unity Catalog](https://docs.databricks.com/data-governance/unity-catalog/index.html) enabled. 
+- Your Databricks workspace must have [Model Serving](https://docs.databricks.com/machine-learning/model-serving/index.html#enable-model-serving-for-your-workspace) enabled.
 
 ### Option 1: Running in a Databricks Workspace (Recommended)
 
@@ -70,6 +56,12 @@ The provided code is intended for use with the Databricks platform.  Specificall
   - In your Databricks workspace, go to Repos
   - Click "Add Repo"
   - Enter the Git repository URL: `https://github.com/databricks/genai-cookbook.git`
+  - After completing the steps above, use sparse checkout mode to clone the subdirectory of your choice.
+
+1a. **Optional: Download the repository as a zip file:**
+In cases where you cannot use Git folders, you can download the repository as a zip file.
+  - Click the "Download ZIP" button on the repository page
+  - Unzip the file and upload it to your Databricks workspace
 
 2. **Set Up Your Databricks Environment:**
   - Use Serverless Notebooks or create a new cluster with Databricks Runtime 14.0 or higher
@@ -81,31 +73,46 @@ The provided code is intended for use with the Databricks platform.  Specificall
 
 ### Option 2: Running Locally
 
-1. **Prerequisites:**
-  - Python 3.10 or higher
-  - [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) installed and configured
-  - Git installed on your local machine
+If you prefer to edit code locally, you can use Databricks Connect and optionally an IDE plugin like [VSCode](https://docs.databricks.com/en/dev-tools/vscode-ext/index.html). 
 
-2. **Clone and Set Up:**
-  ```bash
-  # Clone the repository
-  git clone https://github.com/databricks/genai-cookbook.git
-  cd genai-cookbook
+It is strongly recommended to first read the [Databricks Connect documentation](https://docs.databricks.com/en/
+dev-tools/databricks-connect/index.html) to understand how to connect your local machine to your Databricks 
+workspace.
 
-  # Create and activate virtual environment
-  python -m venv venv
-  source venv/bin/activate  # On Windows use: venv\Scripts\activate
+1. **Install Prerequisites**
+   - Python 3.10 or higher
+   - [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html)
+   - Git
+   - Optional: [VSCode with Databricks Extension](https://docs.databricks.com/en/dev-tools/vscode-ext/index.html)
 
-  # Install dependencies
-  pip install -r dev/dev_requirements.txt
-  ```
+2. **Set Up Databricks Connect**
+   - Read the [Databricks Connect documentation](https://docs.databricks.com/en/dev-tools/databricks-connect/index.html)
+   - Follow the setup instructions to connect your local machine to your workspace
 
-3. **Configure Databricks Connection:**
-  - Set up your Databricks CLI credentials:
-    ```bash
-    databricks configure --token
-    ```
-  - Follow the prompts to enter your Databricks workspace URL and access token
+3. **Configure MLflow**
+   Set the following environment variables:
+   ```bash
+   export MLFLOW_TRACKING_URI=databricks
+   export DATABRICKS_HOST=<your-workspace-url>
+   export DATABRICKS_TOKEN=<your-access-token>
+   ```
+
+4. **Clone and Set Up the Repository**
+   ```bash
+   git clone https://github.com/databricks/genai-cookbook.git
+   cd genai-cookbook
+   python -m venv venv
+   source venv/bin/activate  # On Windows use: venv\Scripts\activate
+   pip install -r dev/dev_requirements.txt
+   ```
+
+5. **Configure Databricks CLI**
+   ```bash
+   databricks configure --token
+   ```
+   When prompted, enter your:
+   - Workspace URL
+   - Access token
 
 ## Contributing
 
@@ -161,5 +168,4 @@ We welcome contributions to improve the cookbook! Here's how you can help:
 
 ### Getting Help
 
-- For bugs or feature requests, [create an issue](https://github.com/databricks/genai-cookbook/issues)
-- For questions, start a [GitHub Discussion](https://github.com/databricks/genai-cookbook/discussions)
+- For bugs or feature requests, or questions, [create an issue](https://github.com/databricks/genai-cookbook/issues)

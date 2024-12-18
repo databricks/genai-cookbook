@@ -24,7 +24,7 @@ This directory contains sample code for building agent applications using client
 
 ### Prerequisites
 
-- Databricks Runtime 14.0 or higher
+- Databricks Runtime 14.0 or higher, or Serverless
 - A Databricks workspace with access to:
   - [Mosaic AI Agent Framework](https://docs.databricks.com/en/generative-ai/agent-framework/build-genai-apps.html)
   - [Mosaic AI Agent Evaluation](https://docs.databricks.com/en/generative-ai/agent-evaluation/index.html)
