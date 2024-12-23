@@ -1,5 +1,6 @@
 # In this file, we construct a function-calling Agent with a Retriever tool using MLflow + langgraph.
-
+import yaml
+from pathlib import Path
 import logging
 import json
 from dataclasses import asdict
@@ -37,15 +38,7 @@ from mlflow.models.resources import (
 from pydantic import BaseModel
 from unitycatalog.ai.core.databricks import DatabricksFunctionClient
 from unitycatalog.ai.langchain.toolkit import UCFunctionToolkit
-
 from cookbook.agents.utils.load_config import load_config
-from cookbook.config.agents.function_calling_agent import FunctionCallingAgentConfig
-from cookbook.config.shared.llm import LLMConfig
-from cookbook.config.shared.tool import (
-    ToolConfig,
-    VectorSearchToolConfig,
-    UCFunctionToolConfig,
-)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -53,13 +46,13 @@ logging.basicConfig(level=logging.INFO)
 FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME = "function_calling_agent_config.yaml"
 
 
-def create_tool(tool_config: ToolConfig) -> Tool:
-    if type(tool_config) == VectorSearchToolConfig:
+def create_tool(tool_config) -> Tool:
+    if tool_config.type == "vector_search":
         vector_search_as_retriever = DatabricksVectorSearch(
-            endpoint=tool_config.endpoint,
-            index_name=tool_config.index_name,
-            columns=tool_config.columns,
-        ).as_retriever(search_kwargs=tool_config.search_kwargs)
+            endpoint=tool_config.vector_search_endpoint,
+            index_name=tool_config.vector_search_index,
+            columns=[tool_config.vector_search_schema.chunk_text, tool_config.vector_search_schema.id_column, tool_config.vector_search_schema.document_uri],
+        ).as_retriever(search_kwargs=tool_config.vector_search_parameters)
 
         @tool
         def search_product_docs(question: str):
@@ -75,7 +68,7 @@ def create_tool(tool_config: ToolConfig) -> Tool:
             return "".join(chunk_contents)
 
         return search_product_docs
-    elif type(tool_config) == UCFunctionToolConfig:
+    elif tool_config.type == "uc_function":
         client = DatabricksFunctionClient()
         toolkit = UCFunctionToolkit(
             client=client, function_names=[tool_config.function_name]
@@ -168,21 +161,21 @@ def wrap_output(stream: Iterator[MessageLikeRepresentation]) -> Iterator[Dict]:
 
 
 def create_resource_dependency(config: BaseModel) -> List[DatabricksResource]:
-    if isinstance(config, LLMConfig):
+    if config.type == "llm":
         return [DatabricksServingEndpoint(endpoint_name=config.llm_endpoint_name)]
-    elif isinstance(config, VectorSearchToolConfig):
+    elif config.type == "vector_search":
         return [
-            DatabricksVectorSearchIndex(index_name=config.index_name),
+            DatabricksVectorSearchIndex(index_name=config.vector_search_index),
             DatabricksServingEndpoint(config.embedding_endpoint_name),
         ]
-    elif isinstance(config, UCFunctionToolConfig):
+    elif config.type == "uc_function":
         return [DatabricksFunction(function_name=config.function_name)]
     else:
         raise ValueError(f"Unknown config type: {type(config)}")
 
 
 def get_resource_dependencies(
-    agent_config: FunctionCallingAgentConfig,
+    agent_config,
 ) -> List[DatabricksResource]:
     configs = [agent_config.llm_config] + agent_config.tool_configs
     dependencies = reduce(lambda x, y: x + y, map(create_resource_dependency, configs))
@@ -190,11 +183,11 @@ def get_resource_dependencies(
 
 
 def create_function_calling_agent(
-    agent_config: Optional[Union[FunctionCallingAgentConfig, str]] = None
+    agent_config
 ) -> RunnableSequence:
     if not agent_config:
         raise (
-            f"No agent config found.  If you are in your local development environment, make sure you either [1] are calling init(agent_config=...) with either an instance of FunctionCallingAgentConfig or the full path to a YAML config file or [2] have a YAML config file saved at {{your_project_root_folder}}/configs/{FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME}."
+            f"No agent config found.  If you are in your local development environment, make sure you either [1] are calling init(agent_config=...) with either a loaded agent config or the full path to a YAML config file or [2] have a YAML config file saved at {{your_project_root_folder}}/configs/{FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME}."
         )
 
     tool_configs = agent_config.tool_configs
@@ -216,12 +209,9 @@ def create_function_calling_agent(
 
     return react_agent
 
+agent_conf = load_config()
 
-agent_conf = load_config(
-    passed_agent_config=None,
-    default_config_file_name=FC_AGENT_DEFAULT_YAML_CONFIG_FILE_NAME,
-)
-
+print(agent_conf)
 # tell MLflow logging where to find the agent's code
 set_model(create_function_calling_agent(agent_conf))
 

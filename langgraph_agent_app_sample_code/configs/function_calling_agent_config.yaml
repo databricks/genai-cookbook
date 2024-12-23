@@ -4,6 +4,7 @@ input_example:
   - content: What can you help me with?
     role: user
 llm_config:
+  type: llm
   llm_endpoint_name: agents-demo-gpt4o-mini
   llm_parameters:
     max_tokens: 1500
@@ -23,8 +24,9 @@ llm_config:
     \ to refine their request.  If you do not have a relevant tool for a question\
     \ or the outputs of the tools are not helpful, respond with: \"I'm sorry, I can't\
     \ help you with that.\""
-tools:
+tool_configs:
 - class_path: cookbook.tools.vector_search.VectorSearchRetrieverTool
+  type: vector_search
   description: Use this tool to search for product documentation.
   doc_similarity_threshold: 0.0
   filterable_columns: []
@@ -32,7 +34,9 @@ tools:
   retriever_filter_parameter_prompt: optional filters to apply to the search. An array
     of objects, each specifying a field name and the filters to apply to that field.
   retriever_query_parameter_prompt: query to look up in retriever
-  vector_search_index: shared.cookbook_local_test_udhay.test_product_docs_docs_chunked_index__v2
+  vector_search_index: shared.cookbook_langgraph_udhay.test_product_docs_docs_chunked_index__v2
+  vector_search_endpoint: one-env-shared-endpoint-15
+  embedding_endpoint_name: databricks-gte-large-en
   vector_search_parameters:
     num_results: 5
     query_type: ann
@@ -40,7 +44,9 @@ tools:
     additional_metadata_columns: []
     chunk_text: content_chunked
     document_uri: doc_uri
+    id_column: chunk_id
 - class_path: cookbook.tools.uc_tool.UCTool
+  type: uc_function
   error_prompt: 'The tool call generated an Exception, detailed in `error`. Think
     step-by-step following these instructions to determine your next step.
 
@@ -57,4 +63,5 @@ tools:
     Based on your thinking, if the error is due to a problem with the input parameters,
     either call this tool again in a way that avoids this exception or collect additional
     information from the user to modify the inputs to avoid this exception.'
-  uc_function_name: shared.cookbook_local_test_udhay.sku_sample_translator
+  function_name: shared.cookbook_local_test_udhay.sku_sample_translator
+
