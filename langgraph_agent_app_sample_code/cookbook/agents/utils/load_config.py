@@ -17,6 +17,7 @@ def load_config():
         agent_conf = Box(yaml.safe_load(Path(fc_agent_config_path).read_text()))
         return agent_conf
     except FileNotFoundError as e:
+        logging.info(f"Could not load config from {fc_agent_config_path}: {e}")
         return load_config_from_mlflow_model_config()
 
 def load_config_from_mlflow_model_config():
