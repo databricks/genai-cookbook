@@ -97,9 +97,7 @@ VECTOR_INDEX_NAME = f"{UC_CATALOG}.{UC_SCHEMA}.{AGENT_NAME}_chunked_docs_index"
 
 # Embedding model endpoint. The list of off-the-shelf embeddings can be found here:
 # https://docs.databricks.com/en/machine-learning/foundation-models/index.html
-EMBEDDING_MODEL_ENDPOINT = "databricks-bge-large-en"
-# EMBEDDING_MODEL_ENDPOINT = "ep-embeddings-small"
-# EMBEDDING_MODEL_ENDPOINT = "bge-test"
+EMBEDDING_MODEL_ENDPOINT = "databricks-gte-large-en"
 
 # COMMAND ----------
 
