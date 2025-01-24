@@ -44,7 +44,7 @@ retriever_config = RetrieverToolConfig(
         document_uri="doc_uri",
         additional_metadata_columns=[],
     ),
-    parameters=RetrieverParametersConfig(num_results=5, query_type="hybrid"),
+    parameters=RetrieverParametersConfig(num_results=5, query_type="ann"),
     vector_search_threshold=0.0, # Increase this to make the search more restrictive
     chunk_template="Passage text: {chunk_text}\nPassage metadata: {metadata}\n\n",
     prompt_template="""Use the following pieces of retrieved context to answer the question.\nOnly use the passages from context that are relevant to the query to answer the question, ignore the irrelevant passages.  When responding, cite your source, referring to the passage by the columns in the passage's metadata.\n\nContext: {context}""",
