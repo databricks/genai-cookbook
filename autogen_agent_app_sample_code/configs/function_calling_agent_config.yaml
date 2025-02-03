@@ -4,7 +4,7 @@ input_example:
   - content: What can you help me with?
     role: user
 llm_config:
-  llm_endpoint_name: casaman-gpt4
+  llm_endpoint_name: databricks-meta-llama-3-3-70b-instruct
   llm_parameters:
     max_tokens: 1500
     temperature: 0.01

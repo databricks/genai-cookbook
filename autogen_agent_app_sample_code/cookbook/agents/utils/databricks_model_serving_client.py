@@ -16,11 +16,15 @@ class DatabricksModelServingClient:
         message.pop("name", None)
         messages.append(message)
 
+      llm_config = self.llm_config.copy()
+
+      if 'tools' in input_data:
+        llm_config["tools"] = input_data["tools"]
+        llm_config["tool_choice"] = "auto"
+
       response = self.openai_client.chat.completions.create(
           model=self.endpoint_name,
           messages=messages,
-          tools=input_data['tools'],
-          tool_choice="auto",
           **self.llm_config
       )
       

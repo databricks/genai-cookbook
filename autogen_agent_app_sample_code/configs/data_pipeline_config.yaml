@@ -9,7 +9,7 @@ output:
   class_path: cookbook.config.data_pipeline.data_pipeline_output.DataPipelineOuputConfig
   parsed_docs_table: casaman_ssa.demos.test_product_docs_docs__v2
   vector_index: casaman_ssa.demos.test_product_docs_docs_chunked_index__v2
-  vector_search_endpoint: dbdemos_vs_endpoint
+  vector_search_endpoint: one-env-shared-endpoint-3
 source:
   class_path: cookbook.config.data_pipeline.uc_volume_source.UCVolumeSourceConfig
   uc_catalog_name: casaman_ssa
