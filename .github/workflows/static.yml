@@ -6,6 +6,8 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches: ["main"]
 
 env:
   BASE_URL: /${{ github.event.repository.name }}
@@ -18,7 +20,9 @@ concurrency:
 
 jobs:
   deploy-book:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: databricks-protected-runner-group
+      labels: linux-ubuntu-latest
     # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
     permissions:
       pages: write
@@ -48,4 +52,4 @@ jobs:
       # Deploy the book's HTML to GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
