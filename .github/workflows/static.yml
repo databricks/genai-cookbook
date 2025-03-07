@@ -21,8 +21,8 @@ concurrency:
 jobs:
   deploy-book:
     runs-on:
-      group: ubuntu-runners
-      labels: ubuntu-20.04-16core
+      group: databricks-protected-runner-group
+      labels: linux-ubuntu-latest
     # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
     permissions:
       pages: write
