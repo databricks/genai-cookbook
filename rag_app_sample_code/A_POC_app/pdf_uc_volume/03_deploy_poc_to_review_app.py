@@ -134,9 +134,11 @@ print(f"\n\nReview App: {deployment_info.review_app_url}")
 # MAGIC %md
 # MAGIC ## Grant stakeholders access to the Review App
 # MAGIC
-# MAGIC Now, grant your stakeholders permissions to use the Review App.  Your stakeholders do not Databricks accounts as long as you have [insert docs].
+# MAGIC Now, grant your stakeholders permissions to use the Review App.  Your stakeholders do not need to have Databricks accounts. From the documentation: 
 # MAGIC
-# MAGIC `#TODO: add docs link`
+# MAGIC > If reviewers don’t have access already, account admins can use account-level SCIM provisioning to sync users and groups automatically from your identity provider to your Databricks account. You can also manually register these users and groups as you set up identities in Databricks. This allows them to be included as eligible reviewers.
+# MAGIC
+# MAGIC [Refer to documentation here](https://docs.databricks.com/en/generative-ai/agent-evaluation/human-evaluation.html#set-up-permissions-to-the-review-app-workspace).
 
 # COMMAND ----------
 
