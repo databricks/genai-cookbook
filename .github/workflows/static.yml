@@ -6,8 +6,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches: ["main"]
 
 env:
   BASE_URL: /${{ github.event.repository.name }}
