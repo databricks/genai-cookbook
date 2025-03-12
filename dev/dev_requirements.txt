@@ -13,4 +13,3 @@ git+https://github.com/unitycatalog/unitycatalog.git#subdirectory=ai/integration
 tabulate
 pandas
 pyspark
-sphinx-reredirects
