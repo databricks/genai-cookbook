@@ -8,13 +8,13 @@ logo: logo2.png
 # Force re-execution of notebooks on each build.
 # See https://jupyterbook.org/content/execute.html
 execute:
-  execute_notebooks: 'off'
+  execute_notebooks: "off"
 
 # Information about where the book exists on the web
 repository:
   url: https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code
-  path_to_book: ../genai_cookbook  # Optional path to your book, relative to the repository root
-  branch: main  # Which branch of the repository should be used when creating links (optional)
+  path_to_book: ../genai_cookbook # Optional path to your book, relative to the repository root
+  branch: main # Which branch of the repository should be used when creating links (optional)
 
 # Add GitHub buttons to your book
 # See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
@@ -28,3 +28,7 @@ html:
 sphinx:
   config:
     html_show_copyright: false
+  redirects:
+    /nbs/5-hands-on-deploy-and-monitor: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-7-deploy-and-monitor.html"
+extra_extensions:
+  - sphinx_reredirects
