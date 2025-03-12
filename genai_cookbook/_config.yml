@@ -8,13 +8,13 @@ logo: logo2.png
 # Force re-execution of notebooks on each build.
 # See https://jupyterbook.org/content/execute.html
 execute:
-  execute_notebooks: 'off'
+  execute_notebooks: "off"
 
 # Information about where the book exists on the web
 repository:
   url: https://github.com/databricks/genai-cookbook/tree/v0.2.0/agent_app_sample_code
-  path_to_book: ../genai_cookbook  # Optional path to your book, relative to the repository root
-  branch: main  # Which branch of the repository should be used when creating links (optional)
+  path_to_book: ../genai_cookbook # Optional path to your book, relative to the repository root
+  branch: main # Which branch of the repository should be used when creating links (optional)
 
 # Add GitHub buttons to your book
 # See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
@@ -28,3 +28,34 @@ html:
 sphinx:
   config:
     html_show_copyright: false
+    redirects:
+      index: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/index.html"
+      index-2: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/introduction.html"
+      nbs/1-introduction-to-agents: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/rag-overview.html"
+      nbs/2-fundamentals-unstructured: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/fundamentals-retrieval-augmented-generation.html"
+      nbs/2-fundamentals-unstructured-data-pipeline: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/fundamentals-data-pipeline-steps.html"
+      nbs/2-fundamentals-unstructured-chain: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/fundamentals-inference-chain-rag.html"
+      nbs/2-fundamentals-unstructured-eval: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/fundamentals-evaluation-monitoring-rag.html"
+      nbs/2-fundamentals-unstructured-llmops: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/fundamentals-governance-llmops.html"
+      nbs/3-deep-dive: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/quality-overview.html"
+      nbs/3-deep-dive-data-pipeline: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/quality-data-pipeline-rag.html"
+      nbs/3-deep-dive-chain: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/quality-rag-chain.html"
+      nbs/4-evaluation: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/evaluate-rag-overview.html"
+      nbs/4-evaluation-eval-sets: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/evaluate-define-quality.html"
+      nbs/4-evaluation-metrics: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/evaluate-assess-performance.html"
+      nbs/4-evaluation-infra: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/evaluate-enable-measurement.html"
+      nbs/5-rag-development-workflow: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/evaluation-driven-development.html"
+      10-min-demo/Mosaic-AI-Agents-10-Minute-Demo: "https://docs.databricks.com/generative-ai/tutorials/agent-framework-notebook.html"
+      nbs/5-hands-on-requirements: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/prerequisites.html"
+      nbs/6-implement-overview: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-1-clone-repository.html"
+      nbs/5-hands-on-build-poc: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-2-build-poc.html"
+      nbs/5-hands-on-curate-eval-set: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-3-evaluation-set.html"
+      nbs/5-hands-on-evaluate-poc: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-4-evaluate-quality.html"
+      nbs/5-hands-on-improve-quality-step-1: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-5-root-cause-analysis.html"
+      nbs/5-hands-on-improve-quality-step-1-retrieval: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-5-debug-retrieval-quality.html"
+      nbs/5-hands-on-improve-quality-step-1-generation: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-5-debug-generation-quality.html"
+      nbs/5-hands-on-improve-quality-step-2: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-6-improve-quality.html"
+      nbs/5-hands-on-improve-quality-step-2-data-pipeline: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-6-improve-data-pipeline.html"
+      nbs/5-hands-on-deploy-and-monitor: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/implementation/step-7-deploy-and-monitor.html"
+  extra_extensions:
+    - sphinx_reredirects
