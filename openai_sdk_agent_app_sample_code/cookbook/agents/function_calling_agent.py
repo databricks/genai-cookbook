@@ -116,62 +116,72 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
         )
 
         # Call the LLM to recursively calls tools and eventually deliver a generation to send back to the user
-        (
-            model_response,
-            messages_log_with_tool_calls,
-        ) = self.recursively_call_and_run_tools(messages=messages)
-
-        # If your front end keeps of converastion history and automatically appends the bot's response to the messages history, remove this line.
-        messages_log_with_tool_calls.append(
-            model_response.choices[0].message.to_dict()
-        )  # OpenAI client
+        messages_log_with_tool_calls = self.recursively_call_and_run_tools(
+            messages=messages
+        )
 
         # remove the system prompt - this should not be exposed to the Agent caller
         messages_log_with_tool_calls = messages_log_with_tool_calls[1:]
 
         return {
-            "content": model_response.choices[0].message.content,
+            # "content": model_response.choices[0].message.content,
+            "content": messages_log_with_tool_calls[-1]["content"],
             # messages should be returned back to the Review App (or any other front end app) and stored there so it can be passed back to this stateless agent with the next turns of converastion.
             "messages": messages_log_with_tool_calls,
         }
 
-    @mlflow.trace(span_type="AGENT")
+    @mlflow.trace(span_type="CHAIN")
     def recursively_call_and_run_tools(self, max_iter=10, **kwargs):
         messages = kwargs["messages"]
         del kwargs["messages"]
         i = 0
         while i < max_iter:
-            response = self.chat_completion(messages=messages, tools=True)
-            assistant_message = response.choices[0].message  # openai client
-            tool_calls = assistant_message.tool_calls  # openai
-            if tool_calls is None:
-                # the tool execution finished, and we have a generation
-                return (response, messages)
-            tool_messages = []
-            for tool_call in tool_calls:  # TODO: should run in parallel
-                function = tool_call.function  # openai
-                args = json.loads(function.arguments)  # openai
-                result = execute_function(self.tool_functions[function.name], args)
-                tool_message = {
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "content": result,
-                }  # openai
+            with mlflow.start_span(name=f"iteration_{i}", span_type="CHAIN") as span:
+                response = self.chat_completion(messages=messages, tools=True)
+                assistant_message = response.choices[0].message  # openai client
+                tool_calls = assistant_message.tool_calls  # openai
+                if tool_calls is None:
+                    # the tool execution finished, and we have a generation
+                    messages.append(assistant_message.to_dict())
+                    return messages
+                tool_messages = []
+                for tool_call in tool_calls:  # TODO: should run in parallel
+                    with mlflow.start_span(
+                        name="execute_tool", span_type="TOOL"
+                    ) as span:
+                        function = tool_call.function  # openai
+                        args = json.loads(function.arguments)  # openai
+                        span.set_inputs(
+                            {
+                                "function_name": function.name,
+                                "function_args_raw": function.arguments,
+                                "function_args_loaded": args,
+                            }
+                        )
+                        result = execute_function(
+                            self.tool_functions[function.name], args
+                        )
+                        tool_message = {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "content": result,
+                        }  # openai
 
-                tool_messages.append(tool_message)
-            assistant_message_dict = assistant_message.dict().copy()  # openai
-            del assistant_message_dict["content"]
-            del assistant_message_dict["function_call"]  # openai only
-            if "audio" in assistant_message_dict:
-                del assistant_message_dict["audio"]  # llama70b hack
-            messages = (
-                messages
-                + [
-                    assistant_message_dict,
-                ]
-                + tool_messages
-            )
-            i += 1
+                        tool_messages.append(tool_message)
+                        span.set_outputs({"new_message": tool_message})
+                assistant_message_dict = assistant_message.dict().copy()  # openai
+                del assistant_message_dict["content"]
+                del assistant_message_dict["function_call"]  # openai only
+                if "audio" in assistant_message_dict:
+                    del assistant_message_dict["audio"]  # llama70b hack
+                messages = (
+                    messages
+                    + [
+                        assistant_message_dict,
+                    ]
+                    + tool_messages
+                )
+                i += 1
         # TODO: Handle more gracefully
         raise "ERROR: max iter reached"
 
@@ -198,8 +208,6 @@ class FunctionCallingAgent(mlflow.pyfunc.PythonModel):
             return traced_create(model=endpoint_name, messages=messages, **llm_options)
 
 
-logging.basicConfig(level=logging.INFO)
-
 # tell MLflow logging where to find the agent's code
 set_model(FunctionCallingAgent())
 
@@ -212,20 +220,24 @@ if debug:
     # print(find_config_folder_location())
     # print(os.path.abspath(os.getcwd()))
     # mlflow.tracing.disable()
+    logging.basicConfig(level=logging.DEBUG)
     agent = FunctionCallingAgent()
 
     vibe_check_query = {
         "messages": [
             # {"role": "user", "content": f"what is agent evaluation?"},
-            # {"role": "user", "content": f"How does the blender work?"},
+            {
+                "role": "user",
+                "content": f"How does the BlendMaster Elite 4000 blender work?",
+            },
             # {
             #     "role": "user",
             #     "content": f"find all docs from the section header 'Databricks documentation archive' or 'Work with files on Databricks'",
             # },
-            {
-                "role": "user",
-                "content": "Translate the sku `OLD-abs-1234` to the new format",
-            }
+            # {
+            #     "role": "user",
+            #     "content": "Translate the sku `OLD-abs-1234` to the new format",
+            # }
             # {
             #     "role": "user",
             #     "content": f"convert sku 'OLD-XXX-1234' to the new format",
@@ -239,3 +251,12 @@ if debug:
 
     output = agent.predict(model_input=vibe_check_query)
     print(output["content"])
+
+    second_turn = {
+        "messages": output["messages"]
+        + [{"role": "user", "content": "How do I turn it on?"}]
+    }
+
+    # Run the Agent again with the same input to continue the conversation
+    second_turn_output = agent.predict(model_input=second_turn)
+    print(second_turn_output["content"])
