@@ -10,3 +10,4 @@ tabulate
 pandas
 pyspark
 databricks-connect==15.1.0
+pytest
