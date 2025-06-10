@@ -1,0 +1,4 @@
+class_path: cookbook.config.shared.agent_storage_location.AgentStorageConfig
+evaluation_set_uc_table: casaman_ssa.demos.my_agent_autogen_eval_set
+mlflow_experiment_name: /Users/manffred.calvosanchez@databricks.com/my_agent_autogen_mlflow_experiment
+uc_model_name: casaman_ssa.demos.my_agent_autogen
