@@ -29,7 +29,7 @@ sphinx:
   config:
     html_show_copyright: false
     redirects:
-      index: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/index.html"
+      index: "https://docs.databricks.com/generative-ai/guide/introduction-generative-ai-apps"
       index-2: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/introduction.html"
       nbs/1-introduction-to-agents: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/rag-overview.html"
       nbs/2-fundamentals-unstructured: "https://docs.databricks.com/generative-ai/tutorials/ai-cookbook/fundamentals-retrieval-augmented-generation.html"
