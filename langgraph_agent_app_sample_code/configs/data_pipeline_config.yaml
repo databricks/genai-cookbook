@@ -1,0 +1,15 @@
+# Choose a Unity Catalog Volume containing PDF, HTML, etc documents to be parsed/chunked/embedded.
+chunking_config:
+  chunk_overlap_tokens: 256
+  chunk_size_tokens: 1024
+  embedding_model_endpoint: databricks-gte-large-en
+output:
+  chunked_docs_table: test_product_docs_docs_chunked__v2
+  parsed_docs_table: test_product_docs_docs__v2
+  vector_index: test_product_docs_docs_chunked_index__v2
+  vector_search_endpoint: one-env-shared-endpoint-15
+source:
+  uc_catalog_name: shared
+  uc_schema_name: cookbook_langgraph_udhay
+  uc_volume_name: product_docs
+  volume_path: /Volumes/shared/cookbook_langgraph_udhay/product_docs
