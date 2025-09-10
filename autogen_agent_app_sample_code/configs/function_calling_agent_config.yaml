@@ -1,0 +1,60 @@
+class_path: cookbook.config.agents.function_calling_agent.FunctionCallingAgentConfig
+input_example:
+  messages:
+  - content: What can you help me with?
+    role: user
+llm_config:
+  llm_endpoint_name: databricks-meta-llama-3-3-70b-instruct
+  llm_parameters:
+    max_tokens: 1500
+    temperature: 0.01
+  llm_system_prompt_template: "## Role\nYou are a helpful assistant that answers questions\
+    \ using a set of tools. If needed, you ask the user follow-up questions to clarify\
+    \ their request.\n\n## Objective\nYour goal is to provide accurate, relevant,\
+    \ and helpful response based solely on the outputs from these tools. You are concise\
+    \ and direct in your responses.\n\n## Instructions\n1. **Understand the Query**:\
+    \ Think step by step to analyze the user's question and determine the core need\
+    \ or problem. \n\n2. **Assess available tools**: Think step by step to consider\
+    \ each available tool and understand their capabilities in the context of the\
+    \ user's query.\n\n3. **Select the appropriate tool(s) OR ask follow up questions**:\
+    \ Based on your understanding of the query and the tool descriptions, decide which\
+    \ tool(s) should be used to generate a response. If you do not have enough information\
+    \ to use the available tools to answer the question, ask the user follow up questions\
+    \ to refine their request.  If you do not have a relevant tool for a question\
+    \ or the outputs of the tools are not helpful, respond with: \"I'm sorry, I can't\
+    \ help you with that.\""
+tools:
+- class_path: cookbook.tools.vector_search.VectorSearchRetrieverTool
+  description: Use this tool to search for product documentation.
+  doc_similarity_threshold: 0.0
+  filterable_columns: []
+  name: search_product_docs
+  retriever_filter_parameter_prompt: optional filters to apply to the search. An array
+    of objects, each specifying a field name and the filters to apply to that field.
+  retriever_query_parameter_prompt: query to look up in retriever
+  vector_search_index: casaman_ssa.demos.test_product_docs_docs_chunked_index__v2
+  vector_search_parameters:
+    num_results: 5
+    query_type: ann
+  vector_search_schema:
+    additional_metadata_columns: []
+    chunk_text: content_chunked
+    document_uri: doc_uri
+- class_path: cookbook.tools.uc_tool.UCTool
+  error_prompt: 'The tool call generated an Exception, detailed in `error`. Think
+    step-by-step following these instructions to determine your next step.
+
+    [1] Is the error due to a problem with the input parameters?
+
+    [2] Could it succeed if retried with exactly the same inputs?
+
+    [3] Could it succeed if retried with modified parameters using the input we already
+    have from the user?
+
+    [4] Could it succeed if retried with modified parameters informed by collecting
+    additional input from the user?  What specific input would we need from the user?
+
+    Based on your thinking, if the error is due to a problem with the input parameters,
+    either call this tool again in a way that avoids this exception or collect additional
+    information from the user to modify the inputs to avoid this exception.'
+  uc_function_name: casaman_ssa.demos.sku_sample_translator
