@@ -1,17 +1,3 @@
-# Databricks notebook source
-# MAGIC %md
-# MAGIC # Genie Space Agent
-# MAGIC
-# MAGIC In this notebook, we construct a Genie space as an Agent. This Agent is encapsulated in a MLflow PyFunc class called `GenieAgent()`.
-
-# COMMAND ----------
-
-# # # If running this notebook by itself, uncomment these.
-# %pip install --upgrade -qqqq mlflow databricks-sdk tabulate tiktoken
-# dbutils.library.restartPython()
-
-# COMMAND ----------
-
 import sys
 
 # Add the parent directory to the path so we can import the `utils` modules
