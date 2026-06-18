@@ -130,12 +130,67 @@ SELECT ai_query(
 );
 ```
 
+## Testing
+
+### Local Unit Tests
+
+```bash
+# Install test dependencies
+pip install pytest
+
+# Run unit tests (mocked Spark)
+pytest agents/memory/tests/ -v
+```
+
+### Databricks Integration Test
+
+Run in a Databricks notebook:
+
+```python
+from agents.memory.tests.test_memory import test_integration_databricks
+test_integration_databricks()
+```
+
+This will:
+1. Create a test schema with memory tables
+2. Test all backend operations (log, retrieve, search)
+3. Clean up after itself
+
+### Manual Verification
+
+```python
+# In a Databricks notebook
+from agents.memory.delta_backend import DeltaMemoryBackend
+
+backend = DeltaMemoryBackend(
+    catalog="your_catalog",
+    schema="agent_memory",
+    agent_id="test"
+)
+
+# Store something
+backend.log_memory("Test entry", role="user")
+
+# Retrieve it
+print(backend.get_memory(limit=10))
+
+# Log a decision
+backend.log_decision(
+    decision="Test decision",
+    context="Testing",
+    rationale="Verification"
+)
+
+# Check decisions
+print(backend.get_decisions())
+```
+
 ## Files
 
 - `delta_backend.py` — Unity Catalog storage backend for soul.py
 - `memory_agent.py` — Memory-enabled agent wrapper
 - `endpoint_model.py` — MLflow model for Model Serving deployment
-- `vector_search_setup.py` — Configure Vector Search for semantic retrieval
+- `tests/test_memory.py` — Unit and integration tests
 
 ## How It Works
 
