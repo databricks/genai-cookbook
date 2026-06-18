@@ -2,12 +2,48 @@
 
 This module adds persistent memory to Databricks agents using [soul.py](https://github.com/menonpg/soul.py)'s hybrid RAG+RLM architecture.
 
+## The Problem: Stateless ai_query() Calls
+
+Databricks' `ai_query()` function lets you call LLMs from SQL — great for tasks like PII redaction:
+
+```sql
+SELECT ai_query(
+    'databricks-meta-llama-3-3-70b-instruct',
+    'Redact all PII from this text: ' || notes
+) AS redacted_notes 
+FROM clinical_records;
+```
+
+But what happens when the model **misses something**? Say it doesn't catch phone extensions like `555-1234 x789`. You fix the prompt, redeploy, and move on.
+
+**The problem:** Next week, you hit a similar edge case. You've forgotten the first one. The model has no memory of what worked before.
+
+## The Solution: Memory-Enabled ai_query()
+
+This module gives `ai_query()` calls persistent memory:
+
+```sql
+-- 1. Run PII redaction
+SELECT ai_query('pii-agent', 'Redact PII: ' || notes) FROM records;
+
+-- 2. When you discover a missed pattern, teach the agent
+SELECT ai_query('pii-agent', '{
+    "operation": "decide",
+    "decision": "Phone extensions (x1234) need redaction",
+    "rationale": "Missed in ticket #4521, added to [PHONE] pattern"
+}');
+
+-- 3. Future calls automatically include learned patterns
+SELECT ai_query('pii-agent', 'Redact PII: ' || notes) FROM records;
+-- Now catches extensions because memory includes the decision
+```
+
 ## Why Memory?
 
 Standard LLM agents are stateless — each query starts fresh. Memory-enabled agents:
 
 - Remember decisions from previous sessions
-- Learn patterns from accumulated interactions  
+- **Learn from mistakes** — patterns missed in PII redaction become future context
 - Build context over time without manual prompt engineering
 
 ## Architecture
